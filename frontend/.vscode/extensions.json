@@ -7,10 +7,11 @@
     "stylelint.vscode-stylelint",
     "fabiospampinato.vscode-highlight",
     "github.vscode-pull-request-github",
-    "vue.volar",
-    "antfu.iconify",
-    "cipchk.cssrem",
-    "sonarsource.sonarlint-vscode",
-    "antfu.goto-alias"
+    "esbenp.prettier-vscode",
+    "formulahendry.auto-rename-tag",
+    "eamodio.gitlens",
+    "christian-kohler.path-intellisense",
+    "pflannery.vscode-versionlens",
+    "zxh404.vscode-proto3"
   ]
 }
