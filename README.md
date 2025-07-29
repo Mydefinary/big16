@@ -17,13 +17,6 @@ cd /bin
 ./kafka-console-consumer --bootstrap-server localhost:9092 --topic
 ```
 
-## Run the backend micro-services
-See the README.md files inside the each microservices directory:
-
-- auth
-- user
-
-
 ## Run API Gateway (Spring Gateway)
 ```
 cd gateway
