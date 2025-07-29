@@ -44,16 +44,16 @@ public class User {
         UserSaved userSaved = new UserSaved(this);
         userSaved.publishAfterCommit();
 
-        EmailNotFound emailNotFound = new EmailNotFound(this);
-        emailNotFound.publishAfterCommit();
+        // EmailNotFound emailNotFound = new EmailNotFound(this);
+        // emailNotFound.publishAfterCommit();
 
-        EmailExistsConfirmed emailExistsConfirmed = new EmailExistsConfirmed(
-            this
-        );
-        emailExistsConfirmed.publishAfterCommit();
+        // EmailExistsConfirmed emailExistsConfirmed = new EmailExistsConfirmed(
+        //     this
+        // );
+        // emailExistsConfirmed.publishAfterCommit();
 
-        UserRegistered userRegistered = new UserRegistered(this);
-        userRegistered.publishAfterCommit();
+        // UserRegistered userRegistered = new UserRegistered(this);
+        // userRegistered.publishAfterCommit();
     }
 
     @PreUpdate
@@ -100,28 +100,21 @@ public class User {
     //>>> Clean Arch / Port Method
     //<<< Clean Arch / Port Method
     public static void findUserIdByEmail(EmailVerified emailVerified) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
-        User user = new User();
-        repository().save(user);
-
-        */
-
-        /** Example 2:  finding and process
-        
-
-        repository().findById(emailVerified.get???()).ifPresent(user->{
-            
-            user // do something
-            repository().save(user);
-
-
+        repository().findById(emailVerified.getId()).ifPresent(user->{
+            if(emailVerified.getPurpose().equals("FIND_ID")){
+                // 아이디 반환하는 로직
+                // 추가해야함
+                
+            }else if (emailVerified.getPurpose().equals("SIGNUP_VERIFY")){
+                user.setStatus("EMAIL_VERIFIED");
+                repository().save(user);
+            }
          });
-        */
 
     }
     //>>> Clean Arch / Port Method
+
+    
 
 }
 //>>> DDD / Aggregate Root
