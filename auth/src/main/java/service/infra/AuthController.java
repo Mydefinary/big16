@@ -13,7 +13,7 @@ import service.domain.*;
 //<<< Clean Arch / Inbound Adaptor
 
 @RestController
-// @RequestMapping(value="/auths")
+@RequestMapping(value="/auths")
 @Transactional
 public class AuthController {
 

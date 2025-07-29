@@ -71,41 +71,28 @@ public class User {
 
     //<<< Clean Arch / Port Method
     public static void userRegister(PasswordSaved passwordSaved) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
-        User user = new User();
-        repository().save(user);
-
-        UserRegistered userRegistered = new UserRegistered(user);
-        userRegistered.publishAfterCommit();
-        */
-
-        /** Example 2:  finding and process
-        
-
-        repository().findById(passwordSaved.get???()).ifPresent(user->{
-            
-            user // do something
+       repository().findById(event.getUserId()).ifPresent(user -> {
+            // 이메일 인증 전 상태로 초기화
+            user.setStatus("EMAIL_NOT_VERIFIED");
             repository().save(user);
 
-            UserRegistered userRegistered = new UserRegistered(user);
-            userRegistered.publishAfterCommit();
-
-         });
-        */
-
+            // 필요하다면 이메일 인증 요청 이벤트 발행 가능
+            // 예: Auth BC로 인증 코드 발송 요청 등
+        });
     }
 
     //>>> Clean Arch / Port Method
     //<<< Clean Arch / Port Method
     public static void findUserIdByEmail(EmailVerified emailVerified) {
         repository().findById(emailVerified.getId()).ifPresent(user->{
-            if(emailVerified.getPurpose().equals("FIND_ID")){
-                // 아이디 반환하는 로직
-                // 추가해야함
-                
-            }else if (emailVerified.getPurpose().equals("SIGNUP_VERIFY")){
+            // 아이디 반환 로직 짜려고 넣은 Policy였는데 프론트에서
+            // GetMapping 할거라 여기서 뭔가 할 필요는 없음
+            // 근데 회원가입 시 이메일 인증 되는 로직을 안만들어서
+            // 여기서 수행 시키기로함
+
+            // Auth BC 내부에도 해당 이벤트에 대한 Policy가 있어서
+            // 무시하기 위해 사용
+            if ("SIGNUP_VERIFY".equals(emailVerified.getPurpose())) {
                 user.setStatus("EMAIL_VERIFIED");
                 repository().save(user);
             }

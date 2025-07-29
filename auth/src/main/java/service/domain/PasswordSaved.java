@@ -12,6 +12,7 @@ import service.infra.AbstractEvent;
 public class PasswordSaved extends AbstractEvent {
 
     private Long id;
+    private Long userId;
 
     public PasswordSaved(Auth aggregate) {
         super(aggregate);

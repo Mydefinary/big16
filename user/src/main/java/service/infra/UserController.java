@@ -13,11 +13,20 @@ import service.domain.*;
 //<<< Clean Arch / Inbound Adaptor
 
 @RestController
-// @RequestMapping(value="/users")
+@RequestMapping(value="/users")
 @Transactional
 public class UserController {
 
     @Autowired
     UserRepository userRepository;
+    
+    // 아이디 찾기 (아이디 반환 Policy를 통해 아이디를 넘겨줌)
+    @GetMapping("/find-id")
+    public ResponseEntity<?> findLoginIdByEmail(@RequestParam String email) {
+        return userRepository.findByEmail(email)
+            .map(user -> ResponseEntity.ok(user.getLoginId()))
+            .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 이메일에 등록된 아이디가 없습니다."));
+            //아이디 없으면 toast 처리하기위해 응답메시지를 보냄
+    }
 }
 //>>> Clean Arch / Inbound Adaptor
