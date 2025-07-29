@@ -1,27 +1,12 @@
-// src/components/Register.js
+// src/pages/Register.js
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { api } from '@api/api';
 import "@style/Register.css";
 import "react-toastify/dist/ReactToastify.css";
-
-function Stars() {
-  const stars = useMemo(() => {
-    return Array.from({ length: 100 }, (_, i) => {
-      const size = Math.random() * 2 + 1.5;
-      const style = {
-        width: size + "px",
-        height: size + "px",
-        top: Math.random() * 100 + "%",
-        left: Math.random() * 100 + "%",
-        animationDelay: Math.random() * 3 + "s",
-      };
-      return <div key={i} className="star" style={style}></div>;
-    });
-  }, []);
-  return <div className="stars">{stars}</div>;
-}
+import { Link } from "react-router-dom";
+import Stars from "@components/Stars";
 
 function Register() {
   const navigate = useNavigate();
@@ -152,8 +137,8 @@ function Register() {
         </div>
 
         <div className="register-footer">
-          이미 계정이 있으신가요?{" "}
-          <a onClick={() => navigate("/login")}>로그인</a>
+          이미 계정이 있으신가요?
+          <Link to="/login">로그인</Link>
         </div>
       </form>
 

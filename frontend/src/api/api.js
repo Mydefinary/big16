@@ -20,7 +20,7 @@ api.interceptors.request.use((config) => {
 // 인증 필요 없는 API (헤더 제외)
 const noAuthApi = axios.create({
   baseURL,
-  withCredentials: true,
+  withCredentials: false, // 쿠키기반인증(쿠키 옮길래?)
 });
 
 export { api, noAuthApi };

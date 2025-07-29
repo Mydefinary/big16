@@ -1,25 +1,10 @@
-// src/components/PasswordResetRequest.js
+// src/pages/PasswordResetRequest.js
 import React, { useState, useMemo } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { noAuthApi } from "@api/api";
 import "@style/PasswordReset.css";
+import Stars from "@components/Stars";
 
-function Stars() {
-  const stars = useMemo(() => {
-    return Array.from({ length: 100 }, (_, i) => {
-      const size = Math.random() * 2 + 1.5;
-      const style = {
-        width: size + "px",
-        height: size + "px",
-        top: Math.random() * 100 + "%",
-        left: Math.random() * 100 + "%",
-        animationDelay: Math.random() * 3 + "s",
-      };
-      return <div key={i} className="star" style={style}></div>;
-    });
-  }, []);
-  return <div className="stars">{stars}</div>;
-}
 
 function PasswordResetRequest() {
   const [email, setEmail] = useState("");

@@ -1,27 +1,11 @@
-// src/components/Login.js
+// src/pages/Login.js
 import React, { useState, useMemo } from "react";
 import {api} from '@api/api'; // axios 인스턴스 (baseURL 등 설정된 상태)
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import '@style/Login.css';
 import { Link } from "react-router-dom";
-
-function Stars() {
-  const stars = useMemo(() => {
-    return Array.from({ length: 100 }, (_, i) => {
-      const size = Math.random() * 2 + 1.5;
-      const style = {
-        width: size + "px",
-        height: size + "px",
-        top: Math.random() * 100 + "%",
-        left: Math.random() * 100 + "%",
-        animationDelay: Math.random() * 3 + "s",
-      };
-      return <div key={i} className="star" style={style}></div>;
-    });
-  }, []); // 한 번만 생성
-  return <div className="stars">{stars}</div>;
-}
+import Stars from "@components/Stars";
 
 function Login() {
   const [email, setEmail] = useState("");
