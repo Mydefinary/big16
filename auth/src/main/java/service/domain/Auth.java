@@ -51,30 +51,20 @@ public class Auth {
 
     //<<< Clean Arch / Port Method
     public static void savePassword(UserSaved userSaved) {
-        //implement business logic here:
+        AuthRepository authRepository = repository();
 
-        /** Example 1:  new item 
+        // 신규 가입 시 authId가 없으므로 새 엔티티 생성
         Auth auth = new Auth();
-        repository().save(auth);
 
-        PasswordSaved passwordSaved = new PasswordSaved(auth);
-        passwordSaved.publishAfterCommit();
-        */
+        auth.setUserId(userSaved.getUserId());
+        auth.setLoginId(userSaved.getLoginId());
+        auth.setPasswordHash(userSaved.getPassword());  // 이미 암호화된 비밀번호가 이벤트에 담겨 있다고 가정
 
-        /** Example 2:  finding and process
-        
+        authRepository.save(auth);
 
-        repository().findById(userSaved.get???()).ifPresent(auth->{
-            
-            auth // do something
-            repository().save(auth);
-
-            PasswordSaved passwordSaved = new PasswordSaved(auth);
-            passwordSaved.publishAfterCommit();
-
-         });
-        */
-
+        // 저장 후 이벤트 발행 (필요하다면)
+        PasswordSaved passwordSavedEvent = new PasswordSaved(auth);
+        passwordSavedEvent.publishAfterCommit();
     }
 
     //>>> Clean Arch / Port Method

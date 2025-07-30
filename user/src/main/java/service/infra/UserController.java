@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import service.domain.*;
+import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+
 
 //<<< Clean Arch / Inbound Adaptor
 
@@ -42,10 +47,23 @@ public class UserController {
         userRepository.save(user);
 
         // 3) 비밀번호 저장 등 Auth BC와 연동 (이벤트 발행 또는 직접 호출)
-        
+        // User 저장이 완료된 후에 이벤트를 발행하여 Auth BC로 비밀번호 정보 전달
+        UserSaved userSavedEvent = new UserSaved(user);
+        // 비밀번호는 반드시 암호화된 상태로 포함시켜야 함
+        userSavedEvent.setPassword(encryptPassword(request.getPassword())); 
+        // 트랜잭션 커밋 후 이벤트 발행
+        userSavedEvent.publishAfterCommit();
+
         // 4) 응답 반환
         return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 완료되었습니다. 이메일 인증을 진행해 주세요");
     }
+
+    // 비밀번호 암호화 예시 메서드 (구현 필요)
+    private String encryptPassword(String rawPassword) {
+        // BCrypt, Argon2 등 암호화 라이브러리를 사용하세요
+        return BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+    }
+
     
     // 아이디 찾기 (아이디 반환 Policy를 통해 아이디를 넘겨줌)
     @GetMapping("/find-id")
