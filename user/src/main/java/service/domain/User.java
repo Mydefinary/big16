@@ -44,20 +44,11 @@ public class User {
         UserSaved userSaved = new UserSaved(this);
         userSaved.publishAfterCommit();
 
-        // EmailNotFound emailNotFound = new EmailNotFound(this);
-        // emailNotFound.publishAfterCommit();
-
-        // EmailExistsConfirmed emailExistsConfirmed = new EmailExistsConfirmed(
-        //     this
-        // );
-        // emailExistsConfirmed.publishAfterCommit();
-
-        // UserRegistered userRegistered = new UserRegistered(this);
-        // userRegistered.publishAfterCommit();
     }
 
     @PreUpdate
     public void onPreUpdate() {
+        System.out.println("회원탈퇴 실행");
         UserDeleted userDeleted = new UserDeleted(this);
         userDeleted.publishAfterCommit();
     }
@@ -101,6 +92,10 @@ public class User {
     }
     //>>> Clean Arch / Port Method
 
+    public void publishEmailExistsConfirmed() {
+        EmailExistsConfirmed event = new EmailExistsConfirmed(this);
+        event.publish();
+    }
     
 
 }
