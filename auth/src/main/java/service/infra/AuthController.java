@@ -19,5 +19,23 @@ public class AuthController {
 
     @Autowired
     AuthRepository authRepository;
+
+    @PatchMapping("/user/password-change")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request,
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getId();
+
+        Auth auth = authRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!BCrypt.checkpw(request.getCurrentPassword(), auth.getPasswordHash())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Current password incorrect");
+        }
+
+        auth.setPasswordHash(BCrypt.hashpw(request.getNewPassword(), BCrypt.gensalt()));
+        authRepository.save(auth);
+
+        return ResponseEntity.ok("Password changed successfully");
+    }
 }
 //>>> Clean Arch / Inbound Adaptor

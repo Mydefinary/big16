@@ -62,7 +62,7 @@ public class User {
 
     //<<< Clean Arch / Port Method
     public static void userRegister(PasswordSaved passwordSaved) {
-       repository().findById(event.getUserId()).ifPresent(user -> {
+       repository().findById(passwordSaved.getUserId()).ifPresent(user -> {
             // 이메일 인증 전 상태로 초기화
             user.setStatus("EMAIL_NOT_VERIFIED");
             repository().save(user);

@@ -42,7 +42,7 @@ public class UserController {
         user.setLoginId(request.getLoginId());
         user.setEmail(request.getEmail());
         user.setNickname(request.getNickname());
-        user.setStatus("EMAIL_NOT_VERIFIED"); // 가입 후 이메일 인증 대기 상태
+        user.setStatus("TRY_TO_REGISTERED"); // 가입 후 이메일 인증 대기 상태
         user.setCreatedAt(new Date());
         userRepository.save(user);
 
