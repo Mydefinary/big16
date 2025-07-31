@@ -12,6 +12,14 @@ import service.infra.AbstractEvent;
 public class EmailVerificationRequested extends AbstractEvent {
 
     private Long id;
+    private String email;
+    // 이메일 인증을 위한 필드
+    private String emailVerificationCode;
+
+    public EmailVerificationRequested(Auth aggregate, String email) {
+        super(aggregate);
+        this.email = email;
+    }
 
     public EmailVerificationRequested(Auth aggregate) {
         super(aggregate);

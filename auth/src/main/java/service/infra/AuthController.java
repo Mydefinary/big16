@@ -53,6 +53,23 @@ public class AuthController {
         return ResponseEntity.ok("비밀번호가 재설정되었습니다.");
     }
 
-    
+    // 인증 코드 검증
+    @PostMapping("/verify-code")
+    public ResponseEntity<?> verifyCode(@RequestBody VerifyCodeRequest request) {
+        String code = request.getCode();
+
+        Optional<Auth> authOpt = authRepository.findByEmail(email);
+        if (authOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("이메일 없음");
+        }
+
+        Auth auth = authOpt.get();
+        boolean valid = auth.verifyCode(code);
+        if (valid) {
+            return ResponseEntity.ok("인증 성공");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("인증 실패 또는 만료");
+        }
+    }
 }
 //>>> Clean Arch / Inbound Adaptor

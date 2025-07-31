@@ -10,4 +10,8 @@ import service.infra.AbstractEvent;
 public class EmailVerified extends AbstractEvent {
 
     private Long id;
+    
+    private Long userId;
+
+    private String purpose;
 }

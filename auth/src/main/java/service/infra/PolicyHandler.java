@@ -20,6 +20,9 @@ public class PolicyHandler {
     @Autowired
     AuthRepository authRepository;
 
+    @Autowired
+    private MailService mailService;
+
     @StreamListener(KafkaProcessor.INPUT)
     public void whatever(@Payload String eventString) {}
 
@@ -73,6 +76,25 @@ public class PolicyHandler {
         Auth.requestEmailVerification(event);
     }
 
+    @StreamListener(
+        value = KafkaProcessor.INPUT,
+        condition = "headers['type']=='EmailVerificationRequested'"
+    )
+    public void wheneverEmailVerificationRequested_RequestEmail(
+        @Payload EmailVerificationRequested emailVerificationRequested
+    ) {
+        EmailVerificationRequested event = emailVerificationRequested;
+        System.out.println(
+            "\n\n##### listener RequestEmail : " +
+            EmailVerificationRequested +
+            "\n\n"
+        );
+        String email = event.getEmail();
+        String code = event.getEmailVerificationCode();
+        // Sample Logic //
+        mailService.sendVerificationEmail(email, code);
+    }
+    
     // @StreamListener(
     //     value = KafkaProcessor.INPUT,
     //     condition = "headers['type']=='EmailVerified'"

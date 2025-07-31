@@ -17,6 +17,8 @@ import service.domain.LoginSuccessed;
 import service.domain.PasswordEdited;
 import service.domain.PasswordReseted;
 import service.domain.PasswordSaved;
+import java.util.Random;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Auth_table")
@@ -81,9 +83,16 @@ public class Auth {
 
         if (authOptional.isPresent()) {
             Auth auth = authOptional.get();
-            // 건드리는 정책 없어서 주석처리
-            // EmailVerificationRequested event = new EmailVerificationRequested(auth);
-            // event.publishAfterCommit();
+            // 랜덤 인증 코드 생성 (6자리 숫자 예시)
+            String code = String.format("%06d", new Random().nextInt(999999));
+
+            auth.emailVerificationCode = code;
+            auth.codeGeneratedAt = LocalDateTime.now();
+
+            repository().save(auth);
+
+            EmailVerificationRequested event = new EmailVerificationRequested(auth, emailExistsConfirmed.getEmail());
+            event.publishAfterCommit();
         } else {
             // 어차피 UserBC에서 처리하기떄문에 복잡한 예외처리 없이 로그정도만
             System.out.println("이메일 없음");
@@ -91,36 +100,14 @@ public class Auth {
 
     }
 
-    //이메일 인증코드 생성, 저장, 발송
-    public void generateAndSendVerificationCode(String email) {
-        // 랜덤 인증 코드 생성 (6자리 숫자 예시)
-        String code = String.format("%06d", new Random().nextInt(999999));
-
-        this.emailVerificationCode = code;
-        this.codeGeneratedAt = LocalDateTime.now();
-
-        repository().save(this);
-
-        // 메일 발송 (MailService 등 별도 서비스 이용 권장)
-        MailService.sendVerificationEmail(email, code);
-
-        System.out.println("[generateAndSendVerificationCode] 인증 코드 생성 및 발송 완료: " + code);
-    }
-
     //인증코드 검증
-    public boolean verifyCode(String email, String inputCode) {
-        Optional<Auth> authOpt = repository().findByEmail(email);
-        if (authOpt.isEmpty()) return false;
-
-        Auth auth = authOpt.get();
-        if (auth.emailVerificationCode == null) return false;
-
-        // 유효기간 체크 (예: 10분 이내)
-        if (auth.codeGeneratedAt.isBefore(LocalDateTime.now().minusMinutes(10))) {
-            return false;
-        }
-
-        return auth.emailVerificationCode.equals(inputCode);
+    public boolean verifyCode(String inputCode) {
+        // 코드가 없거나
+        if (this.emailVerificationCode == null) return false;
+        // 제한시간이 지났거나
+        if (this.codeGeneratedAt.isBefore(LocalDateTime.now().minusMinutes(10))) return false;
+        // 코드가 같은지 확인
+        return this.emailVerificationCode.equals(inputCode);
     }
 
     //>>> Clean Arch / Port Method

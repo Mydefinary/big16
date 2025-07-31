@@ -75,7 +75,7 @@ public class User {
     //>>> Clean Arch / Port Method
     //<<< Clean Arch / Port Method
     public static void findUserIdByEmail(EmailVerified emailVerified) {
-        repository().findById(emailVerified.getId()).ifPresent(user->{
+        repository().findById(emailVerified.getUserId()).ifPresent(user->{
             // 아이디 반환 로직 짜려고 넣은 Policy였는데 프론트에서
             // GetMapping 할거라 여기서 뭔가 할 필요는 없음
             // 근데 회원가입 시 이메일 인증 되는 로직을 안만들어서
