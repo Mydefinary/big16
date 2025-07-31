@@ -49,13 +49,16 @@ public class PolicyHandler {
     public void wheneverEmailVerified_FindUserIdByEmail(
         @Payload EmailVerified emailVerified
     ) {
-        EmailVerified event = emailVerified;
-        System.out.println(
-            "\n\n##### listener FindUserIdByEmail : " + emailVerified + "\n\n"
-        );
+        System.out.println("[이메일 인증 이벤트] 목적: " + emailVerified.getPurpose());
 
-        // Sample Logic //
-        User.findUserIdByEmail(event);
+        if ("SIGNUP_VERIFY".equals(emailVerified.getPurpose())) {
+            System.out.println("SIGNUP_VERIFY 목적 - User.findUserIdByEmail 실행");
+            User.findUserIdByEmail(emailVerified);
+        } else {
+            System.out.println("다른 목적의 이메일 인증 이벤트 수신됨: " + emailVerified.getPurpose());
+        }
     }
+
+
 }
 //>>> Clean Arch / Inbound Adaptor

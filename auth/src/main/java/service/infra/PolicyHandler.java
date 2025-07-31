@@ -73,20 +73,21 @@ public class PolicyHandler {
         Auth.requestEmailVerification(event);
     }
 
-    @StreamListener(
-        value = KafkaProcessor.INPUT,
-        condition = "headers['type']=='EmailVerified'"
-    )
-    public void wheneverEmailVerified_ResetPassword(
-        @Payload EmailVerified emailVerified
-    ) {
-        EmailVerified event = emailVerified;
-        System.out.println(
-            "\n\n##### listener ResetPassword : " + emailVerified + "\n\n"
-        );
+    // @StreamListener(
+    //     value = KafkaProcessor.INPUT,
+    //     condition = "headers['type']=='EmailVerified'"
+    // )
+    // public void wheneverEmailVerified_ResetPassword(
+    //     @Payload EmailVerified emailVerified
+    // ) {
+    //     System.out.println("[이메일 인증 이벤트 - Auth] 목적: " + emailVerified.getPurpose());
 
-        // Sample Logic //
-        Auth.resetPassword(event);
-    }
+    //     if ("PASSWORD_RESET".equals(emailVerified.getPurpose())) {
+    //         System.out.println("PASSWORD_RESET 목적 - Auth.resetPassword 실행");
+    //         Auth.resetPassword(emailVerified);
+    //     } else {
+    //         System.out.println("다른 목적의 이메일 인증 이벤트 수신됨: " + emailVerified.getPurpose());
+    //     }
+    // }
 }
 //>>> Clean Arch / Inbound Adaptor

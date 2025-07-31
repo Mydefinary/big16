@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import service.domain.*;
+import service.dto.*;
 
 //<<< Clean Arch / Inbound Adaptor
 
@@ -37,5 +38,21 @@ public class AuthController {
 
         return ResponseEntity.ok("Password changed successfully");
     }
+
+    @PatchMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        String email = request.getEmail();
+        String newPassword = request.getNewPassword();
+
+        Auth auth = authRepository.findByUserId(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 실제 서비스 로직에 위임
+        auth.resetPassword(newPassword);
+
+        return ResponseEntity.ok("비밀번호가 재설정되었습니다.");
+    }
+
+    
 }
 //>>> Clean Arch / Inbound Adaptor
