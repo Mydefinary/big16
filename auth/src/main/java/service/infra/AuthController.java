@@ -30,9 +30,8 @@ public class AuthController {
 
     @PatchMapping("/user/password-change")
     public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request,
-                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails.getId();
-
+                                            @RequestHeader("X-User-Id") Long userId) { // 수정된 부분
+        
         Auth auth = authRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -63,6 +62,7 @@ public class AuthController {
     // 인증 코드 검증
     @PostMapping("/verify-code")
     public ResponseEntity<?> verifyCode(@RequestBody VerifyCodeRequest request) {
+        String email = request.getEmail();
         String code = request.getCode();
 
         Optional<Auth> authOpt = authRepository.findByEmail(email);

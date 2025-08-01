@@ -160,7 +160,7 @@ public class Auth {
 
             repository().save(auth);
 
-            EmailVerificationRequested event = new EmailVerificationRequested(auth, emailExistsConfirmed.getEmail());
+            EmailVerificationRequested event = new EmailVerificationRequested(auth, userRegistered.getEmail());
             event.publishAfterCommit();
         } else {
             // 어차피 UserBC에서 처리하기떄문에 복잡한 예외처리 없이 로그정도만
