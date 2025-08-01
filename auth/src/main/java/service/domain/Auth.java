@@ -19,6 +19,10 @@ import service.domain.PasswordReseted;
 import service.domain.PasswordSaved;
 import java.util.Random;
 import java.time.LocalDateTime;
+import org.mindrot.jbcrypt.BCrypt;
+import java.util.Optional;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 
 @Entity
 @Table(name = "Auth_table")
@@ -81,7 +85,7 @@ public class Auth {
     public static void requestEmailVerification(
         EmailExistsConfirmed emailExistsConfirmed
     ) {
-        Optional<Auth> authOptional = repository().findByEmail(emailExistsConfirmed.getEmail());
+        Optional<Auth> authOptional = repository().findByUserId(emailExistsConfirmed.getUserId());
 
         if (authOptional.isPresent()) {
             Auth auth = authOptional.get();
@@ -126,6 +130,9 @@ public class Auth {
     //<<< Clean Arch / Port Method
     public static void requestEmailVerification(UserRegistered userRegistered) {
         
+
+        Optional<Auth> authOptional = repository().findByUserId(emailExistsConfirmed.getUserId());
+
         if (authOptional.isPresent()) {
             Auth auth = authOptional.get();
             // 랜덤 인증 코드 생성 (6자리 숫자 예시)

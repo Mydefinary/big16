@@ -7,4 +7,8 @@ import service.domain.*;
 //<<< PoEAA / Repository
 @RepositoryRestResource(collectionResourceRel = "auths", path = "auths")
 public interface AuthRepository
-    extends PagingAndSortingRepository<Auth, Long> {}
+    extends PagingAndSortingRepository<Auth, Long> {
+        Optional<Auth> findByUserId(Long userId);
+        Optional<Auth> findByEmail(String email);
+        Optional<Auth> findByLoginId(String loginId);
+    }

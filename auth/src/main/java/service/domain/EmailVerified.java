@@ -15,7 +15,7 @@ public class EmailVerified extends AbstractEvent {
 
     private Long userId;
 
-    Private String purpose;
+    private String purpose;
 
     public EmailVerified(Auth aggregate) {
         super(aggregate);
