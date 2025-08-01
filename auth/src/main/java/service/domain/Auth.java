@@ -40,14 +40,29 @@ public class Auth {
 
     private String passwordHash;
 
-    private String refreshToken;
-
-    // 이메일 인증을 위한 필드
+    // 토큰 관리 필드들
+    private String accessToken;       
+    private String refreshToken;      
+    private LocalDateTime tokenIssuedAt;   // 토큰 발급 시간 (선택사항)
+    
+    // 이메일 인증 필드들
     private String emailVerificationCode;
-    // 제한시간
     private LocalDateTime codeGeneratedAt; 
-    // 인증 종류
     private String purpose;
+
+    // 토큰 업데이트 메서드 추가
+    public void updateTokens(String accessToken, String refreshToken) {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.tokenIssuedAt = LocalDateTime.now();
+    }
+    
+    // 토큰 무효화 메서드
+    public void invalidateTokens() {
+        this.accessToken = null;
+        this.refreshToken = null;
+        this.tokenIssuedAt = null;
+    }
 
     @PreUpdate
     public void onPreUpdate() {

@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import service.domain.*;
 import service.dto.*;
+import java.util.Map;
+import java.util.HashMap;
+import service.common.JwtUtil;
 
 //<<< Clean Arch / Inbound Adaptor
 
@@ -78,20 +81,152 @@ public class AuthController {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
 
         try {
-            auth.verifyPassword(command.getPassword());  // Auth 내에 해당 메서드 필요
-            String token = JwtUtil.generateToken(auth.getUserId());  // userId만 전달
+            auth.verifyPassword(command.getPassword());
+            
+            // Access Token과 Refresh Token 생성
+            String accessToken = JwtUtil.generateToken(auth.getUserId());
+            String refreshToken = JwtUtil.generateRefreshToken(auth.getUserId());
+            
+            // 토큰 정보 저장
+            auth.updateTokens(accessToken, refreshToken);
+            authRepository.save(auth);
 
-            // 로그인 성공 이벤트 발행 가능
-            // LoginSuccessed event = new LoginSuccessed(auth, token);
-            // event.publish();
+            // 로그인 성공 이벤트 발행
+            LoginSuccessed event = new LoginSuccessed(auth, accessToken);
+            event.publish();
 
-            return ResponseEntity.ok(Map.of("accessToken", token));
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("accessToken", accessToken);
+            tokens.put("refreshToken", refreshToken);
+            tokens.put("tokenType", "Bearer");
+            
+            return ResponseEntity.ok(tokens);
         } catch (IllegalArgumentException e) {
-            // 로그인 실패 이벤트 발행 가능
+            // 로그인 실패 이벤트 발행
             LoginFailed event = new LoginFailed(auth);
             event.publish();
 
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패"+e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("로그인 실패: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
+        String refreshToken = request.getRefreshToken();
+        
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Refresh Token이 필요합니다.");
+        }
+        
+        try {
+            // Refresh Token 유효성 검증
+            if (!JwtUtil.validateToken(refreshToken)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("유효하지 않은 Refresh Token입니다.");
+            }
+            
+            // Refresh Token에서 userId 추출
+            Long userId = JwtUtil.getUserIdFromToken(refreshToken);
+            
+            // DB에서 해당 사용자의 Refresh Token 확인
+            Auth auth = authRepository.findByUserId(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+            
+            // 저장된 Refresh Token과 비교
+            if (!refreshToken.equals(auth.getRefreshToken())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Refresh Token이 일치하지 않습니다.");
+            }
+            
+            // 새로운 Access Token 생성
+            String newAccessToken = JwtUtil.generateToken(userId);
+            
+            // 선택사항: 새로운 Refresh Token도 생성 (보안 강화)
+            String newRefreshToken = JwtUtil.generateRefreshToken(userId);
+            
+            // 토큰 정보 업데이트
+            auth.updateTokens(newAccessToken, newRefreshToken);
+            authRepository.save(auth);
+            
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("accessToken", newAccessToken);
+            tokens.put("refreshToken", newRefreshToken);
+            tokens.put("tokenType", "Bearer");
+            
+            return ResponseEntity.ok(tokens);
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("토큰 갱신 실패: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody LogoutRequest request) {
+        String refreshToken = request.getRefreshToken();
+        
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Refresh Token이 필요합니다.");
+        }
+        
+        try {
+            // Refresh Token에서 userId 추출 (만료되어도 추출은 가능)
+            Long userId = JwtUtil.getUserIdFromToken(refreshToken);
+            
+            // DB에서 해당 사용자 찾기
+            Optional<Auth> authOptional = authRepository.findByUserId(userId);
+            
+            if (authOptional.isPresent()) {
+                Auth auth = authOptional.get();
+                
+                // 토큰 무효화
+                auth.invalidateTokens();
+                authRepository.save(auth);
+                
+                System.out.println("로그아웃 완료: userId = " + userId);
+            }
+            
+            return ResponseEntity.ok("로그아웃이 완료되었습니다.");
+            
+        } catch (Exception e) {
+            // 토큰이 만료되거나 잘못되어도 로그아웃은 성공으로 처리
+            System.err.println("로그아웃 처리 중 오류: " + e.getMessage());
+            return ResponseEntity.ok("로그아웃이 완료되었습니다.");
+        }
+    }
+
+    // 모든 기기에서 로그아웃 (추가 기능)
+    @PostMapping("/logout-all")
+    public ResponseEntity<?> logoutAll(@RequestBody LogoutRequest request) {
+        String refreshToken = request.getRefreshToken();
+        
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Refresh Token이 필요합니다.");
+        }
+        
+        try {
+            Long userId = JwtUtil.getUserIdFromToken(refreshToken);
+            
+            // 해당 사용자의 모든 토큰 무효화
+            Optional<Auth> authOptional = authRepository.findByUserId(userId);
+            
+            if (authOptional.isPresent()) {
+                Auth auth = authOptional.get();
+                auth.invalidateTokens();
+                authRepository.save(auth);
+                
+                System.out.println("전체 로그아웃 완료: userId = " + userId);
+            }
+            
+            return ResponseEntity.ok("모든 기기에서 로그아웃이 완료되었습니다.");
+            
+        } catch (Exception e) {
+            System.err.println("전체 로그아웃 처리 중 오류: " + e.getMessage());
+            return ResponseEntity.ok("로그아웃이 완료되었습니다.");
         }
     }
 }

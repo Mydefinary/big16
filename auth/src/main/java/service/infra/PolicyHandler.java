@@ -86,13 +86,35 @@ public class PolicyHandler {
         EmailVerificationRequested event = emailVerificationRequested;
         System.out.println(
             "\n\n##### listener RequestEmail : " +
-            EmailVerificationRequested +
+            emailVerificationRequested +  // 변수명 수정 (기존 클래스명이었음)
             "\n\n"
         );
+        
         String email = event.getEmail();
         String code = event.getEmailVerificationCode();
-        // Sample Logic //
-        mailService.sendVerificationEmail(email, code);
+        
+        if (email != null && code != null) {
+            System.out.println("이메일 발송 시작: " + email + " (코드: " + code + ")");
+            
+            try {
+                // MailService의 메인 메서드 사용
+                mailService.sendVerificationEmail(email, code);
+                System.out.println("이메일 발송 성공: " + email);
+            } catch (Exception e) {
+                System.err.println("이메일 발송 실패: " + email + " - " + e.getMessage());
+                
+                // 실패 시 간단한 버전으로 재시도
+                try {
+                    mailService.sendVerificationEmailSimple(email, code);
+                    System.out.println("이메일 발송 성공 (Simple 버전): " + email);
+                } catch (Exception e2) {
+                    System.err.println("이메일 발송 완전 실패: " + email + " - " + e2.getMessage());
+                    // 필요시 실패 이벤트 발행 가능
+                }
+            }
+        } else {
+            System.err.println("이메일 또는 인증코드가 없습니다. email: " + email + ", code: " + code);
+        }
     }
     
     // @StreamListener(
