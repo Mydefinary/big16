@@ -14,7 +14,9 @@ import service.domain.*;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import java.util.Date;
 
 
 //<<< Clean Arch / Inbound Adaptor
@@ -101,22 +103,13 @@ public class UserController {
 
     // 회원탈퇴 로직 아직 JWT 토큰 관련 수정을 진행하지 않아서 사용x
     @PatchMapping("/deactivate")
-    public ResponseEntity<?> deactivateUser() {
-        // 1. SecurityContext에서 인증 정보 가져오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        // 2. 토큰에서 추출된 userId (예: authentication.getName() 또는 커스텀 UserDetails에서 꺼내기)
-        Long userId = Long.parseLong(authentication.getName());
-
-        // 3. 사용자 조회
+    public ResponseEntity<?> deactivateUser(@RequestHeader("X-User-Id") Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(404).body("사용자를 찾을 수 없습니다.");
         }
 
         User user = userOpt.get();
-
-        // 4. 상태 변경 (회원탈퇴)
         user.setStatus("DELETED");
         userRepository.save(user);
 
