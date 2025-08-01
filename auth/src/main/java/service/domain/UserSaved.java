@@ -12,4 +12,5 @@ public class UserSaved extends AbstractEvent {
     private Long userId;
     private String loginId;
     private String password;
+    private String email;
 }

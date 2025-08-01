@@ -38,6 +38,8 @@ public class Auth {
 
     private String loginId;
 
+    private String email;
+
     private String passwordHash;
 
     // 토큰 관리 필드들
@@ -87,6 +89,7 @@ public class Auth {
         auth.setUserId(userSaved.getUserId());
         auth.setLoginId(userSaved.getLoginId());
         auth.setPasswordHash(userSaved.getPassword());  // 이미 암호화된 비밀번호가 이벤트에 담겨 있다고 가정
+        auth.setEmail(userSaved.getEmail());
 
         repository().save(auth);
 
@@ -144,9 +147,7 @@ public class Auth {
     //>>> Clean Arch / Port Method
     //<<< Clean Arch / Port Method
     public static void requestEmailVerification(UserRegistered userRegistered) {
-        
-
-        Optional<Auth> authOptional = repository().findByUserId(emailExistsConfirmed.getUserId());
+        Optional<Auth> authOptional = repository().findByUserId(userRegistered.getUserId());
 
         if (authOptional.isPresent()) {
             Auth auth = authOptional.get();
@@ -219,7 +220,7 @@ public class Auth {
     //         PasswordReseted passwordReseted = new PasswordReseted(auth);
     //         passwordReseted.publishAfterCommit();
     //     });
-    }
+    //}
 
     //>>> Clean Arch / Port Method
 
