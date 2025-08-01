@@ -110,13 +110,16 @@ public class Auth {
         // 제한시간이 지났거나
         if (this.codeGeneratedAt.isBefore(LocalDateTime.now().minusMinutes(10))) return false;
         // 코드가 같은지 확인
-        if(this.emailVerificationCode.equals(inputCode)){
+
+        boolean isVerified = this.emailVerificationCode.equals(inputCode);
+
+        if(isVerified){
             EmailVerified event = new EmailVerified(this);
             event.publish();
         }
         // 이메일 인증 실패 이벤트는 이후 실행하는거 없어서 주석 처리
         // EmailVerificationFailed event = new EmailVerificationFailed(this);
-        return this.emailVerificationCode.equals(inputCode);
+        return isVerified;
     }
 
     //>>> Clean Arch / Port Method
@@ -153,6 +156,14 @@ public class Auth {
 
         this.setPasswordHash(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
         repository().save(this);
+    }
+
+    // 로그인 검증
+    public String verifyPassword(String inputPassword) {
+        if (!BCrypt.checkpw(inputPassword, this.passwordHash)) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+        return this.loginId; // 로그인 ID 반환 (토큰 생성에 사용)
     }
 
     //<<< Clean Arch / Port Method

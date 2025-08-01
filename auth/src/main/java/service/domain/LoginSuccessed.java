@@ -14,6 +14,11 @@ public class LoginSuccessed extends AbstractEvent {
     private Long authId;
     private String accessToken;
 
+    public LoginSuccessed(Auth aggregate, String accessToken) {
+        super(aggregate);
+        this.accessToken = accessToken;
+    }
+
     public LoginSuccessed(Auth aggregate) {
         super(aggregate);
     }

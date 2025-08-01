@@ -44,7 +44,7 @@ public class AuthController {
         String email = request.getEmail();
         String newPassword = request.getNewPassword();
 
-        Auth auth = authRepository.findByUserId(email)
+        Auth auth = authRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // 실제 서비스 로직에 위임
@@ -69,6 +69,29 @@ public class AuthController {
             return ResponseEntity.ok("인증 성공");
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("인증 실패 또는 만료");
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginCommand command) {
+        Auth auth = authRepository.findByLoginId(command.getLoginId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
+
+        try {
+            auth.verifyPassword(command.getPassword());  // Auth 내에 해당 메서드 필요
+            String token = JwtUtil.generateToken(auth.getUserId());  // userId만 전달
+
+            // 로그인 성공 이벤트 발행 가능
+            // LoginSuccessed event = new LoginSuccessed(auth, token);
+            // event.publish();
+
+            return ResponseEntity.ok(Map.of("accessToken", token));
+        } catch (IllegalArgumentException e) {
+            // 로그인 실패 이벤트 발행 가능
+            LoginFailed event = new LoginFailed(auth);
+            event.publish();
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패"+e.getMessage());
         }
     }
 }
