@@ -16,11 +16,6 @@ public class EmailVerificationRequested extends AbstractEvent {
     // 이메일 인증을 위한 필드
     private String emailVerificationCode;
 
-    public EmailVerificationRequested(Auth aggregate, String email) {
-        super(aggregate);
-        this.email = email;
-    }
-
     public EmailVerificationRequested(Auth aggregate) {
         super(aggregate);
     }

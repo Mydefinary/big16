@@ -111,12 +111,13 @@ public class Auth {
             String code = String.format("%06d", new Random().nextInt(999999));
             
             auth.setPurpose("PASSWORD_RESET");
-            auth.emailVerificationCode = code;
+            auth.setEmailVerificationCode(code);
+
             auth.codeGeneratedAt = LocalDateTime.now();
 
             repository().save(auth);
 
-            EmailVerificationRequested event = new EmailVerificationRequested(auth, emailExistsConfirmed.getEmail());
+            EmailVerificationRequested event = new EmailVerificationRequested(auth);
             event.publishAfterCommit();
         } else {
             // 어차피 UserBC에서 처리하기떄문에 복잡한 예외처리 없이 로그정도만
@@ -155,12 +156,12 @@ public class Auth {
             String code = String.format("%06d", new Random().nextInt(999999));
             
             auth.setPurpose("SIGN_UP_VERIFICATION");
-            auth.emailVerificationCode = code;
+            auth.setEmailVerificationCode(code);
             auth.codeGeneratedAt = LocalDateTime.now();
 
             repository().save(auth);
 
-            EmailVerificationRequested event = new EmailVerificationRequested(auth, userRegistered.getEmail());
+            EmailVerificationRequested event = new EmailVerificationRequested(auth);
             event.publishAfterCommit();
         } else {
             // 어차피 UserBC에서 처리하기떄문에 복잡한 예외처리 없이 로그정도만

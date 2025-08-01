@@ -3,6 +3,7 @@ package service.domain;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import service.domain.*;
+import java.util.Optional;
 
 //<<< PoEAA / Repository
 @RepositoryRestResource(collectionResourceRel = "users", path = "users")

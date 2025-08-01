@@ -9,5 +9,6 @@ import service.infra.AbstractEvent;
 @ToString
 public class UserRegistered extends AbstractEvent {
 
-    private Long id;
+    private Long userId;
+    private Long email;
 }

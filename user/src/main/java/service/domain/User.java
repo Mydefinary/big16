@@ -67,6 +67,9 @@ public class User {
             user.setStatus("EMAIL_NOT_VERIFIED");
             repository().save(user);
 
+            UserRegistered userRegistered = new UserRegistered(user);
+            userRegistered.publishAfterCommit();
+
             // 필요하다면 이메일 인증 요청 이벤트 발행 가능
             // 예: Auth BC로 인증 코드 발송 요청 등
         });
