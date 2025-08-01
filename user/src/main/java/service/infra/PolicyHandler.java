@@ -51,8 +51,8 @@ public class PolicyHandler {
     ) {
         System.out.println("[이메일 인증 이벤트] 목적: " + emailVerified.getPurpose());
 
-        if ("SIGNUP_VERIFY".equals(emailVerified.getPurpose())) {
-            System.out.println("SIGNUP_VERIFY 목적 - User.findUserIdByEmail 실행");
+        if ("SIGN_UP_VERIFICATION".equals(emailVerified.getPurpose())) {
+            System.out.println("SIGN_UP_VERIFICATION 목적 - User.findUserIdByEmail 실행");
             User.findUserIdByEmail(emailVerified);
         } else {
             System.out.println("다른 목적의 이메일 인증 이벤트 수신됨: " + emailVerified.getPurpose());

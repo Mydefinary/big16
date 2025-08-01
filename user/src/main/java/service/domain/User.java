@@ -83,7 +83,7 @@ public class User {
 
             // Auth BC 내부에도 해당 이벤트에 대한 Policy가 있어서
             // 무시하기 위해 사용
-            if ("SIGNUP_VERIFY".equals(emailVerified.getPurpose())) {
+            if ("SIGN_UP_VERIFICATION".equals(emailVerified.getPurpose())) {
                 user.setStatus("EMAIL_VERIFIED");
                 repository().save(user);
             }

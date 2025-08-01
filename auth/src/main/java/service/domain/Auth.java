@@ -42,6 +42,8 @@ public class Auth {
     private String emailVerificationCode;
     // 제한시간
     private LocalDateTime codeGeneratedAt; 
+    // 인증 종류
+    private String purpose;
 
     @PreUpdate
     public void onPreUpdate() {
@@ -85,7 +87,8 @@ public class Auth {
             Auth auth = authOptional.get();
             // 랜덤 인증 코드 생성 (6자리 숫자 예시)
             String code = String.format("%06d", new Random().nextInt(999999));
-
+            
+            auth.setPurpose("PASSWORD_RESET");
             auth.emailVerificationCode = code;
             auth.codeGeneratedAt = LocalDateTime.now();
 
@@ -107,35 +110,36 @@ public class Auth {
         // 제한시간이 지났거나
         if (this.codeGeneratedAt.isBefore(LocalDateTime.now().minusMinutes(10))) return false;
         // 코드가 같은지 확인
+        if(this.emailVerificationCode.equals(inputCode)){
+            EmailVerified event = new EmailVerified(this);
+            event.publish();
+        }
+        // 이메일 인증 실패 이벤트는 이후 실행하는거 없어서 주석 처리
+        // EmailVerificationFailed event = new EmailVerificationFailed(this);
         return this.emailVerificationCode.equals(inputCode);
     }
 
     //>>> Clean Arch / Port Method
     //<<< Clean Arch / Port Method
     public static void requestEmailVerification(UserRegistered userRegistered) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
-        Auth auth = new Auth();
-        repository().save(auth);
-
-        EmailVerificationRequested emailVerificationRequested = new EmailVerificationRequested(auth);
-        emailVerificationRequested.publishAfterCommit();
-        */
-
-        /** Example 2:  finding and process
         
-
-        repository().findById(userRegistered.get???()).ifPresent(auth->{
+        if (authOptional.isPresent()) {
+            Auth auth = authOptional.get();
+            // 랜덤 인증 코드 생성 (6자리 숫자 예시)
+            String code = String.format("%06d", new Random().nextInt(999999));
             
-            auth // do something
+            auth.setPurpose("SIGN_UP_VERIFICATION");
+            auth.emailVerificationCode = code;
+            auth.codeGeneratedAt = LocalDateTime.now();
+
             repository().save(auth);
 
-            EmailVerificationRequested emailVerificationRequested = new EmailVerificationRequested(auth);
-            emailVerificationRequested.publishAfterCommit();
-
-         });
-        */
+            EmailVerificationRequested event = new EmailVerificationRequested(auth, emailExistsConfirmed.getEmail());
+            event.publishAfterCommit();
+        } else {
+            // 어차피 UserBC에서 처리하기떄문에 복잡한 예외처리 없이 로그정도만
+            System.out.println("이메일 없음");
+        }
 
     }
 
