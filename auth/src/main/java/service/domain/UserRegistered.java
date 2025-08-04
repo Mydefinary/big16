@@ -10,5 +10,5 @@ import service.infra.AbstractEvent;
 public class UserRegistered extends AbstractEvent {
 
     private Long userId;
-    private Long email;
+    private String email;
 }
