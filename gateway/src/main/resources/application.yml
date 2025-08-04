@@ -2,26 +2,30 @@ server:
   port: 8088
 
 ---
-
 spring:
   profiles: default
   cloud:
-    gateway:
-#<<< API Gateway / Routes
+    gateway: #<<< API Gateway / Routes
       routes:
         - id: auth
           uri: http://localhost:8082
           predicates:
-            - Path=/auths/**, 
+            - Path=/auths/**
+          filters:
+            - name: JwtAuthenticationFilter
         - id: user
           uri: http://localhost:8083
           predicates:
-            - Path=/users/**, 
+            - Path=/users/**
+          filters:
+            - name: JwtAuthenticationFilter
         - id: frontend
           uri: http://localhost:8080
           predicates:
             - Path=/**
-#>>> API Gateway / Routes
+          filters:
+            - name: JwtAuthenticationFilter
+      #>>> API Gateway / Routes
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -33,9 +37,7 @@ spring:
               - "*"
             allowCredentials: true
 
-
 ---
-
 spring:
   profiles: docker
   cloud:
@@ -44,15 +46,21 @@ spring:
         - id: auth
           uri: http://auth:8080
           predicates:
-            - Path=/auths/**, 
+            - Path=/auths/**
+          filters:
+            - name: JwtAuthenticationFilter
         - id: user
           uri: http://user:8080
           predicates:
-            - Path=/users/**, 
+            - Path=/users/**
+          filters:
+            - name: JwtAuthenticationFilter
         - id: frontend
           uri: http://frontend:8080
           predicates:
             - Path=/**
+          filters:
+            - name: JwtAuthenticationFilter
       globalcors:
         corsConfigurations:
           '[/**]':

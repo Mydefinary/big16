@@ -39,6 +39,17 @@ spring:
           destination: service
 #>>> EDA / Topic Name
           contentType: application/json
+  mail:
+    host: smtp.mailtrap.io
+    port: 2525
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 logging:
   level:
@@ -80,5 +91,3 @@ spring:
         event-out:
           destination: service
           contentType: application/json
-
-
