@@ -7,18 +7,28 @@ spring:
   cloud:
     gateway: #<<< API Gateway / Routes
       routes:
-        - id: auth
+        - id: auth-public
+          uri: http://localhost:8082
+          predicates:
+            - Path=/auths/login,/auths/refresh,/auths/verify-code,/auths/reset-password
+          # 필터 없음 (인증 불필요)
+        - id: auth-private
           uri: http://localhost:8082
           predicates:
             - Path=/auths/**
-          filters:
-            - name: JwtAuthenticationFilter
-        - id: user
+          # filters:
+          #   - name: JwtAuthenticationFilter
+        - id: user-public
+          uri: http://localhost:8083
+          predicates:
+            - Path=/users/register,/users/check-email,/users/find-id
+          # 필터 없음
+        - id: user-private
           uri: http://localhost:8083
           predicates:
             - Path=/users/**
-          filters:
-            - name: JwtAuthenticationFilter
+          # filters:
+          #   - name: JwtAuthenticationFilter
         - id: frontend
           uri: http://localhost:8080
           predicates:

@@ -91,12 +91,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Spring Security Core -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-
 		<!-- jBCrypt -->
 		<dependency>
 			<groupId>org.mindrot</groupId>
