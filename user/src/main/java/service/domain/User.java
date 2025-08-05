@@ -41,14 +41,18 @@ public class User {
 
     @PostPersist
     public void onPostPersist() {
-        UserSaved userSaved = new UserSaved(this);
-        userSaved.publishAfterCommit();
+        // UserSaved userSaved = new UserSaved(this);
+        // userSaved.publishAfterCommit();
 
     }
 
     @PreUpdate
     public void onPreUpdate() {
-        System.out.println("회원탈퇴 실행");
+        // System.out.println("회원탈퇴 실행");
+        
+    }
+
+    public void Withdrawal(){
         UserDeleted userDeleted = new UserDeleted(this);
         userDeleted.publishAfterCommit();
     }

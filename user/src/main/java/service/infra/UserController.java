@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import service.domain.*;
 import org.mindrot.jbcrypt.BCrypt;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import java.util.Date;
@@ -112,6 +110,8 @@ public class UserController {
         User user = userOpt.get();
         user.setStatus("DELETED");
         userRepository.save(user);
+
+        user.Withdrawal();
 
         return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
