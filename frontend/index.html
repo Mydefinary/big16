@@ -1,34 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>서비스</title>
-  <link rel="stylesheet" type="text/css" href="/loader.css" />
-</head>
-
-<body>
-  <div id="root">
-    <div id="loading-bg">
-      <div class="loading-logo"></div>
-      <div class="loading">
-        <div class="effect-1 effects"></div>
-        <div class="effect-2 effects"></div>
-        <div class="effect-3 effects"></div>
-      </div>
-    </div>
-  </div>
-  <script type="module" src="/src/main.jsx"></script>
-  <script>
-    const loaderColor = localStorage.getItem('Materio-initial-loader-bg') || '#FFFFFF'
-    const primaryColor = localStorage.getItem('Materio-initial-loader-color') || '#9155FD'
-
-    if (loaderColor)
-      document.documentElement.style.setProperty('--initial-loader-bg', loaderColor)
-    if (primaryColor)
-      document.documentElement.style.setProperty('--initial-loader-color', primaryColor)
-  </script>
-</body>
-
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>인증 시스템</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

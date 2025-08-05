@@ -1,197 +1,203 @@
-// src/pages/Register.js
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
-import { api } from '@api/api';
-import "@style/Register.css";
-import "react-toastify/dist/ReactToastify.css";
-import { Link } from "react-router-dom";
-import Stars from "@components/Stars";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { userAPI } from '../services/api';
 
-function Register() {
+const Register = () => {
+  const [formData, setFormData] = useState({
+    loginId: '',
+    email: '',
+    nickname: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    loginId: "",      // 로그인아이디 추가
-    email: "",
-    password: "",
-    confirmPassword: "",
-    name: "",
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showCFPassword, setShowCFPassword] = useState(false);
-
-  // 모달 상태 추가
-  const [showModal, setShowModal] = useState(false);
-
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    
+    // 실시간 비밀번호 확인 검증
+    if (e.target.name === 'confirmPassword' || e.target.name === 'password') {
+      const password = e.target.name === 'password' ? e.target.value : formData.password;
+      const confirmPassword = e.target.name === 'confirmPassword' ? e.target.value : formData.confirmPassword;
+      
+      if (confirmPassword && password !== confirmPassword) {
+        setErrors(prev => ({ ...prev, confirmPassword: '비밀번호가 일치하지 않습니다.' }));
+      } else {
+        setErrors(prev => ({ ...prev, confirmPassword: '' }));
+      }
+    }
   };
 
-  // 비밀번호 유효성 검사 함수
-  const validatePassword = (password) => {
-    const lengthCheck = password.length >= 8;
-    // const upperCheck = /[A-Z]/.test(password);
-    const lowerCheck = /[a-z]/.test(password);
-    const numberCheck = /[0-9]/.test(password);
-    const specialCheck = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  const validateForm = () => {
+    const newErrors = {};
 
-    // return lengthCheck && upperCheck && lowerCheck && numberCheck && specialCheck;
-    return lengthCheck && lowerCheck && numberCheck && specialCheck;
+    if (!formData.loginId) newErrors.loginId = '아이디를 입력하세요.';
+    if (!formData.email) newErrors.email = '이메일을 입력하세요.';
+    if (!formData.nickname) newErrors.nickname = '이름을 입력하세요.';
+    if (!formData.password) newErrors.password = '비밀번호를 입력하세요.';
+    if (!formData.confirmPassword) newErrors.confirmPassword = '비밀번호 확인을 입력하세요.';
+    
+    if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = '비밀번호가 일치하지 않습니다.';
+    }
+
+    // 이메일 형식 검증
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      newErrors.email = '올바른 이메일 형식을 입력하세요.';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!form.loginId.trim()) {
-      toast.error("로그인 아이디를 입력하세요.");
-      return;
-    }
-
-    if (!validatePassword(form.password)) {
-      toast.error("비밀번호는 8자 이상, 소문자, 숫자, 특수문자를 포함해야 합니다.");
-      return;
-    }
-
-    if (form.password !== form.confirmPassword) {
-      toast.error("비밀번호가 일치하지 않습니다.");
-      return;
-    }
+    
+    if (!validateForm()) return;
+    
+    setLoading(true);
 
     try {
-      await api.post("/auth/register", {
-        loginId: form.loginId,
-        email: form.email,
-        password: form.password,
-        name: form.name,
+      await userAPI.register({
+        loginId: formData.loginId,
+        email: formData.email,
+        nickname: formData.nickname,
+        password: formData.password
       });
-      setShowModal(true); // 모달 띄우기
+      
+      // 회원가입 성공 시 이메일 인증 페이지로 이동
+      navigate('/email-verification', { 
+        state: { 
+          email: formData.email,
+          purpose: 'SIGN_UP_VERIFICATION',
+          message: '회원가입이 완료되었습니다. 이메일로 발송된 인증코드를 입력해주세요.'
+        } 
+      });
     } catch (err) {
-      const msg =
-        err.response?.data || err.message || "회원가입 중 오류가 발생했습니다.";
-      toast.error(msg);
+      console.error('Registration error:', err);
+      const errorMessage = err.response?.data;
+      if (typeof errorMessage === 'string') {
+        if (errorMessage.includes('로그인 아이디')) {
+          setErrors({ loginId: errorMessage });
+        } else if (errorMessage.includes('이메일')) {
+          setErrors({ email: errorMessage });
+        } else {
+          setErrors({ general: errorMessage });
+        }
+      } else {
+        setErrors({ general: '회원가입에 실패했습니다.' });
+      }
+    } finally {
+      setLoading(false);
     }
-  };
-
-  // 모달 확인 버튼 클릭 시
-  const handleConfirm = () => {
-    setShowModal(false);
-    navigate("/login");
   };
 
   return (
-    <div className="register-wrapper">
-      <Stars />
-      <header className="header">회원가입</header>
-      <form className="register-container" onSubmit={handleSubmit}>
-        <h2 className="register-title">계정을 생성하세요</h2>
-
-        <input
-          type="text"
-          name="loginId"
-          placeholder="로그인 아이디"
-          className="register-input"
-          value={form.loginId}
-          onChange={handleChange}
-          required
-          autoFocus
-        />
-        <input
-          type="text"
-          name="name"
-          placeholder="이름"
-          className="register-input"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="이메일"
-          className="register-input"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-        <div className="password-wrapper">
-          <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            placeholder="비밀번호"
-            className="register-input"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
-          <button
-            type="button"
-            className="show-password-btn"
-            onMouseDown={() => setShowPassword(true)}
-            onMouseUp={() => setShowPassword(false)}
-            onMouseLeave={() => setShowPassword(false)}
-            aria-label="비밀번호 보기"
-          >
-            👁️
-          </button>
-        </div>
-        <div className="password-wrapper">
-          <input
-            type={showCFPassword ? "text" : "password"}
-            name="confirmPassword"
-            placeholder="비밀번호 확인"
-            className="register-input"
-            value={form.confirmPassword}
-            onChange={handleChange}
-            required
-          />
-          <button
-            type="button"
-            className="show-password-btn"
-            onMouseDown={() => setShowCFPassword(true)}
-            onMouseUp={() => setShowCFPassword(false)}
-            onMouseLeave={() => setShowCFPassword(false)}
-            aria-label="비밀번호 확인 보기"
-          >
-            👁️
-          </button>
-        </div>
-
-        <div className="button-group">
-          <button
-            type="button"
-            className="back-button"
-            onClick={() => navigate(-1)}
-          >
-            뒤로가기
-          </button>
-          <button className="register-button" type="submit">
-            가입하기
-          </button>
-        </div>
-
-        <div className="register-footer">
-          이미 계정이 있으신가요? <Link to="/login">로그인</Link>
-        </div>
-      </form>
-
-      {/* 모달 영역 */}
-      {showModal && (
-        <div className="modal-backdrop">
-          <div className="modal-box">
-            <p>회원가입 성공!</p>
-            <p>이메일 인증을 확인하세요.</p>
-            <button className="modal-confirm-btn" onClick={handleConfirm}>
-              확인
-            </button>
+    <div className="auth-container">
+      <div className="auth-form">
+        <h2>회원가입</h2>
+        
+        {errors.general && <div className="error-message">{errors.general}</div>}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="loginId">로그인 아이디</label>
+            <input
+              type="text"
+              id="loginId"
+              name="loginId"
+              value={formData.loginId}
+              onChange={handleChange}
+              required
+              placeholder="로그인 아이디를 입력하세요"
+            />
+            {errors.loginId && <div className="field-error">{errors.loginId}</div>}
           </div>
-        </div>
-      )}
 
-      <ToastContainer position="top-right" autoClose={3000} />
+          <div className="form-group">
+            <label htmlFor="email">이메일</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              placeholder="이메일을 입력하세요"
+            />
+            {errors.email && <div className="field-error">{errors.email}</div>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="nickname">이름</label>
+            <input
+              type="text"
+              id="nickname"
+              name="nickname"
+              value={formData.nickname}
+              onChange={handleChange}
+              required
+              placeholder="이름을 입력하세요"
+            />
+            {errors.nickname && <div className="field-error">{errors.nickname}</div>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">비밀번호</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              placeholder="비밀번호를 입력하세요"
+            />
+            {errors.password && <div className="field-error">{errors.password}</div>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword">비밀번호 확인</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              placeholder="비밀번호를 다시 입력하세요"
+            />
+            {errors.confirmPassword && <div className="field-error">{errors.confirmPassword}</div>}
+          </div>
+
+          <button 
+            type="submit" 
+            className="auth-button primary"
+            disabled={loading || Object.keys(errors).some(key => errors[key])}
+          >
+            {loading ? '가입 중...' : '가입하기'}
+          </button>
+        </form>
+
+        <div className="auth-links">
+          <button 
+            type="button" 
+            onClick={() => navigate('/login')} 
+            className="link-button"
+          >
+            로그인 페이지로 돌아가기
+          </button>
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 export default Register;

@@ -1,88 +1,96 @@
-// src/pages/Login.js
-import React, { useState, useMemo } from "react";
-import {api} from '@api/api'; // axios 인스턴스 (baseURL 등 설정된 상태)
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import '@style/Login.css';
-import { Link } from "react-router-dom";
-import Stars from "@components/Stars";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { authAPI } from '../services/api';
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const Login = () => {
+  const [formData, setFormData] = useState({
+    loginId: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     setLoading(true);
+
     try {
-      const res = await api.post("/auth/login", { email, password });
-      localStorage.setItem("accessToken", res.data.token);
-      localStorage.setItem("refreshToken", res.data.refreshToken);
-      toast.success("로그인 성공!");
-      // TODO: 로그인 후 페이지 이동 등
+      const response = await authAPI.login(formData);
+      const { accessToken, refreshToken } = response.data;
+      
+      login(accessToken, refreshToken);
+      navigate('/dashboard');
     } catch (err) {
-      // 서버에서 내려준 메시지 보여주기
-      const msg =
-        err.response?.data ||
-        err.message ||
-        "로그인 중 오류가 발생했습니다.";
-      toast.error(msg);
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || '로그인에 실패했습니다.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-wrapper">
-      <Stars />
-      <header className="header">이미지 광고 서비스</header>
-      <form className="login-container" onSubmit={handleSubmit}>
-        <h2 className="login-title">로그인</h2>
+    <div className="auth-container">
+      <div className="auth-form">
+        <h2>로그인</h2>
+        
+        {error && <div className="error-message">{error}</div>}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="loginId">아이디</label>
+            <input
+              type="text"
+              id="loginId"
+              name="loginId"
+              value={formData.loginId}
+              onChange={handleChange}
+              required
+              placeholder="아이디를 입력하세요"
+            />
+          </div>
 
-        <input
-          type="email"
-          placeholder="이메일"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          autoFocus
-          className="login-input"
-        />
+          <div className="form-group">
+            <label htmlFor="password">비밀번호</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              placeholder="비밀번호를 입력하세요"
+            />
+          </div>
 
-        <div className="password-wrapper">
-          <input
-            type={showPassword ? "text" : "password"}
-            value={password}
-            placeholder="비밀번호"
-            onChange={(e) => setPassword(e.target.value)}
-            className="login-input"
-            required
-          />
-          <button
-            type="button"
-            className="show-password-btn"
-            onMouseDown={() => setShowPassword(true)}
-            onMouseUp={() => setShowPassword(false)}
-            onMouseLeave={() => setShowPassword(false)}
-            aria-label="비밀번호 보기"
+          <button 
+            type="submit" 
+            className="auth-button primary"
+            disabled={loading}
           >
-            👁️
+            {loading ? '로그인 중...' : '로그인'}
           </button>
-        </div>
+        </form>
 
-        <button type="submit" disabled={loading} className="login-button">
-          {loading ? "로딩중..." : "로그인"}
-        </button>
-
-        <div className="login-footer">
-          <Link to="/register">회원가입</Link> | <Link to="/password-reset">비밀번호 재설정</Link>
+        <div className="auth-links">
+          <Link to="/find-id" className="link">아이디 찾기</Link>
+          <Link to="/find-password" className="link">비밀번호 찾기</Link>
+          <Link to="/register" className="link">회원가입</Link>
         </div>
-      </form>
-      <ToastContainer position="top-right" autoClose={3000} />
+      </div>
     </div>
   );
-}
+};
 
 export default Login;

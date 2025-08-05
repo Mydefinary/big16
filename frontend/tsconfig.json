@@ -29,6 +29,6 @@
     "src/**/*",
     "src/**/*.tsx",
     "src/**/*.ts"
-  ],
+, "current/App.jsx", "current/main.jsx", "current/router", "current/pages", "current/components", "current/api"  ],
   "exclude": ["dist", "node_modules", "src/@iconify/*"]
 }
