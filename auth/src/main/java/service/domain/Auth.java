@@ -46,6 +46,7 @@ public class Auth {
     private String accessToken;       
     private String refreshToken;      
     private LocalDateTime tokenIssuedAt;   // 토큰 발급 시간 (선택사항)
+    private String emailToken;
     
     // 이메일 인증 필드들
     private String emailVerificationCode;
@@ -64,6 +65,7 @@ public class Auth {
         this.accessToken = null;
         this.refreshToken = null;
         this.tokenIssuedAt = null;
+        this.emailToken= null;
     }
 
     @PreUpdate

@@ -47,8 +47,8 @@ public class AuthController {
 
     @PatchMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request,
-                                                @RequestHeader("X-User-Email") String email) {
-        // String email = request.getEmail();
+                                                @RequestHeader("X-User-Email") String token) {
+        String email = JwtUtil.getEmailFromToken(token);
         String newPassword = request.getNewPassword();
 
         Auth auth = authRepository.findByEmail(email)
@@ -57,6 +57,8 @@ public class AuthController {
         // 실제 서비스 로직에 위임
         auth.resetPassword(newPassword);
 
+        // 비밀번호 재설정 후 토큰 초기화
+        auth.invalidateTokens();                                                
         return ResponseEntity.ok("비밀번호가 재설정되었습니다.");
     }
 
@@ -77,6 +79,7 @@ public class AuthController {
         if (valid) {
             if ("PASSWORD_RESET".equals(auth.getPurpose())){
                 String emailToken = JwtUtil.generateEmailToken(email);
+                auth.setEmailToken(emailToken);
                 return ResponseEntity.ok().header("X-Email-Token", emailToken).build();
             }
             return ResponseEntity.ok("인증 성공");
