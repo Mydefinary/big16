@@ -68,7 +68,7 @@ public class Auth {
 
     @PreUpdate
     public void onPreUpdate() {
-        System.out.println("PreUpdate에서 비밀번호 재설정 되는지");
+        // System.out.println("PreUpdate에서 비밀번호 재설정 되는지");
         // 어차피 이후 정책 발행을 하지 않아서 주석 처리함
         // PasswordEdited passwordEdited = new PasswordEdited(this);
         // passwordEdited.publishAfterCommit();
@@ -107,6 +107,15 @@ public class Auth {
 
         if (authOptional.isPresent()) {
             Auth auth = authOptional.get();
+            // 기존 인증 코드가 있고, 생성된 지 5분 이내면 재사용
+            // if (auth.getPurpose().equals("PASSWORD_RESET") && auth.codeGeneratedAt != null) {
+            //     Duration duration = Duration.between(auth.codeGeneratedAt, LocalDateTime.now());
+            //     if (duration.toMinutes() < 5) {
+            //         // 기존 코드 유효하므로 재사용, 이벤트 재발행만 할지 말지 결정 가능
+            //         System.out.println("기존 인증 코드가 아직 유효합니다.");
+            //         return;
+            //     }
+            // }
             // 랜덤 인증 코드 생성 (6자리 숫자 예시)
             String code = String.format("%06d", new Random().nextInt(999999));
             

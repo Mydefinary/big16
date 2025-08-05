@@ -15,7 +15,7 @@ import java.util.HashMap;
 import service.common.JwtUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+// import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.mindrot.jbcrypt.BCrypt;
 
 //<<< Clean Arch / Inbound Adaptor
@@ -46,8 +46,9 @@ public class AuthController {
     }
 
     @PatchMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
-        String email = request.getEmail();
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request,
+                                                @RequestHeader("X-User-Email") String email) {
+        // String email = request.getEmail();
         String newPassword = request.getNewPassword();
 
         Auth auth = authRepository.findByEmail(email)
@@ -64,6 +65,7 @@ public class AuthController {
     public ResponseEntity<?> verifyCode(@RequestBody VerifyCodeRequest request) {
         String email = request.getEmail();
         String code = request.getCode();
+        
 
         Optional<Auth> authOpt = authRepository.findByEmail(email);
         if (authOpt.isEmpty()) {
@@ -73,6 +75,10 @@ public class AuthController {
         Auth auth = authOpt.get();
         boolean valid = auth.verifyCode(code);
         if (valid) {
+            if ("PASSWORD_RESET".equals(auth.getPurpose())){
+                String emailToken = JwtUtil.generateEmailToken(email);
+                return ResponseEntity.ok().header("X-Email-Token", emailToken).build();
+            }
             return ResponseEntity.ok("인증 성공");
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("인증 실패 또는 만료");
@@ -81,10 +87,10 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginCommand command) {
-        Auth auth = authRepository.findByLoginId(command.getLoginId())
+        try {
+            Auth auth = authRepository.findByLoginId(command.getLoginId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
 
-        try {
             auth.verifyPassword(command.getPassword());
             
             // Access Token과 Refresh Token 생성
