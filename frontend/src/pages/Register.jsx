@@ -12,25 +12,41 @@ const Register = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-    
-    // 실시간 비밀번호 확인 검증
-    if (e.target.name === 'confirmPassword' || e.target.name === 'password') {
-      const password = e.target.name === 'password' ? e.target.value : formData.password;
-      const confirmPassword = e.target.name === 'confirmPassword' ? e.target.value : formData.confirmPassword;
-      
-      if (confirmPassword && password !== confirmPassword) {
-        setErrors(prev => ({ ...prev, confirmPassword: '비밀번호가 일치하지 않습니다.' }));
-      } else {
-        setErrors(prev => ({ ...prev, confirmPassword: '' }));
+    const { name, value } = e.target;
+
+    // 입력값 업데이트
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    // 입력 수정 시 해당 필드 에러 삭제
+    setErrors(prev => {
+      const copy = { ...prev };
+      if (copy[name]) {
+        delete copy[name];
       }
+      return copy;
+    });
+
+    // 비밀번호 / 비밀번호 확인 일치 검증
+    if (name === 'password' || name === 'confirmPassword') {
+      const password = name === 'password' ? value : formData.password;
+      const confirmPassword = name === 'confirmPassword' ? value : formData.confirmPassword;
+
+      setErrors(prev => {
+        const copy = { ...prev };
+        if (confirmPassword && password !== confirmPassword) {
+          copy.confirmPassword = '비밀번호가 일치하지 않습니다.';
+        } else {
+          delete copy.confirmPassword;
+        }
+        return copy;
+      });
     }
   };
 
@@ -42,26 +58,27 @@ const Register = () => {
     if (!formData.nickname) newErrors.nickname = '이름을 입력하세요.';
     if (!formData.password) newErrors.password = '비밀번호를 입력하세요.';
     if (!formData.confirmPassword) newErrors.confirmPassword = '비밀번호 확인을 입력하세요.';
-    
+
     if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = '비밀번호가 일치하지 않습니다.';
     }
 
-    // 이메일 형식 검증
+    // 이메일 형식 검사
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.email && !emailRegex.test(formData.email)) {
       newErrors.email = '올바른 이메일 형식을 입력하세요.';
     }
 
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setLoading(true);
 
     try {
@@ -71,18 +88,19 @@ const Register = () => {
         nickname: formData.nickname,
         password: formData.password
       });
-      
-      // 회원가입 성공 시 이메일 인증 페이지로 이동
-      navigate('/email-verification', { 
-        state: { 
+
+      // 회원가입 성공 후 이메일 인증 페이지로 이동
+      navigate('/email-verification', {
+        state: {
           email: formData.email,
           purpose: 'SIGN_UP_VERIFICATION',
           message: '회원가입이 완료되었습니다. 이메일로 발송된 인증코드를 입력해주세요.'
-        } 
+        }
       });
     } catch (err) {
       console.error('Registration error:', err);
       const errorMessage = err.response?.data;
+
       if (typeof errorMessage === 'string') {
         if (errorMessage.includes('로그인 아이디')) {
           setErrors({ loginId: errorMessage });
@@ -103,9 +121,9 @@ const Register = () => {
     <div className="auth-container">
       <div className="auth-form">
         <h2>회원가입</h2>
-        
+
         {errors.general && <div className="error-message">{errors.general}</div>}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="loginId">로그인 아이디</label>
@@ -177,19 +195,19 @@ const Register = () => {
             {errors.confirmPassword && <div className="field-error">{errors.confirmPassword}</div>}
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="auth-button primary"
-            disabled={loading || Object.keys(errors).some(key => errors[key])}
+            disabled={loading || Object.values(errors).some(e => e)}
           >
             {loading ? '가입 중...' : '가입하기'}
           </button>
         </form>
 
         <div className="auth-links">
-          <button 
-            type="button" 
-            onClick={() => navigate('/login')} 
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
             className="link-button"
           >
             로그인 페이지로 돌아가기

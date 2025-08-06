@@ -2,57 +2,158 @@ package service.infra;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.SimpleMailMessage;
 import io.github.cdimascio.dotenv.Dotenv;
 
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
 @Service
 public class MailService {
 
-    @Autowired
+    @Autowired(required = false)  // JavaMailSender가 없어도 서비스 생성 가능
     private JavaMailSender mailSender;
     
-    private static final Dotenv dotenv = Dotenv.load();
-    private static final String FROM_EMAIL = dotenv.get("MAIL_FROM_ADDRESS", "noreply@yourapp.com");
-    private static final String FROM_NAME = dotenv.get("MAIL_FROM_NAME", "인증서비스");
+    @Value("${spring.mail.username:}")
+    private String mailUsername;
+    
+    @Value("${spring.mail.password:}")
+    private String mailPassword;
+    
+    private final String fromEmail;
+    private final String fromName;
+    
+    public MailService() {
+        // dotenv에서 값 읽기
+        String tempFromEmail;
+        String tempFromName;
+        
+        try {
+            Dotenv dotenv = Dotenv.load();
+            tempFromEmail = dotenv.get("MAIL_FROM_ADDRESS", "noreply@yourapp.com");
+            tempFromName = dotenv.get("MAIL_FROM_NAME", "인증서비스");
+            System.out.println("MailService 초기화 완료 - FROM: " + tempFromEmail);
+        } catch (Exception e) {
+            System.err.println("dotenv 로딩 실패, 기본값 사용: " + e.getMessage());
+            tempFromEmail = "noreply@yourapp.com";
+            tempFromName = "인증서비스";
+        }
+        
+        this.fromEmail = tempFromEmail;
+        this.fromName = tempFromName;
+    }
 
     public void sendVerificationEmail(String toEmail, String code) {
+        // 메일 설정 확인
+        if (!isMailConfigured()) {
+            sendMockEmail(toEmail, code, "HTML");
+            return;
+        }
+        
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             
-            helper.setFrom(FROM_EMAIL, FROM_NAME);
+            helper.setFrom(fromEmail, fromName);
             helper.setTo(toEmail);
             helper.setSubject("이메일 인증 코드 안내");
-            helper.setText("인증 코드는 " + code + " 입니다. 10분 이내에 입력해주세요.");
+            
+            // HTML 형식으로 변경 (Java 8 호환)
+            String htmlContent = "<html>" +
+                "<body>" +
+                "<h2>이메일 인증 코드</h2>" +
+                "<p>안녕하세요!</p>" +
+                "<p>요청하신 이메일 인증 코드는 다음과 같습니다:</p>" +
+                "<h3 style=\"color: #007bff; font-size: 24px; letter-spacing: 2px;\">" + code + "</h3>" +
+                "<p>이 코드는 <strong>10분</strong> 내에 입력해주세요.</p>" +
+                "<hr>" +
+                "<p style=\"font-size: 12px; color: #666;\">본 메일은 자동 발송되는 메일입니다.</p>" +
+                "</body>" +
+                "</html>";
+            
+            helper.setText(htmlContent, true);
             
             mailSender.send(message);
-            System.out.println("이메일 발송 완료: " + toEmail + " (코드: " + code + ")");
+            System.out.println("✅ 이메일 발송 완료: " + toEmail + " (코드: " + code + ")");
             
         } catch (Exception e) {
-            System.err.println("이메일 발송 실패: " + e.getMessage());
+            System.err.println("❌ 이메일 발송 실패: " + e.getMessage());
             e.printStackTrace();
+            // 실패 시 Mock으로 대체
+            sendMockEmail(toEmail, code, "HTML (발송실패)");
         }
     }
     
-    // 간단한 버전 (한글 이름 문제 시 사용)
+    // 간단한 버전
     public void sendVerificationEmailSimple(String toEmail, String code) {
+        if (!isMailConfigured()) {
+            sendMockEmail(toEmail, code, "Simple");
+            return;
+        }
+        
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(FROM_EMAIL);
+        message.setFrom(fromEmail);
         message.setTo(toEmail);
         message.setSubject("이메일 인증 코드 안내");
         message.setText("인증 코드는 " + code + " 입니다. 10분 이내에 입력해주세요.");
 
         try {
             mailSender.send(message);
-            System.out.println("이메일 발송 완료: " + toEmail + " (코드: " + code + ")");
+            System.out.println("✅ 이메일 발송 완료 (Simple): " + toEmail + " (코드: " + code + ")");
         } catch (Exception e) {
-            System.err.println("이메일 발송 실패: " + e.getMessage());
+            System.err.println("❌ 이메일 발송 실패 (Simple): " + e.getMessage());
             e.printStackTrace();
+            sendMockEmail(toEmail, code, "Simple (발송실패)");
         }
+    }
+    
+    // Mock 이메일 (실제 발송 안함)
+    private void sendMockEmail(String toEmail, String code, String type) {
+        System.out.println("==========================================");
+        System.out.println("📧 [MOCK EMAIL] " + type);
+        System.out.println("📧 TO: " + toEmail);
+        System.out.println("📧 FROM: " + fromName + " <" + fromEmail + ">");
+        System.out.println("📧 SUBJECT: 이메일 인증 코드 안내");
+        System.out.println("📧 CODE: " + code);
+        System.out.println("📧 MESSAGE: 인증 코드는 " + code + " 입니다. 10분 이내에 입력해주세요.");
+        System.out.println("📧 실제 메일은 발송되지 않습니다");
+        System.out.println("==========================================");
+    }
+    
+    // 메일 설정 확인
+    private boolean isMailConfigured() {
+        boolean configured = mailSender != null && 
+                           mailUsername != null && !mailUsername.isEmpty() && 
+                           !mailUsername.equals("temp-username") &&
+                           mailPassword != null && !mailPassword.isEmpty() && 
+                           !mailPassword.equals("temp-password");
+        
+        if (!configured) {
+            System.out.println("ℹ️ 메일 설정이 완전하지 않음 - Mock 모드로 동작");
+            System.out.println("   Username: " + mailUsername + " / Password: " + 
+                             (mailPassword != null && !mailPassword.isEmpty() ? "설정됨" : "없음"));
+        }
+        
+        return configured;
+    }
+    
+    // 설정 상태 확인
+    public void printConfiguration() {
+        System.out.println("=== MAIL 설정 현황 ===");
+        System.out.println("JavaMailSender: " + (mailSender != null ? "사용가능" : "없음"));
+        System.out.println("Username: " + mailUsername);
+        System.out.println("Password: " + (mailPassword != null && !mailPassword.isEmpty() ? "****" : "EMPTY"));
+        System.out.println("From Email: " + fromEmail);
+        System.out.println("From Name: " + fromName);
+        System.out.println("설정완료: " + isMailConfigured());
+        System.out.println("=====================");
+    }
+    
+    // 연결 테스트
+    public boolean testConnection() {
+        printConfiguration();
+        return isMailConfigured();
     }
 }

@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: auth
 ---
@@ -40,7 +42,7 @@ spring:
 #>>> EDA / Topic Name
           contentType: application/json
   mail:
-    host: smtp.mailtrap.io
+    host: sandbox.smtp.mailtrap.io
     port: 2525
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
