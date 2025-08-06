@@ -115,9 +115,10 @@ public class AuthController {
             
             return ResponseEntity.ok(tokens);
         } catch (IllegalArgumentException e) {
-            // 로그인 실패 이벤트 발행
-            LoginFailed event = new LoginFailed(auth);
-            event.publish();
+            // 로그인 실패 이벤트 발행 해야하는데 auth를 
+            // 못불러온거라 기능도 없으니 그냥 주석 처리
+            // LoginFailed event = new LoginFailed(auth);
+            // event.publish();
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("로그인 실패: " + e.getMessage());
