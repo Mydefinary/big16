@@ -42,6 +42,10 @@ public class Auth {
 
     private String passwordHash;
 
+    private boolean isVerified = false;
+
+    private Date createdAt;
+
     // 토큰 관리 필드들
     private String accessToken;       
     private String refreshToken;      
@@ -92,6 +96,7 @@ public class Auth {
         auth.setLoginId(userSaved.getLoginId());
         auth.setPasswordHash(userSaved.getPassword());  // 이미 암호화된 비밀번호가 이벤트에 담겨 있다고 가정
         auth.setEmail(userSaved.getEmail());
+        auth.setCreatedAt(userSaved.getCreatedAt());
 
         repository().save(auth);
 
@@ -145,7 +150,7 @@ public class Auth {
         if (this.codeGeneratedAt.isBefore(LocalDateTime.now().minusMinutes(10))) return false;
         // 코드가 같은지 확인
 
-        boolean isVerified = this.emailVerificationCode.equals(inputCode);
+        isVerified = this.emailVerificationCode.equals(inputCode);
 
         if(isVerified){
             EmailVerified event = new EmailVerified(this);
