@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({
     loginId: '',
     password: ''
   });
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
   const { login } = useAuth();
@@ -23,7 +24,6 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
@@ -34,7 +34,16 @@ const Login = () => {
       navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || '로그인에 실패했습니다.');
+      // const message = err.response?.data?.message || '로그인에 실패했습니다.';
+      const message =typeof err.response?.data === 'string' 
+      ? err.response.data 
+      : err.response?.data?.message || '로그인에 실패했습니다.'
+      toast.error(message, {
+        position: "top-right",
+        autoClose: 5000,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } finally {
       setLoading(false);
     }
@@ -44,8 +53,6 @@ const Login = () => {
     <div className="auth-container">
       <div className="auth-form">
         <h2>로그인</h2>
-        
-        {error && <div className="error-message">{error}</div>}
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -89,6 +96,9 @@ const Login = () => {
           <Link to="/register" className="link">회원가입</Link>
         </div>
       </div>
+
+      {/* ToastContainer는 최상단에 한 번만 넣으면 됩니다 */}
+      <ToastContainer />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // API 기본 설정
-const API_BASE_URL = 'http://localhost:8088'; // Gateway 주소
+const API_BASE_URL = 'https://improved-space-computing-machine-9gx9qqww4qv3p7rr-8088.app.github.dev'; // Gateway 주소
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -66,7 +66,17 @@ export const authAPI = {
   logout: (refreshToken) => api.post('/auths/logout', { refreshToken }),
   refreshToken: (refreshToken) => api.post('/auths/refresh', { refreshToken }),
   verifyCode: (email, code) => api.post('/auths/verify-code', { email, code }),
-  resetPassword: (email, newPassword) => api.post('/auths/reset-password', { email, newPassword }),
+  // resetPassword: (email, newPassword) => api.patch('/auths/reset-password', { email, newPassword }),
+  resetPassword: (newPassword, emailToken) =>
+  api.patch(
+    '/auths/reset-password',
+    { newPassword },
+    {
+      headers: {
+        'X-User-Email': emailToken, // Bearer 없이 토큰 문자열만
+      },
+    }
+  ),
   changePassword: (currentPassword, newPassword) => 
     api.patch('/auths/user/password-change', { currentPassword, newPassword }),
 };

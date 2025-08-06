@@ -11,7 +11,6 @@ const FindPassword = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  
   const navigate = useNavigate();
 
   // 1단계: 이메일 확인 및 인증코드 발송
@@ -39,8 +38,15 @@ const FindPassword = () => {
     setLoading(true);
 
     try {
-      // 인증코드 확인
-      await authAPI.verifyCode(email, code);
+      // 인증코드 확인 요청 및 응답 받기
+      const response = await authAPI.verifyCode(email, code);
+
+      // 커스텀 헤더에서 토큰 꺼내기
+      const emailToken = response.headers['x-email-token'];
+      if (emailToken) {
+        localStorage.setItem('emailToken', emailToken);
+      }
+
       setStep(3);
     } catch (err) {
       console.error('Code verification error:', err);
@@ -69,8 +75,17 @@ const FindPassword = () => {
     setLoading(true);
 
     try {
-      // 비밀번호 재설정
-      await authAPI.resetPassword(email, password);
+      // // 비밀번호 재설정
+      // await authAPI.resetPassword(email, password);
+      // 수정된 resetPassword 함수 호출: newPassword와 accessToken 전달
+
+      const emailToken = localStorage.getItem('emailToken');
+      if (!emailToken) {
+        setError('이메일 인증 토큰이 없습니다. 다시 인증해주세요.');
+        setLoading(false);
+        return;
+      }
+      await authAPI.resetPassword(password, emailToken);
       setSuccess(true);
       
       // 3초 후 로그인 페이지로 이동
@@ -87,7 +102,7 @@ const FindPassword = () => {
 
   const renderStep1 = () => (
     <>
-      <h2>비밀번호 찾기</h2>
+      <h2>비밀번호 재설정</h2>
       <p>가입시 사용한 이메일을 입력해주세요.</p>
       
       {error && <div className="error-message">{error}</div>}
