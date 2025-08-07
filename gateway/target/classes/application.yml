@@ -10,14 +10,14 @@ spring:
         - id: auth-public
           uri: http://localhost:8082
           predicates:
-            - Path=/auths/login,/auths/refresh,/auths/verify-code,/auths/reset-password
+            - Path=/auths/login,/auths/refresh,/auths/verify-code,/auths/reset-password, /auths/resend-code
           # 필터 없음 (인증 불필요)
         - id: auth-private
           uri: http://localhost:8082
           predicates:
             - Path=/auths/**
-          # filters:
-          #   - name: JwtAuthenticationFilter
+          filters:
+            - name: JwtAuthenticationFilter
         - id: user-public
           uri: http://localhost:8083
           predicates:
@@ -27,8 +27,8 @@ spring:
           uri: http://localhost:8083
           predicates:
             - Path=/users/**
-          # filters:
-          #   - name: JwtAuthenticationFilter
+          filters:
+            - name: JwtAuthenticationFilter
         - id: frontend
           uri: http://localhost:8080
           predicates:

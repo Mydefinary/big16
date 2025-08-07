@@ -3,14 +3,21 @@ package service.common;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.JwtException;
 import io.github.cdimascio.dotenv.Dotenv;
 
+import javax.crypto.SecretKey;
 import java.util.Date;
+import java.nio.charset.StandardCharsets;
 
 public class JwtUtil {
     
     private static final Dotenv dotenv = Dotenv.load();
     private static final String SECRET_KEY = dotenv.get("JWT_SECRET");
+    
+    // 🔑 JJWT 0.11+에서는 SecretKey 객체 사용
+    private static final SecretKey signingKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
     private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60; // 1시간
     private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 7; // 7일
@@ -23,7 +30,7 @@ public class JwtUtil {
                 .setSubject(userId.toString())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY.getBytes())
+                .signWith(signingKey, SignatureAlgorithm.HS256)  // 🆕 SecretKey 사용
                 .compact();
     }
 
@@ -34,7 +41,7 @@ public class JwtUtil {
                 .setSubject(userId.toString())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY.getBytes())
+                .signWith(signingKey, SignatureAlgorithm.HS256)  // 🆕 SecretKey 사용
                 .compact();
     }
 
@@ -46,7 +53,7 @@ public class JwtUtil {
                 .claim("type", "email-verification")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EMAIL_TOKEN_EXPIRATION))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY.getBytes())
+                .signWith(signingKey, SignatureAlgorithm.HS256)  // 🆕 SecretKey 사용
                 .compact();
     }
 
@@ -70,7 +77,7 @@ public class JwtUtil {
         try {
             parseToken(token);
             return true;
-        } catch (Exception e) {
+        } catch (JwtException | IllegalArgumentException e) {  // 🆕 구체적인 예외 처리
             return false;
         }
     }
@@ -80,7 +87,7 @@ public class JwtUtil {
         try {
             Claims claims = parseToken(token);
             return claims.getExpiration().before(new Date());
-        } catch (Exception e) {
+        } catch (JwtException | IllegalArgumentException e) {  // 🆕 구체적인 예외 처리
             return true;
         }
     }
@@ -88,8 +95,9 @@ public class JwtUtil {
     // 내부: 토큰 파싱
     private static Claims parseToken(String token) {
         checkSecret();
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY.getBytes())
+        return Jwts.parserBuilder()  // 🆕 parserBuilder() 사용
+                .setSigningKey(signingKey)
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
     }

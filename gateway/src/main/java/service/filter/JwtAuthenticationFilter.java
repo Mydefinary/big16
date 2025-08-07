@@ -88,6 +88,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             path.startsWith("/auths/refresh") ||
             path.startsWith("/auths/verify-code") ||
             path.startsWith("/auths/reset-password") ||
+            path.startsWith("/auths/resend-code") ||
             path.startsWith("/users/register") ||
             path.startsWith("/users/check-email") ||
             path.startsWith("/users/find-id")) {
