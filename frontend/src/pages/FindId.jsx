@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI, authAPI } from '../services/api';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const FindId = () => {
   const [step, setStep] = useState(1); // 1: 이메일 입력, 2: 코드 입력, 3: 아이디 표시
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [foundId, setFoundId] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
@@ -15,16 +16,27 @@ const FindId = () => {
   // 1단계: 이메일 확인 및 인증코드 발송
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
       // 이메일 존재 확인
       await userAPI.checkEmail(email);
       setStep(2);
+      
+      toast.success('인증코드가 발송되었습니다. 메일함을 확인해주세요.', {
+        position: "top-center",
+        autoClose: 5000,
+      });
     } catch (err) {
       console.error('Email check error:', err);
-      setError(err.response?.data || '이메일을 찾을 수 없습니다.');
+      const errorMessage = typeof err.response?.data === 'string' 
+        ? err.response.data 
+        : err.response?.data?.message || '이메일을 찾을 수 없습니다.';
+      
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -33,7 +45,6 @@ const FindId = () => {
   // 2단계: 인증코드 확인
   const handleCodeSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
@@ -44,20 +55,39 @@ const FindId = () => {
       const response = await userAPI.findId(email);
       setFoundId(response.data);
       setStep(3);
+      
+      toast.success('인증이 완료되었습니다!', {
+        position: "top-center",
+        autoClose: 3000,
+      });
     } catch (err) {
       console.error('Code verification error:', err);
-      setError(err.response?.data || '인증코드가 올바르지 않습니다.');
+      const errorMessage = typeof err.response?.data === 'string' 
+        ? err.response.data 
+        : err.response?.data?.message || '인증코드가 올바르지 않습니다.';
+      
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+      });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBackToEmail = () => {
+    setStep(1);
+    setCode('');
+    toast.info('이메일을 다시 입력해주세요.', {
+      position: "top-center",
+      autoClose: 3000,
+    });
   };
 
   const renderStep1 = () => (
     <>
       <h2>아이디 찾기</h2>
       <p>가입시 사용한 이메일을 입력해주세요.</p>
-      
-      {error && <div className="error-message">{error}</div>}
       
       <form onSubmit={handleEmailSubmit}>
         <div className="form-group">
@@ -92,8 +122,6 @@ const FindId = () => {
         <p>메일함을 확인하여 6자리 인증코드를 입력해주세요.</p>
       </div>
       
-      {error && <div className="error-message">{error}</div>}
-      
       <form onSubmit={handleCodeSubmit}>
         <div className="form-group">
           <label htmlFor="code">인증코드 (6자리)</label>
@@ -123,7 +151,7 @@ const FindId = () => {
       <div className="auth-links">
         <button 
           type="button" 
-          onClick={() => setStep(1)}
+          onClick={handleBackToEmail}
           className="link-button"
         >
           이메일 다시 입력
@@ -178,6 +206,8 @@ const FindId = () => {
           </button>
         </div>
       </div>
+
+      <ToastContainer />
     </div>
   );
 };

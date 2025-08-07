@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI, authAPI } from '../services/api';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const FindPassword = () => {
   const [step, setStep] = useState(1); // 1: 이메일 입력, 2: 코드 입력, 3: 새 비밀번호 설정
@@ -8,7 +10,6 @@ const FindPassword = () => {
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
@@ -16,16 +17,27 @@ const FindPassword = () => {
   // 1단계: 이메일 확인 및 인증코드 발송
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
       // 이메일 존재 확인 (비밀번호 재설정용 이벤트 발송)
       await userAPI.checkEmail(email);
       setStep(2);
+      
+      toast.success('인증코드가 발송되었습니다. 메일함을 확인해주세요.', {
+        position: "top-center",
+        autoClose: 5000,
+      });
     } catch (err) {
       console.error('Email check error:', err);
-      setError(err.response?.data || '이메일을 찾을 수 없습니다.');
+      const errorMessage = typeof err.response?.data === 'string' 
+        ? err.response.data 
+        : err.response?.data?.message || '이메일을 찾을 수 없습니다.';
+      
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -34,7 +46,6 @@ const FindPassword = () => {
   // 2단계: 인증코드 확인
   const handleCodeSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
@@ -48,9 +59,21 @@ const FindPassword = () => {
       }
 
       setStep(3);
+      
+      toast.success('인증이 완료되었습니다!', {
+        position: "top-center",
+        autoClose: 3000,
+      });
     } catch (err) {
       console.error('Code verification error:', err);
-      setError(err.response?.data || '인증코드가 올바르지 않습니다.');
+      const errorMessage = typeof err.response?.data === 'string' 
+        ? err.response.data 
+        : err.response?.data?.message || '인증코드가 올바르지 않습니다.';
+      
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -59,32 +82,37 @@ const FindPassword = () => {
   // 3단계: 새 비밀번호 설정
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    setError('');
 
     // 비밀번호 확인
     if (password !== confirmPassword) {
-      setError('비밀번호가 일치하지 않습니다.');
+      toast.error('비밀번호가 일치하지 않습니다.', {
+        position: "top-right",
+        autoClose: 3000,
+      });
       return;
     }
 
     if (password.length < 6) {
-      setError('비밀번호는 6자리 이상이어야 합니다.');
+      toast.error('비밀번호는 6자리 이상이어야 합니다.', {
+        position: "top-right",
+        autoClose: 3000,
+      });
       return;
     }
 
     setLoading(true);
 
     try {
-      // // 비밀번호 재설정
-      // await authAPI.resetPassword(email, password);
-      // 수정된 resetPassword 함수 호출: newPassword와 accessToken 전달
-
       const emailToken = localStorage.getItem('emailToken');
       if (!emailToken) {
-        setError('이메일 인증 토큰이 없습니다. 다시 인증해주세요.');
+        toast.error('이메일 인증 토큰이 없습니다. 다시 인증해주세요.', {
+          position: "top-right",
+          autoClose: 5000,
+        });
         setLoading(false);
         return;
       }
+      
       await authAPI.resetPassword(password, emailToken);
       setSuccess(true);
       
@@ -94,18 +122,32 @@ const FindPassword = () => {
       }, 3000);
     } catch (err) {
       console.error('Password reset error:', err);
-      setError(err.response?.data || '비밀번호 재설정에 실패했습니다.');
+      const errorMessage = typeof err.response?.data === 'string' 
+        ? err.response.data 
+        : err.response?.data?.message || '비밀번호 재설정에 실패했습니다.';
+      
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+      });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBackToEmail = () => {
+    setStep(1);
+    setCode('');
+    toast.info('이메일을 다시 입력해주세요.', {
+      position: "top-center",
+      autoClose: 3000,
+    });
   };
 
   const renderStep1 = () => (
     <>
       <h2>비밀번호 재설정</h2>
       <p>가입시 사용한 이메일을 입력해주세요.</p>
-      
-      {error && <div className="error-message">{error}</div>}
       
       <form onSubmit={handleEmailSubmit}>
         <div className="form-group">
@@ -140,8 +182,6 @@ const FindPassword = () => {
         <p>메일함을 확인하여 6자리 인증코드를 입력해주세요.</p>
       </div>
       
-      {error && <div className="error-message">{error}</div>}
-      
       <form onSubmit={handleCodeSubmit}>
         <div className="form-group">
           <label htmlFor="code">인증코드 (6자리)</label>
@@ -171,7 +211,7 @@ const FindPassword = () => {
       <div className="auth-links">
         <button 
           type="button" 
-          onClick={() => setStep(1)}
+          onClick={handleBackToEmail}
           className="link-button"
         >
           이메일 다시 입력
@@ -184,8 +224,6 @@ const FindPassword = () => {
     <>
       <h2>새 비밀번호 설정</h2>
       <p>새로 사용할 비밀번호를 입력해주세요.</p>
-      
-      {error && <div className="error-message">{error}</div>}
       
       <form onSubmit={handlePasswordSubmit}>
         <div className="form-group">
@@ -244,6 +282,7 @@ const FindPassword = () => {
             바로 로그인하기
           </button>
         </div>
+        <ToastContainer />
       </div>
     );
   }
@@ -265,6 +304,8 @@ const FindPassword = () => {
           </button>
         </div>
       </div>
+
+      <ToastContainer />
     </div>
   );
 };

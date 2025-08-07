@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../services/api';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -69,6 +71,15 @@ const Register = () => {
       newErrors.email = '올바른 이메일 형식을 입력하세요.';
     }
 
+    // 유효성 검사 실패 시 toast로 에러 표시
+    if (Object.keys(newErrors).length > 0) {
+      const firstError = Object.values(newErrors)[0];
+      toast.error(firstError, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+
     setErrors(newErrors);
 
     return Object.keys(newErrors).length === 0;
@@ -89,6 +100,11 @@ const Register = () => {
         password: formData.password
       });
 
+      toast.success('회원가입이 완료되었습니다!', {
+        position: "top-center",
+        autoClose: 3000,
+      });
+
       // 회원가입 성공 후 이메일 인증 페이지로 이동
       navigate('/email-verification', {
         state: {
@@ -99,18 +115,22 @@ const Register = () => {
       });
     } catch (err) {
       console.error('Registration error:', err);
-      const errorMessage = err.response?.data;
+      const errorMessage = typeof err.response?.data === 'string' 
+        ? err.response.data 
+        : err.response?.data?.message || '회원가입에 실패했습니다.';
 
-      if (typeof errorMessage === 'string') {
-        if (errorMessage.includes('로그인 아이디')) {
-          setErrors({ loginId: errorMessage });
-        } else if (errorMessage.includes('이메일')) {
-          setErrors({ email: errorMessage });
-        } else {
-          setErrors({ general: errorMessage });
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+      });
+
+      // 특정 필드 에러인 경우 해당 필드에 에러 표시 (선택적)
+      if (typeof err.response?.data === 'string') {
+        if (err.response.data.includes('로그인 아이디')) {
+          setErrors({ loginId: err.response.data });
+        } else if (err.response.data.includes('이메일')) {
+          setErrors({ email: err.response.data });
         }
-      } else {
-        setErrors({ general: '회원가입에 실패했습니다.' });
       }
     } finally {
       setLoading(false);
@@ -121,8 +141,6 @@ const Register = () => {
     <div className="auth-container">
       <div className="auth-form">
         <h2>회원가입</h2>
-
-        {errors.general && <div className="error-message">{errors.general}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -214,6 +232,8 @@ const Register = () => {
           </button>
         </div>
       </div>
+
+      <ToastContainer />
     </div>
   );
 };

@@ -67,7 +67,8 @@ public class MailService {
                 "<p>안녕하세요!</p>" +
                 "<p>요청하신 이메일 인증 코드는 다음과 같습니다:</p>" +
                 "<h3 style=\"color: #007bff; font-size: 24px; letter-spacing: 2px;\">" + code + "</h3>" +
-                "<p>이 코드는 <strong>10분</strong> 내에 입력해주세요.</p>" +
+                "<p>이 코드는 <strong>3분</strong> 내에 입력해주세요.</p>" +
+                "<p>미입력 시 계정이 만료됩니다</p>" + 
                 "<hr>" +
                 "<p style=\"font-size: 12px; color: #666;\">본 메일은 자동 발송되는 메일입니다.</p>" +
                 "</body>" +

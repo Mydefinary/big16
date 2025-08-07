@@ -482,3 +482,7 @@ body {
 .dashboard-container > * {
   animation: fadeIn 0.5s ease-out;
 }
+
+.auth-form p {
+  margin-bottom: 20px;
+}

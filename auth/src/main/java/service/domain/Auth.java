@@ -206,6 +206,38 @@ public class Auth {
         return this.loginId; // 로그인 ID 반환 (토큰 생성에 사용)
     }
 
+    public void resendEmailVerification() {
+        // 새로운 인증코드 생성
+        String newCode = this.generateNewVerificationCode();
+        
+        // 이벤트 발행 (기존 EmailVerificationRequested 재사용)
+        EmailVerificationRequested event = new EmailVerificationRequested(this);
+        event.publishAfterCommit();
+    }
+
+    public String generateNewVerificationCode() {
+        // 6자리 랜덤 숫자 생성
+        String code = String.format("%06d", new Random().nextInt(999999));
+        
+        // 생성된 코드를 Auth 엔티티에 저장 (기존 필드 사용)
+        this.emailVerificationCode = code;
+        
+        // 코드 생성 시간 업데이트 (기존 필드 사용)
+        this.codeGeneratedAt = LocalDateTime.now();
+        
+        System.out.println("새로운 인증코드 재생성: " + code + " (이메일: " + this.email + ")");
+        
+        return code;
+    }
+
+    public boolean canResendCode() {
+        // 마지막 코드 생성 후 1분이 지나야 재발송 가능
+        if (this.codeGeneratedAt != null && 
+            this.codeGeneratedAt.isAfter(LocalDateTime.now().minusMinutes(1))) {
+            return false;
+        }
+        return true;
+    }
     //<<< Clean Arch / Port Method
     // Policy를 사용하지 않기로 해서 폐기
     // public static void resetPassword(EmailVerified emailVerified) {

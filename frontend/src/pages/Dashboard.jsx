@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Dashboard = () => {
   const { token, refreshToken, logout } = useAuth();
@@ -23,6 +25,10 @@ const Dashboard = () => {
         });
       } catch (error) {
         console.error('Token parsing error:', error);
+        toast.error('토큰 정보를 파싱하는 중 오류가 발생했습니다.', {
+          position: "top-right",
+          autoClose: 5000,
+        });
       }
     }
   }, [token]);
@@ -32,8 +38,16 @@ const Dashboard = () => {
     try {
       // 서버에 로그아웃 요청
       await authAPI.logout(refreshToken);
+      toast.success('로그아웃이 완료되었습니다.', {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } catch (error) {
       console.error('Logout error:', error);
+      toast.error('로그아웃 처리 중 오류가 발생했습니다.', {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } finally {
       // 로컬 스토리지 정리 및 로그인 페이지로 이동
       logout();
@@ -52,15 +66,40 @@ const Dashboard = () => {
       const { login } = useAuth();
       login(accessToken, newRefreshToken);
       
-      alert('토큰이 성공적으로 갱신되었습니다!');
+      toast.success('토큰이 성공적으로 갱신되었습니다!', {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } catch (error) {
       console.error('Token refresh error:', error);
-      alert('토큰 갱신에 실패했습니다. 다시 로그인해주세요.');
+      const message = typeof error.response?.data === 'string' 
+        ? error.response.data 
+        : error.response?.data?.message || '토큰 갱신에 실패했습니다.';
+      
+      toast.error(message, {
+        position: "top-right",
+        autoClose: 5000,
+      });
+      
       logout();
       navigate('/login');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePasswordChange = () => {
+    toast.info('비밀번호 변경 기능은 추후 구현 예정입니다.', {
+      position: "top-center",
+      autoClose: 3000,
+    });
+  };
+
+  const handleAccountDelete = () => {
+    toast.warn('회원 탈퇴 기능은 추후 구현 예정입니다.', {
+      position: "top-center",
+      autoClose: 3000,
+    });
   };
 
   return (
@@ -153,14 +192,14 @@ const Dashboard = () => {
           <h2>👤 사용자 기능</h2>
           <div className="action-buttons">
             <button 
-              onClick={() => alert('비밀번호 변경 기능은 추후 구현 예정입니다.')}
+              onClick={handlePasswordChange}
               className="action-button secondary"
             >
               🔒 비밀번호 변경
             </button>
             
             <button 
-              onClick={() => alert('회원 탈퇴 기능은 추후 구현 예정입니다.')}
+              onClick={handleAccountDelete}
               className="action-button danger"
             >
               ❌ 회원 탈퇴
@@ -168,6 +207,8 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      <ToastContainer />
     </div>
   );
 };

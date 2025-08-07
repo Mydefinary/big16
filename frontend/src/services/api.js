@@ -79,6 +79,9 @@ export const authAPI = {
   ),
   changePassword: (currentPassword, newPassword) => 
     api.patch('/auths/user/password-change', { currentPassword, newPassword }),
+  
+  // 재발송 기능 추가
+  resendCode: (email) => api.post('/auths/resend-code', { email }),
 };
 
 // User API

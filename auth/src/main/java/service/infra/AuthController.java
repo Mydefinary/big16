@@ -62,6 +62,30 @@ public class AuthController {
         return ResponseEntity.ok("비밀번호가 재설정되었습니다.");
     }
 
+    @PostMapping("/resend-code")
+    public ResponseEntity<?> resendCode(@RequestBody ResendCodeRequest request) {
+        String email = request.getEmail();
+        
+        Optional<Auth> authOpt = authRepository.findByEmail(email);
+        if (authOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("이메일을 찾을 수 없습니다.");
+        }
+        
+        Auth auth = authOpt.get();
+        
+        // 재발송 제한 확인
+        if (!auth.canResendCode()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body("잠시 후 다시 시도해주세요. (1분 후 재발송 가능)");
+        }
+        
+        // 이벤트 기반으로 재발송 처리
+        auth.resendEmailVerification();
+        authRepository.save(auth);
+        
+        return ResponseEntity.ok("인증 코드가 재발송되었습니다.");
+    }
+
     // 인증 코드 검증
     @PostMapping("/verify-code")
     public ResponseEntity<?> verifyCode(@RequestBody VerifyCodeRequest request) {
@@ -84,7 +108,7 @@ public class AuthController {
             }
             return ResponseEntity.ok("인증 성공");
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("인증 실패 또는 만료");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("인증에 실패했습니다. 코드를 확인해주세요.");
         }
     }
 
@@ -93,7 +117,11 @@ public class AuthController {
         try {
             Auth auth = authRepository.findByLoginId(command.getLoginId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
-
+            
+            if (!auth.isVerified()){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("로그인 실패 : 이메일 미인증 상태");
+            }
             auth.verifyPassword(command.getPassword());
             
             // Access Token과 Refresh Token 생성
