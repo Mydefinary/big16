@@ -96,6 +96,7 @@ const EmailVerification = () => {
         <div className="email-info">
           <p><strong>{email}</strong>로 인증코드를 발송했습니다.</p>
           <p>메일함을 확인하여 6자리 인증코드를 입력해주세요.</p>
+          <p>3분동안 미인증 시 계정이 만료됩니다</p>
         </div>
         
         {error && <div className="error-message">{error}</div>}

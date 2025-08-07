@@ -11,6 +11,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import service.config.kafka.KafkaProcessor;
 import service.domain.*;
+import java.util.List;
 
 //<<< Clean Arch / Inbound Adaptor
 @Service
@@ -59,6 +60,30 @@ public class PolicyHandler {
         }
     }
 
-
+    @StreamListener(
+        value = KafkaProcessor.INPUT,
+        condition = "headers['type']=='UnverifiedAccountsDeleted'"
+    )
+    public void wheneverUnverifiedAccountsDeleted_DeleteUsers(
+        @Payload UnverifiedAccountsDeleted unverifiedAccountsDeleted
+    ) {
+        System.out.println(
+            "\n\n##### listener DeleteUsers : " + unverifiedAccountsDeleted + "\n\n"
+        );
+        
+        List<Long> userIds = unverifiedAccountsDeleted.getUserIds();
+        
+        if (userIds != null && !userIds.isEmpty()) {
+            try {
+                // User 엔티티에 정리 로직 위임
+                User.deleteUnverifiedUsers(userIds);
+                
+                System.out.println("연관 사용자 " + userIds.size() + "개 삭제 완료");
+                
+            } catch (Exception e) {
+                System.err.println("사용자 삭제 중 오류: " + e.getMessage());
+            }
+        }
+    }
 }
 //>>> Clean Arch / Inbound Adaptor

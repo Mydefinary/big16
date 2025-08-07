@@ -103,7 +103,18 @@ public class User {
         EmailExistsConfirmed event = new EmailExistsConfirmed(this);
         event.publish();
     }
-    
+
+    // 왜 auth와 처리가 다르냐면 user는 이벤트를 받아서 삭제하는 거고
+    // auth은 스케줄러를 통해 삭제해서 그렇다
+    public static void deleteUnverifiedUsers(List<Long> userIds) {
+        UserRepository userRepository = UserApplication.applicationContext.getBean(
+            UserRepository.class
+        );
+        
+        userRepository.deleteAllById(userIds);
+        
+        System.out.println("User 서비스에서 " + userIds.size() + "개 사용자 삭제 완료");
+    }
 
 }
 //>>> DDD / Aggregate Root
