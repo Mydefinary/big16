@@ -10,9 +10,94 @@ const FindPassword = () => {
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [errors, setErrors] = useState({}); // 에러 상태 추가
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+
+  // 비밀번호 필드 변경 핸들러 (회원가입과 동일한 로직)
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+
+    // 입력값 업데이트
+    if (name === 'password') {
+      setPassword(value);
+    } else if (name === 'confirmPassword') {
+      setConfirmPassword(value);
+    }
+
+    // 입력 수정 시 해당 필드 에러 삭제
+    setErrors(prev => {
+      const copy = { ...prev };
+      if (copy[name]) {
+        delete copy[name];
+      }
+      return copy;
+    });
+
+    // 비밀번호 / 비밀번호 확인 일치 검증
+    if (name === 'password' || name === 'confirmPassword') {
+      const newPassword = name === 'password' ? value : password;
+      const newConfirmPassword = name === 'confirmPassword' ? value : confirmPassword;
+
+      setErrors(prev => {
+        const copy = { ...prev };
+        
+        // 비밀번호 유효성 검사
+        if (name === 'password' && value) {
+          if (value.length < 8) {
+            copy.password = '비밀번호는 8자리 이상이어야 합니다.';
+          } else if (!/(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(value)) {
+            copy.password = '비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다.';
+          } else {
+            delete copy.password;
+          }
+        }
+        
+        // 비밀번호 확인 일치 검사
+        if (newConfirmPassword && newPassword !== newConfirmPassword) {
+          copy.confirmPassword = '비밀번호가 일치하지 않습니다.';
+        } else if (newPassword && newConfirmPassword && newPassword === newConfirmPassword) {
+          delete copy.confirmPassword;
+        }
+        
+        return copy;
+      });
+    }
+  };
+
+  // 3단계 비밀번호 유효성 검사 (회원가입과 동일한 로직)
+  const validatePassword = () => {
+    const newErrors = {};
+
+    if (!password) newErrors.password = '비밀번호를 입력하세요.';
+    if (!confirmPassword) newErrors.confirmPassword = '비밀번호 확인을 입력하세요.';
+
+    // 비밀번호 유효성 검사
+    if (password) {
+      if (password.length < 8) {
+        newErrors.password = '비밀번호는 8자리 이상이어야 합니다.';
+      } else if (!/(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password)) {
+        newErrors.password = '비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다.';
+      }
+    }
+
+    if (password && confirmPassword && password !== confirmPassword) {
+      newErrors.confirmPassword = '비밀번호가 일치하지 않습니다.';
+    }
+
+    // 유효성 검사 실패 시 toast로 에러 표시
+    if (Object.keys(newErrors).length > 0) {
+      const firstError = Object.values(newErrors)[0];
+      toast.error(firstError, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // 1단계: 이메일 확인 및 인증코드 발송
   const handleEmailSubmit = async (e) => {
@@ -83,22 +168,7 @@ const FindPassword = () => {
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
 
-    // 비밀번호 확인
-    if (password !== confirmPassword) {
-      toast.error('비밀번호가 일치하지 않습니다.', {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error('비밀번호는 6자리 이상이어야 합니다.', {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      return;
-    }
+    if (!validatePassword()) return; // 회원가입과 동일한 검증 로직 사용
 
     setLoading(true);
 
@@ -227,17 +297,34 @@ const FindPassword = () => {
       
       <form onSubmit={handlePasswordSubmit}>
         <div className="form-group">
-          <label htmlFor="password">새 비밀번호</label>
+          <label htmlFor="password">
+            새 비밀번호
+            <div className="help-icon-container">
+              <span className="help-icon">?</span>
+              <div className="tooltip tooltip-right">
+                <div className="tooltip-content">
+                  <strong>비밀번호 요구사항:</strong>
+                  <ul>
+                    <li>8자리 이상</li>
+                    <li>영문 포함</li>
+                    <li>숫자 포함</li>
+                    <li>특수문자 포함 (@$!%*?&)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </label>
           <input
             type="password"
             id="password"
             name="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handlePasswordChange}
             required
-            placeholder="새 비밀번호를 입력하세요"
-            minLength="6"
+            placeholder="영문, 숫자, 특수문자 포함 8자리 이상"
+            minLength="8"
           />
+          {errors.password && <div className="field-error">{errors.password}</div>}
         </div>
 
         <div className="form-group">
@@ -247,20 +334,17 @@ const FindPassword = () => {
             id="confirmPassword"
             name="confirmPassword"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={handlePasswordChange}
             required
             placeholder="비밀번호를 다시 입력하세요"
-            minLength="6"
           />
-          {confirmPassword && password !== confirmPassword && (
-            <div className="field-error">비밀번호가 일치하지 않습니다.</div>
-          )}
+          {errors.confirmPassword && <div className="field-error">{errors.confirmPassword}</div>}
         </div>
 
         <button 
           type="submit" 
           className="auth-button primary"
-          disabled={loading || !password || !confirmPassword || password !== confirmPassword}
+          disabled={loading || Object.values(errors).some(e => e)}
         >
           {loading ? '설정 중...' : '비밀번호 재설정'}
         </button>

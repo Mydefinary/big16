@@ -42,11 +42,25 @@ const Register = () => {
 
       setErrors(prev => {
         const copy = { ...prev };
+        
+        // 비밀번호 유효성 검사
+        if (name === 'password' && value) {
+          if (value.length < 8) {
+            copy.password = '비밀번호는 8자리 이상이어야 합니다.';
+          } else if (!/(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(value)) {
+            copy.password = '비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다.';
+          } else {
+            delete copy.password;
+          }
+        }
+        
+        // 비밀번호 확인 일치 검사
         if (confirmPassword && password !== confirmPassword) {
           copy.confirmPassword = '비밀번호가 일치하지 않습니다.';
-        } else {
+        } else if (password && confirmPassword && password === confirmPassword) {
           delete copy.confirmPassword;
         }
+        
         return copy;
       });
     }
@@ -60,6 +74,15 @@ const Register = () => {
     if (!formData.nickname) newErrors.nickname = '이름을 입력하세요.';
     if (!formData.password) newErrors.password = '비밀번호를 입력하세요.';
     if (!formData.confirmPassword) newErrors.confirmPassword = '비밀번호 확인을 입력하세요.';
+
+    // 비밀번호 유효성 검사
+    if (formData.password) {
+      if (formData.password.length < 8) {
+        newErrors.password = '비밀번호는 8자리 이상이어야 합니다.';
+      } else if (!/(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(formData.password)) {
+        newErrors.password = '비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다.';
+      }
+    }
 
     if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = '비밀번호가 일치하지 않습니다.';
@@ -186,7 +209,23 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">비밀번호</label>
+            <label htmlFor="password">
+              비밀번호
+              <div className="help-icon-container">
+                <span className="help-icon">?</span>
+                <div className="tooltip tooltip-right">
+                  <div className="tooltip-content">
+                    <strong>비밀번호 요구사항:</strong>
+                    <ul>
+                      <li>8자리 이상</li>
+                      <li>영문 포함</li>
+                      <li>숫자 포함</li>
+                      <li>특수문자 포함 (@$!%*?&)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </label>
             <input
               type="password"
               id="password"
@@ -194,7 +233,8 @@ const Register = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              placeholder="비밀번호를 입력하세요"
+              placeholder="영문, 숫자, 특수문자 포함 8자리 이상"
+              minLength="8"
             />
             {errors.password && <div className="field-error">{errors.password}</div>}
           </div>
