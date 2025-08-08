@@ -75,7 +75,7 @@ jobs:
       - name: Set AKS context
         uses: azure/aks-set-context@v3
         with:
-          # AZURE_CREDENTIALS에 있는 정보로 자동 설정됨
+          # 위 env에 설정한 값으로 자동 삽입
           resource-group: "kt16big"
           cluster-name: "kt16big"
 
