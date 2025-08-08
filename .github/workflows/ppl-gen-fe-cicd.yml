@@ -1,0 +1,59 @@
+# .github/workflows/ppl-gen-fe-cicd.yml
+
+# 워크플로우의 전체 이름을 정의합니다. GitHub Actions 탭에 이 이름이 표시됩니다.
+name: 'CI/CD for PPL-GEN Frontend'
+
+# 어떤 이벤트가 발생했을 때 이 워크플로우를 실행할지 정의합니다.
+on:
+  # 'img-gen-cicd' 브랜치에 코드가 푸시될 때 실행됩니다.
+  push:
+    branches: [ "img-gen-cicd" ]
+    # 'paths'에 지정된 파일 경로가 변경되었을 때만 워크플로우를 실행하여 효율성을 높입니다.
+    paths:
+      - 'ppl-gen-react/frontend/**'
+      - '.github/workflows/ppl-gen-fe-cicd.yml'
+  # 'img-gen-cicd' 브랜치를 대상으로 하는 Pull Request가 생성/업데이트될 때 실행됩니다.
+  pull_request:
+    branches: [ "img-gen-cicd" ]
+    paths:
+      - 'ppl-gen-react/frontend/**'
+
+# 이 워크플로우의 모든 잡(job)에서 공통적으로 사용할 환경 변수를 설정합니다.
+env:
+  ACR_NAME: "kt16big" # 이미지를 푸시할 Azure Container Registry의 이름
+  IMAGE_NAME: "ppl-gen-fe" # ACR에 저장될 Docker 이미지의 이름
+  WORKING_DIR: "ppl-gen-react/frontend" # 작업 대상 폴더 (Dockerfile이 있는 위치)
+
+# 실제 작업(task)들의 묶음인 잡(job)을 정의합니다.
+jobs:
+  # 'ACR에 빌드하고 푸시한다'는 이름의 잡입니다.
+  build-and-push-to-acr:
+    # 이 잡을 실행할 가상 머신의 종류를 지정합니다. (최신 우분투)
+    runs-on: ubuntu-latest
+    # 이 잡에서 실행될 단계(step)들을 순서대로 정의합니다.
+    steps:
+      # 1. 리포지토리 코드를 현재 Runner(가상 머신)에 받아옵니다.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. GitHub Secret에 저장된 인증 정보를 사용하여 Azure에 로그인합니다.
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 3. Docker가 이미지를 푸시할 수 있도록 ACR(Azure Container Registry)에 로그인합니다.
+      - name: Log in to ACR
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      # 4. Dockerfile을 사용하여 이미지를 빌드하고 ACR로 푸시합니다.
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ env.WORKING_DIR }} # Docker 빌드 컨텍스트 경로
+          file: ${{ env.WORKING_DIR }}/Dockerfile # Dockerfile의 정확한 위치
+          push: true # 빌드 후 ACR로 푸시 실행
+          # 이미지에 태그를 부여합니다. 고유한 커밋ID와 'latest' 두개를 사용합니다.
+          tags: |
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
