@@ -14,7 +14,7 @@ const WebtoonDetail = () => {
     <div className="webtoon-overview">
       <div className="hero-section">
         <div className="hero-content">
-          <h1 className="hero-title">"Webtoon WorkFlow AX"</h1>
+          <h1 className="hero-title">"ToonConnect"</h1>
           <p className="hero-subtitle">Seamlessly connecting distribution and content expansion with AI.</p>
           <div className="hero-badge">KT AIVLE SCHOOL 6기 16조</div>
         </div>
@@ -43,7 +43,7 @@ const WebtoonDetail = () => {
             </div>
             <div className="team-item">
               <span className="team-label">기간:</span>
-              <span>2024년 1월 - 현재</span>
+              <span>2025년 6월 - 현재</span>
             </div>
           </div>
         </section>

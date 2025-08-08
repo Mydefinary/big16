@@ -1,10 +1,37 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { authAPI } from '../services/api';
+import { toast } from 'react-toastify';
 
 const Header = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, token, refreshToken, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      // 서버에 로그아웃 요청
+      await authAPI.logout(refreshToken);
+      toast.success('로그아웃이 완료되었습니다.', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('로그아웃 처리 중 오류가 발생했습니다.', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } finally {
+      // 로컬 스토리지 정리 및 로그인 페이지로 이동
+      logout();
+      navigate('/login');
+      setLoading(false);
+    }
+  };
 
   // 현재 경로가 활성 상태인지 확인하는 함수
   const isActive = (path) => {
@@ -28,40 +55,40 @@ const Header = () => {
         <nav className="header-nav">
           <ul className="nav-list">
             <li className="nav-item">
-              <Link 
-                to="/question" 
+              <Link
+                to="/question"
                 className={`nav-link ${isActive('/question') ? 'active' : ''}`}
               >
                 작품 질의하기
               </Link>
             </li>
             <li className="nav-item">
-              <Link 
-                to="/characters" 
+              <Link
+                to="/characters"
                 className={`nav-link ${isActive('/characters') ? 'active' : ''}`}
               >
                 하이라이트 제작
               </Link>
             </li>
             <li className="nav-item">
-              <Link 
-                to="/gallery" 
+              <Link
+                to="/gallery"
                 className={`nav-link ${isActive('/gallery') ? 'active' : ''}`}
               >
                 웹툰 상세 분석
               </Link>
             </li>
             <li className="nav-item">
-              <Link 
-                to="/community" 
+              <Link
+                to="/community"
                 className={`nav-link ${isActive('/community') ? 'active' : ''}`}
               >
                 광고 초안 생성
               </Link>
             </li>
             <li className="nav-item">
-              <Link 
-                to="/board" 
+              <Link
+                to="/board"
                 className={`nav-link ${isActive('/board') ? 'active' : ''}`}
               >
                 광고 파트너십 문의
@@ -89,6 +116,16 @@ const Header = () => {
               <Link to="/dashboard" className="header-btn dashboard-btn">
                 Dashboard
               </Link>
+              <Link to="/mypage" className="header-btn mypage-btn">
+                MyPage
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="header-btn logout-btn"
+                disabled={loading}
+              >
+                {loading ? '로그아웃 중...' : 'Logout'}
+              </button>
               <Link to="/faq" className="header-btn faq-btn">
                 FAQ
               </Link>
@@ -101,5 +138,3 @@ const Header = () => {
 };
 
 export default Header;
-
-/* Header CSS를 App.css에 추가해주세요 */
