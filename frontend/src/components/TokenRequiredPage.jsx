@@ -3,12 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ComingSoonPage from './ComingSoonPage';
 
-const TokenRequiredPage = ({ pageName, description }) => {
+const TokenRequiredPage = ({ pageName, description, DetailComponent }) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
-  // 로그인한 사용자에게는 ComingSoonPage 표시
+  // 로그인한 사용자에게는 실제 페이지 또는 ComingSoonPage 표시
   if (isAuthenticated()) {
+    // DetailComponent가 있으면 실제 페이지를 보여주고, 없으면 ComingSoonPage 표시
+    if (DetailComponent) {
+      return <DetailComponent />;
+    }
     return <ComingSoonPage pageName={pageName} description={description} />;
   }
 

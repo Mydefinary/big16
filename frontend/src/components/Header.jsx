@@ -29,10 +29,10 @@ const Header = () => {
           <ul className="nav-list">
             <li className="nav-item">
               <Link 
-                to="/" 
-                className={`nav-link ${isActive('/') ? 'active' : ''}`}
+                to="/question" 
+                className={`nav-link ${isActive('/question') ? 'active' : ''}`}
               >
-                작품 상세페이지
+                작품 질의하기
               </Link>
             </li>
             <li className="nav-item">
@@ -40,7 +40,7 @@ const Header = () => {
                 to="/characters" 
                 className={`nav-link ${isActive('/characters') ? 'active' : ''}`}
               >
-                라이언캐릭터 제작
+                하이라이트 제작
               </Link>
             </li>
             <li className="nav-item">
@@ -48,7 +48,7 @@ const Header = () => {
                 to="/gallery" 
                 className={`nav-link ${isActive('/gallery') ? 'active' : ''}`}
               >
-                캔북 소재 본석
+                웹툰 상세 분석
               </Link>
             </li>
             <li className="nav-item">
@@ -56,7 +56,7 @@ const Header = () => {
                 to="/community" 
                 className={`nav-link ${isActive('/community') ? 'active' : ''}`}
               >
-                콘코 소재 생성
+                광고 초안 생성
               </Link>
             </li>
             <li className="nav-item">
@@ -64,7 +64,7 @@ const Header = () => {
                 to="/board" 
                 className={`nav-link ${isActive('/board') ? 'active' : ''}`}
               >
-                콘고 매수식별 움직
+                광고 파트너십 문의
               </Link>
             </li>
           </ul>

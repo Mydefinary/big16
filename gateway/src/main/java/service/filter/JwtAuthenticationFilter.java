@@ -113,7 +113,8 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             path.equals("/register") ||
             path.equals("/email-verification") ||
             path.equals("/find-id") ||
-            path.equals("/find-password")) {
+            path.equals("/find-password") ||
+            path.equals("/main")) {
             return true;
         }
         
