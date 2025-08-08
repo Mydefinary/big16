@@ -17,8 +17,8 @@ on:
 # 환경 변수 설정
 env:
   ACR_NAME: "kt16big" # 예: myacr (login server 아님)
-  IMAGE_NAME: "ppl-gen-be"
-  WORKING_DIR: "ppl-gen/BE"
+  IMAGE_NAME: "ppl-gen-backend"
+  WORKING_DIR: "ppl-gen-react/backend"
 
 jobs:
   build-and-push-to-acr:
