@@ -643,3 +643,922 @@ body {
   margin: 2px 0;
   color: #374151;
 }
+
+/* Header 추가 */
+/* Header Styles - 이 코드를 App.css 상단에 추가해주세요 */
+
+/* Header */
+.header {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 64px;
+}
+
+/* 로고 */
+.header-logo .logo-link {
+  font-size: 20px;
+  font-weight: 700;
+  color: #22c55e;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.header-logo .logo-link:hover {
+  color: #16a34a;
+}
+
+/* 네비게이션 */
+.header-nav {
+  flex: 1;
+  margin: 0 40px;
+}
+
+.nav-list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 32px;
+  justify-content: center;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-link {
+  color: #374151;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 0;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  color: #22c55e;
+}
+
+.nav-link.active {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #22c55e;
+  border-radius: 1px;
+}
+
+/* 우측 액션 버튼들 */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-btn {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.signup-btn {
+  color: #22c55e;
+  border: 1px solid #22c55e;
+  background: white;
+}
+
+.signup-btn:hover {
+  background: #22c55e;
+  color: white;
+}
+
+.signin-btn {
+  background: #22c55e;
+  color: white;
+  border: 1px solid #22c55e;
+}
+
+.signin-btn:hover {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.faq-btn {
+  color: #6b7280;
+  background: transparent;
+  border: none;
+}
+
+.faq-btn:hover {
+  color: #374151;
+}
+
+.dashboard-btn {
+  background: #22c55e;
+  color: white;
+  border: 1px solid #22c55e;
+}
+
+.dashboard-btn:hover {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .header-container {
+    padding: 0 16px;
+    height: 56px;
+  }
+  
+  .header-nav {
+    display: none; /* 모바일에서는 네비게이션 숨김 */
+  }
+  
+  .header-actions {
+    gap: 12px;
+  }
+  
+  .header-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .header-logo .logo-link {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-container {
+    padding: 0 12px;
+  }
+  
+  .header-actions {
+    gap: 8px;
+  }
+  
+  .header-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+/* Main Content Styles - App.css에 추가해주세요 */
+
+/* 메인 콘텐츠 영역 */
+.main-content {
+  min-height: calc(100vh - 64px); /* Header 높이만큼 빼기 */
+}
+
+/* 페이지 placeholder 스타일 */
+.page-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 64px);
+  font-size: 24px;
+  color: #6b7280;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  text-align: center;
+  padding: 40px 20px;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    min-height: calc(100vh - 56px);
+  }
+  
+  .page-placeholder {
+    min-height: calc(100vh - 56px);
+    font-size: 18px;
+    padding: 20px;
+  }
+}
+
+/* 토큰 css */
+/* Token Required Page Styles - App.css에 추가해주세요 */
+
+.token-required-container {
+  min-height: calc(100vh - 64px);
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.token-required-content {
+  max-width: 800px;
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.1);
+  border: 2px solid #dcfce7;
+  text-align: center;
+  margin-bottom: 30px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.token-required-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  animation: bounce 2s infinite;
+}
+
+.token-required-title {
+  font-size: 32px;
+  color: #15803d;
+  margin-bottom: 30px;
+  font-weight: 700;
+}
+
+.token-required-message h2 {
+  font-size: 24px;
+  color: #ef4444;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.main-message {
+  font-size: 18px;
+  color: #374151;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.page-description {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.page-description h3 {
+  color: #15803d;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.page-description p {
+  color: #374151;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.feature-info {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.feature-info h3 {
+  color: #15803d;
+  margin-bottom: 15px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.feature-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.feature-info li {
+  padding: 8px 0;
+  color: #374151;
+  font-size: 15px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.feature-info li:last-child {
+  border-bottom: none;
+}
+
+.token-required-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.action-button.large {
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  min-width: 160px;
+  justify-content: center;
+}
+
+.action-button.primary.large {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+}
+
+.action-button.primary.large:hover {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+}
+
+.action-button.secondary.large {
+  background: white;
+  color: #22c55e;
+  border: 2px solid #22c55e;
+}
+
+.action-button.secondary.large:hover {
+  background: #22c55e;
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+}
+
+.help-section {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 20px;
+  margin-top: 20px;
+}
+
+.help-text {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.link-text {
+  background: none;
+  border: none;
+  color: #22c55e;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 14px;
+  padding: 0;
+}
+
+.link-text:hover {
+  color: #16a34a;
+}
+
+/* 토큰 정보 박스 */
+.token-info-box {
+  max-width: 800px;
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.08);
+  border: 2px solid #dcfce7;
+}
+
+.token-info-box h4 {
+  color: #15803d;
+  margin-bottom: 15px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.security-features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.security-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.security-icon {
+  margin-right: 12px;
+  font-size: 16px;
+}
+
+/* 애니메이션 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .token-required-container {
+    padding: 20px 16px;
+    min-height: calc(100vh - 56px);
+  }
+  
+  .token-required-content {
+    padding: 30px 20px;
+  }
+  
+  .token-required-title {
+    font-size: 24px;
+  }
+  
+  .token-required-icon {
+    font-size: 48px;
+  }
+  
+  .token-required-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .action-button.large {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .security-features {
+    gap: 8px;
+  }
+  
+  .security-item {
+    font-size: 13px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .token-required-content {
+    padding: 20px 15px;
+  }
+  
+  .feature-info,
+  .page-description {
+    padding: 15px;
+  }
+}
+
+/* 커밍순 */
+/* Coming Soon Page Styles - App.css에 추가해주세요 */
+
+.coming-soon-container {
+  min-height: calc(100vh - 64px);
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.coming-soon-content {
+  max-width: 800px;
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.1);
+  border: 2px solid #dcfce7;
+  text-align: center;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.coming-soon-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  animation: pulse 2s infinite;
+}
+
+.coming-soon-title {
+  font-size: 32px;
+  color: #15803d;
+  margin-bottom: 30px;
+  font-weight: 700;
+}
+
+.coming-soon-message h2 {
+  font-size: 24px;
+  color: #f59e0b;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.page-description {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.page-description h3 {
+  color: #15803d;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.progress-info {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.progress-info h3 {
+  color: #15803d;
+  margin-bottom: 20px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.progress-items {
+  display: grid;
+  gap: 12px;
+}
+
+.progress-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.progress-status {
+  margin-right: 12px;
+  font-size: 16px;
+  width: 24px;
+  text-align: center;
+}
+
+.progress-status.completed {
+  color: #22c55e;
+}
+
+.progress-status.in-progress {
+  color: #f59e0b;
+  animation: spin 2s linear infinite;
+}
+
+.progress-status.pending {
+  color: #9ca3af;
+}
+
+.release-info {
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.release-info h3 {
+  color: #d97706;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.release-date {
+  font-size: 20px;
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 8px;
+}
+
+.release-note {
+  font-size: 14px;
+  color: #a16207;
+  font-style: italic;
+}
+
+.coming-soon-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.notification-section {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 20px;
+  margin-top: 20px;
+}
+
+.notification-section h4 {
+  color: #15803d;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.notification-section p {
+  color: #6b7280;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.notification-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.notification-btn:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+}
+
+/* 애니메이션 */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .coming-soon-container {
+    padding: 20px 16px;
+    min-height: calc(100vh - 56px);
+  }
+  
+  .coming-soon-content {
+    padding: 30px 20px;
+  }
+  
+  .coming-soon-title {
+    font-size: 24px;
+  }
+  
+  .coming-soon-icon {
+    font-size: 48px;
+  }
+  
+  .coming-soon-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .action-button.large {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .progress-items {
+    gap: 8px;
+  }
+  
+  .progress-item {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .coming-soon-content {
+    padding: 20px 15px;
+  }
+  
+  .progress-info,
+  .page-description,
+  .release-info {
+    padding: 15px;
+  }
+}
+
+/* FAQ Page Styles - App.css에 추가해주세요 */
+
+.faq-container {
+  min-height: calc(100vh - 64px);
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  padding: 40px 20px;
+}
+
+.faq-header {
+  text-align: center;
+  margin-bottom: 40px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.faq-header h1 {
+  font-size: 36px;
+  color: #15803d;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.faq-header p {
+  font-size: 18px;
+  color: #6b7280;
+}
+
+.faq-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.faq-list {
+  margin-bottom: 40px;
+}
+
+.faq-item {
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border: 2px solid #dcfce7;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.faq-item:hover {
+  border-color: #bbf7d0;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
+}
+
+.faq-question {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 20px 24px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.faq-question:hover {
+  background: #f9fafb;
+}
+
+.faq-toggle {
+  transition: transform 0.3s ease;
+  color: #22c55e;
+  font-weight: bold;
+}
+
+.faq-toggle.open {
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  padding: 0 24px 20px 24px;
+  border-top: 1px solid #f3f4f6;
+  background: #fafafa;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.faq-answer p {
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 16px 0 0 0;
+}
+
+.faq-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.action-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  border: 2px solid #dcfce7;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
+  max-width: 500px;
+  width: 100%;
+}
+
+.action-card h3 {
+  color: #15803d;
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.action-card p {
+  color: #6b7280;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .faq-container {
+    padding: 20px 16px;
+    min-height: calc(100vh - 56px);
+  }
+  
+  .faq-header h1 {
+    font-size: 28px;
+  }
+  
+  .faq-header p {
+    font-size: 16px;
+  }
+  
+  .faq-question {
+    padding: 16px 20px;
+    font-size: 15px;
+  }
+  
+  .faq-answer {
+    padding: 0 20px 16px 20px;
+  }
+  
+  .action-card {
+    padding: 24px 20px;
+  }
+}
