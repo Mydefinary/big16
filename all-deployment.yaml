@@ -1,0 +1,227 @@
+# ===================================================
+# 1. PPL 생성기 - 백엔드(FastAPI) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ppl-gen-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ppl-gen-backend
+  template:
+    metadata:
+      labels:
+        app: ppl-gen-backend
+    spec:
+      # ✅ [수정] Pod가 'userpool'에서 실행되도록 강제합니다.
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: ppl-gen-backend-container
+        image: kt16big.azurecr.io/ppl-gen-backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: REPLICATE_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: REPLICATE_API_TOKEN
+---
+# ===================================================
+# 2. PPL 생성기 - 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: ppl-gen-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: ppl-gen-backend
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+---
+# ===================================================
+# 3. PPL 생성기 - 프론트엔드(React) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ppl-gen-frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ppl-gen-frontend
+  template:
+    metadata:
+      labels:
+        app: ppl-gen-frontend
+    spec:
+      # ✅ [수정] Pod가 'userpool'에서 실행되도록 강제합니다.
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: ppl-gen-frontend-container
+        image: kt16big.azurecr.io/ppl-gen-frontend:latest
+        ports:
+        - containerPort: 3000
+---
+# ===================================================
+# 4. PPL 생성기 - 프론트엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: ppl-gen-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: ppl-gen-frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+---
+# ===================================================
+# 5. 굿즈 생성기 - 백엔드(FastAPI) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goods-gen-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goods-gen-backend
+  template:
+    metadata:
+      labels:
+        app: goods-gen-backend
+    spec:
+      # ✅ [수정] Pod가 'userpool'에서 실행되도록 강제합니다.
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: goods-gen-backend-container
+        image: kt16big.azurecr.io/goods-gen-backend:latest
+        ports:
+        - containerPort: 8001
+        env:
+        - name: BFL_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: BFL_API_KEY
+---
+# ===================================================
+# 6. 굿즈 생성기 - 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: goods-gen-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: goods-gen-backend
+  ports:
+  - protocol: TCP
+    port: 8001
+    targetPort: 8001
+---
+# ===================================================
+# 7. 굿즈 생성기 - 프론트엔드(React) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goods-gen-frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goods-gen-frontend
+  template:
+    metadata:
+      labels:
+        app: goods-gen-frontend
+    spec:
+      # ✅ [수정] Pod가 'userpool'에서 실행되도록 강제합니다.
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: goods-gen-frontend-container
+        image: kt16big.azurecr.io/goods-gen-frontend:latest
+        ports:
+        - containerPort: 3000
+---
+# ===================================================
+# 8. 굿즈 생성기 - 프론트엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: goods-gen-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: goods-gen-frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+---
+# ===================================================
+# 9. NGINX 인그레스(Ingress) 규칙
+# ===================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: multi-app-gateway-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - http:
+      paths:
+      # PPL 생성기 FE
+      - path: /ppl-gen(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: ppl-gen-frontend-service
+            port:
+              number: 80
+      # PPL 생성기 BE
+      - path: /api/ppl-gen(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: ppl-gen-backend-service
+            port:
+              number: 8000
+      # 굿즈 생성기 FE
+      - path: /goods-gen(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: goods-gen-frontend-service
+            port:
+              number: 80
+      # 굿즈 생성기 BE
+      - path: /api/goods-gen(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: goods-gen-backend-service
+            port:
+              number: 8001
