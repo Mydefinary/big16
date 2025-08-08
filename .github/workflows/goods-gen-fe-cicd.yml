@@ -57,3 +57,30 @@ jobs:
           tags: |
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+
+# ... (build-and-push-to-acr 잡은 그대로 둠) ...
+
+  deploy-to-aks:
+    runs-on: ubuntu-latest
+    # build-and-push-to-acr 잡이 성공해야만 실행됨
+    needs: build-and-push-to-acr
+    steps:
+      # 1. Azure에 로그인
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 2. AKS 클러스터에 연결 설정
+      - name: Set AKS context
+        uses: azure/aks-set-context@v3
+        with:
+          # AZURE_CREDENTIALS에 있는 정보로 자동 설정됨
+          resource-group: "kt16big"
+          cluster-name: "kt16big"
+
+      # 3. kubectl을 사용하여 배포된 이미지 업데이트
+      - name: Deploy to AKS
+        run: |
+          kubectl set image deployment/ppl-gen-be-deployment \
+            ppl-gen-be-container=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}

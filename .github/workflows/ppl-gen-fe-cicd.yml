@@ -23,6 +23,8 @@ env:
   ACR_NAME: "kt16big" # 이미지를 푸시할 Azure Container Registry의 이름
   IMAGE_NAME: "ppl-gen-fe" # ACR에 저장될 Docker 이미지의 이름
   WORKING_DIR: "ppl-gen-react/frontend" # 작업 대상 폴더 (Dockerfile이 있는 위치)
+  AKS_CLUSTER_NAME: "kt16big-aks" # aks cluser name
+  AKS_RESOURCE_GROUP: "kt16big" # 리소스 그룹
 
 # 실제 작업(task)들의 묶음인 잡(job)을 정의합니다.
 jobs:
@@ -57,3 +59,30 @@ jobs:
           tags: |
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+            
+# ... (build-and-push-to-acr 잡은 그대로 둠) ...
+
+  deploy-to-aks:
+    runs-on: ubuntu-latest
+    # build-and-push-to-acr 잡이 성공해야만 실행됨
+    needs: build-and-push-to-acr
+    steps:
+      # 1. Azure에 로그인
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 2. AKS 클러스터에 연결 설정
+      - name: Set AKS context
+        uses: azure/aks-set-context@v3
+        with:
+          # AZURE_CREDENTIALS에 있는 정보로 자동 설정됨
+          resource-group: ${{ env.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ env.AKS_CLUSTER_NAME }}
+
+      # 3. kubectl을 사용하여 배포된 이미지 업데이트
+      - name: Deploy to AKS
+        run: |
+          kubectl set image deployment/ppl-gen-frontend-deployment \
+            ppl-gen-frontend-container=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
