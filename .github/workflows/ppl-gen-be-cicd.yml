@@ -1,0 +1,50 @@
+# .github/workflows/ppl-gen-be-cicd.yml
+
+name: 'CI/CD for PPL-GEN Backend'
+
+on:
+  push:
+    branches: [ "img-gen-cicd" ]
+    # ppl-gen/BE/ 폴더 내의 파일이 변경되었을 때만 이 워크플로우를 실행합니다.
+    paths:
+      - 'ppl-gen/BE/**'
+      - '.github/workflows/ppl-gen-be-cicd.yml' # 워크플로우 파일 자체가 변경될 때도 실행
+  pull_request:
+    branches: [ "img-gen-cicd" ]
+    paths:
+      - 'ppl-gen/BE/**'
+
+# 환경 변수 설정
+env:
+  ACR_NAME: "kt16big" # 예: myacr (login server 아님)
+  IMAGE_NAME: "ppl-gen-be"
+  WORKING_DIR: "ppl-gen/BE"
+
+jobs:
+  build-and-push-to-acr:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 리포지토리 코드 가져오기
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Azure에 로그인 (GitHub Secret 사용)
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 3. Azure Container Registry(ACR)에 로그인
+      - name: Log in to ACR
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      # 4. Docker 이미지 빌드 및 ACR에 푸시
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ env.WORKING_DIR }} # Dockerfile이 있는 위치
+          file: ${{ env.WORKING_DIR }}/Dockerfile # Dockerfile 경로
+          push: true # ACR에 푸시
+          tags: |
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
