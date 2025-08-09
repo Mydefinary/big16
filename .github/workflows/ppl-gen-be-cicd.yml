@@ -7,7 +7,7 @@ on:
     branches: [ "img-gen-cicd" ]
     # ppl-gen/BE/ 폴더 내의 파일이 변경되었을 때만 이 워크플로우를 실행합니다.
     paths:
-      - 'ppl-gen/BE/**'
+      - 'ppl-gen/backend/**'
       - '.github/workflows/ppl-gen-be-cicd.yml' # 워크플로우 파일 자체가 변경될 때도 실행
   pull_request:
     branches: [ "img-gen-cicd" ]
