@@ -1,5 +1,3 @@
-# ppl-gen의 main.py
-
 import os
 import base64
 import mimetypes
@@ -9,11 +7,11 @@ from typing import Optional
 from fastapi import FastAPI, File, UploadFile, Form, Request
 from fastapi.responses import JSONResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.concurrency import run_in_threadpool
 from dotenv import load_dotenv
 import replicate
 import requests
+from googletrans import Translator # ✅ 번역 라이브러리 import
 
 # --- 기본 설정 (수정 없음) ---
 load_dotenv()
@@ -21,29 +19,40 @@ token_value = os.getenv("REPLICATE_API_TOKEN")
 
 if not token_value:
     raise RuntimeError("❌ .env 또는 Secret에 REPLICATE_API_TOKEN이 설정되어 있지 않습니다.")
-# [핵심 수정] .strip()을 추가하여 토큰 값의 앞뒤 공백/줄바꿈을 제거합니다.
 REPLICATE_API_TOKEN = token_value.strip()
-# replicate 라이브러리가 환경 변수를 직접 참조하므로 다시 설정해 줍니다.
 os.environ["REPLICATE_API_TOKEN"] = REPLICATE_API_TOKEN
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    # ✅ 모든 오리진을 허용하도록 변경
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- ✨✨✨ 새로운 코드 추가 ✨✨✨ ---
-# 'static' 폴더를 정적 파일 경로로 지정합니다.
-# 이제 "http://127.0.0.1:8000/static/이미지파일.png" 와 같은 주소로 파일에 접근할 수 있습니다.
-STATIC_DIR = Path("static")
-STATIC_DIR.mkdir(parents=True, exist_ok=True)  # static 폴더가 없으면 생성
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+# ✅ [신규] 번역을 위한 Translator 객체 생성
+translator = Translator()
+
+# ✅ [신규] 한글 프롬프트를 영어로 번역하는 API 엔드포인트
+@app.post("/translate")
+async def translate_prompt(request: Request):
+    data = await request.json()
+    korean_text = data.get("prompt")
+    if not korean_text:
+        return JSONResponse(status_code=400, content={"error": "번역할 프롬프트가 없습니다."})
+    
+    try:
+        # 백그라운드 스레드에서 번역 실행
+        translated = await run_in_threadpool(translator.translate, korean_text, dest='en')
+        return JSONResponse(content={"translated_text": translated.text})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
 
+# --- 기존 코드 (수정 없음) ---
 def encode_file(file: UploadFile) -> str:
     content = file.file.read()
     if not content:
@@ -51,8 +60,6 @@ def encode_file(file: UploadFile) -> str:
     mime_type = mimetypes.guess_type(file.filename)[0] or "image/png"
     return f"data:{mime_type};base64," + base64.b64encode(content).decode("utf-8")
 
-
-# --- ✨✨✨ generate_image 함수 전체 수정 ✨✨✨ ---
 @app.post("/generate")
 async def generate_image(
     request: Request,
@@ -86,23 +93,19 @@ async def generate_image(
             "flux-kontext-apps/multi-image-kontext-max",
             input=inputs
         )
-
+        
         print(f"✅ Replicate 응답 받음 (타입: {type(output)})")
-
-        image_bytes = None
-        # iterator나 list일 경우를 대비해 첫 번째 항목을 가져옵니다.
+        
         result = output[0] if isinstance(output, list) and output else output
+        image_bytes = None
 
-        # ✨✨✨ 핵심 수정 로직 ✨✨✨
-        # 1. 결과가 FileOutput 객체(또는 파일 유사 객체)인 경우
         if hasattr(result, 'read') and callable(getattr(result, 'read')):
             print("✅ 결과 처리: FileOutput 객체에서 .read()로 데이터 추출")
             image_bytes = result.read()
-        # 2. 결과가 URL 문자열인 경우 (만약을 위한 대비책)
         elif isinstance(result, str) and result.startswith('http'):
             print("✅ 결과 처리: URL 문자열이므로 requests로 다운로드")
             response = requests.get(result)
-            response.raise_for_status()  # 200 OK가 아니면 에러 발생
+            response.raise_for_status()
             image_bytes = response.content
         else:
             raise TypeError(f"처리할 수 없는 결과 타입입니다: {type(result)}")
@@ -110,8 +113,6 @@ async def generate_image(
         if not image_bytes:
             raise ValueError("이미지 데이터를 얻는 데 실패했습니다.")
 
-        # [핵심 수정] JSON 대신 이미지 데이터를 직접 반환합니다.(파일저장, URL 반환 로직 폐기)
-        # 브라우저가 이 응답을 이미지 파일로 인식하도록 media_type을 설정합니다.
         file_extension = output_format if output_format in ['png', 'jpeg', 'webp'] else 'png'
         print(f"✅ 이미지 데이터 직접 반환 (타입: image/{file_extension})")
         return Response(content=image_bytes, media_type=f"image/{file_extension}")
