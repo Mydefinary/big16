@@ -12,6 +12,8 @@ on:
     branches: [ "img-gen-cicd" ]
     paths:
       - 'goods-gen-react/frontend/**'
+      - '.github/workflows/goods-gen-fe-cicd.yml'
+
 
 env:
   ACR_NAME: "kt16big"

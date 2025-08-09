@@ -12,7 +12,8 @@ on:
   pull_request:
     branches: [ "img-gen-cicd" ]
     paths:
-      - 'ppl-gen/BE/**'
+      - 'ppl-gen-react/backend/**'
+      - '.github/workflows/ppl-gen-be-cicd.yml'
 
 # 환경 변수 설정
 env:
