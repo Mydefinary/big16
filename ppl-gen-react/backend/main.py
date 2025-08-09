@@ -11,32 +11,37 @@ from fastapi.concurrency import run_in_threadpool
 from dotenv import load_dotenv
 import replicate
 import requests
-from googletrans import Translator # ✅ 번역 라이브러리 import
+import openai # ✅ openai 라이브러리 import
 
-# --- 기본 설정 (수정 없음) ---
+# --- 기본 설정 (수정) ---
 load_dotenv()
-token_value = os.getenv("REPLICATE_API_TOKEN")
 
+# Replicate API 토큰 설정
+token_value = os.getenv("REPLICATE_API_TOKEN")
 if not token_value:
-    raise RuntimeError("❌ .env 또는 Secret에 REPLICATE_API_TOKEN이 설정되어 있지 않습니다.")
+    raise RuntimeError("❌ REPLICATE_API_TOKEN이 설정되어 있지 않습니다.")
 REPLICATE_API_TOKEN = token_value.strip()
 os.environ["REPLICATE_API_TOKEN"] = REPLICATE_API_TOKEN
+
+# ✅ [신규] OpenAI API 키 설정
+openai_api_key = os.getenv("OPENAI_API_KEY")
+if not openai_api_key:
+    raise RuntimeError("❌ OPENAI_API_KEY가 설정되어 있지 않습니다.")
+# OpenAI 클라이언트 초기화
+client = openai.AsyncOpenAI(api_key=openai_api_key.strip())
+
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    # ✅ 모든 오리진을 허용하도록 변경
     allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ✅ [신규] 번역을 위한 Translator 객체 생성
-translator = Translator()
-
-# ✅ [신규] 한글 프롬프트를 영어로 번역하는 API 엔드포인트
+# ✅ [수정] OpenAI API를 호출하는 번역 엔드포인트
 @app.post("/translate")
 async def translate_prompt(request: Request):
     data = await request.json()
@@ -45,11 +50,25 @@ async def translate_prompt(request: Request):
         return JSONResponse(status_code=400, content={"error": "번역할 프롬프트가 없습니다."})
     
     try:
-        # 백그라운드 스레드에서 번역 실행
-        translated = await run_in_threadpool(translator.translate, korean_text, dest='en')
-        return JSONResponse(content={"translated_text": translated.text})
+        # ChatGPT API 호출
+        chat_completion = await client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a translator who translates Korean into natural, concise English for an image generation AI model.",
+                },
+                {
+                    "role": "user",
+                    "content": korean_text,
+                }
+            ],
+            model="gpt-4o", # 또는 "gpt-3.5-turbo"
+        )
+        translated_text = chat_completion.choices[0].message.content
+        return JSONResponse(content={"translated_text": translated_text})
     except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
+        print(f"OpenAI API Error: {e}")
+        return JSONResponse(status_code=500, content={"error": "번역 중 오류가 발생했습니다."})
 
 
 # --- 기존 코드 (수정 없음) ---
@@ -100,10 +119,8 @@ async def generate_image(
         image_bytes = None
 
         if hasattr(result, 'read') and callable(getattr(result, 'read')):
-            print("✅ 결과 처리: FileOutput 객체에서 .read()로 데이터 추출")
             image_bytes = result.read()
         elif isinstance(result, str) and result.startswith('http'):
-            print("✅ 결과 처리: URL 문자열이므로 requests로 다운로드")
             response = requests.get(result)
             response.raise_for_status()
             image_bytes = response.content
@@ -114,7 +131,6 @@ async def generate_image(
             raise ValueError("이미지 데이터를 얻는 데 실패했습니다.")
 
         file_extension = output_format if output_format in ['png', 'jpeg', 'webp'] else 'png'
-        print(f"✅ 이미지 데이터 직접 반환 (타입: image/{file_extension})")
         return Response(content=image_bytes, media_type=f"image/{file_extension}")
 
     except Exception as e:

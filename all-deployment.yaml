@@ -29,6 +29,11 @@ spec:
             secretKeyRef:
               name: api-keys-secret
               key: REPLICATE_API_TOKEN
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: OPENAI_API_KEY
 ---
 # ===================================================
 # 2. PPL 생성기 - 백엔드 서비스
