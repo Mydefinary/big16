@@ -238,6 +238,26 @@ public class Auth {
         }
         return true;
     }
+    
+    // 삭제
+    public static void deleteAuthData(UserDeleted userDeleted) {
+        Optional<Auth> authOptional = repository().findByUserId(userDeleted.getUserId());
+        
+        if (authOptional.isPresent()) {
+            Auth auth = authOptional.get();
+            
+            // 토큰 무효화 (혹시 다른 곳에서 참조하고 있을 수도 있으니)
+            auth.invalidateTokens();
+            
+            // Auth 데이터 완전 삭제
+            repository().delete(auth);
+            
+            System.out.println("사용자 탈퇴로 인한 Auth 데이터 삭제 완료: userId = " + userDeleted.getUserId());
+        } else {
+            System.out.println("삭제할 Auth 데이터가 없습니다: userId = " + userDeleted.getUserId());
+        }
+    }
+
     //<<< Clean Arch / Port Method
     // Policy를 사용하지 않기로 해서 폐기
     // public static void resetPassword(EmailVerified emailVerified) {

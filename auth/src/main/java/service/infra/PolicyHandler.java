@@ -54,7 +54,6 @@ public class PolicyHandler {
             "\n\n"
         );
 
-        // Sample Logic //
         Auth.requestEmailVerification(event);
     }
 
@@ -115,6 +114,23 @@ public class PolicyHandler {
         } else {
             System.err.println("이메일 또는 인증코드가 없습니다. email: " + email + ", code: " + code);
         }
+    }
+
+    @StreamListener(
+        value = KafkaProcessor.INPUT,
+        condition = "headers['type']=='UserDeleted'"
+    )
+    public void wheneverUserDeleted_DeleteAuthData(
+        @Payload UserDeleted userDeleted
+    ) {
+        UserDeleted event = userDeleted;
+        System.out.println(
+            "\n\n##### listener DeleteAuthData : " +
+            userDeleted +
+            "\n\n"
+        );
+
+        Auth.deleteAuthData(event);
     }
     
     // @StreamListener(

@@ -80,40 +80,41 @@ public class UserController {
         Optional<User> userOpt = userRepository.findByEmail(email);
 
         if (userOpt.isPresent()) {
-            // User user = userOpt.get();
-            // EmailExistsConfirmed event = new EmailExistsConfirmed();
-            // event.setUserId(user.getUserId());
-            // event.setEmail(user.getEmail());
-            // // publishAfterCommit()을 하지 않는 이유
-            // // 어차피 DB 저장같이 트랜젝션이 필요한 작업이 아니라
-            // // 바로 이벤트를 발행해도 됨!
-            // event.publish();
             userOpt.get().publishEmailExistsConfirmed(); // ← 이 메서드를 User 안에 정의
             return ResponseEntity.ok("이메일이 존재합니다.");
         } else {
-            // EmailNotFound 이벤트는 User에서 따로 처리할
-            // 작업이 없어서 그냥 명시만 하는 느낌으로 사용
-            // 아래의 주석을 풀든 안풀든 상관 없을 듯
-            // EmailNotFound event = new EmailNotFound();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("이메일을 찾을 수 없습니다.");
         }
     }
 
-    // 회원탈퇴 로직 아직 JWT 토큰 관련 수정을 진행하지 않아서 사용x
     @PatchMapping("/deactivate")
     public ResponseEntity<?> deactivateUser(@RequestHeader("X-User-Id") Long userId) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(404).body("사용자를 찾을 수 없습니다.");
+        try {
+            System.out.println("회원탈퇴 요청 - 사용자 ID: " + userId); // 디버깅용 로그
+            
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isEmpty()) {
+                System.out.println("사용자를 찾을 수 없음 - ID: " + userId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자를 찾을 수 없습니다.");
+            }
+
+            User user = userOpt.get();
+            System.out.println("사용자 탈퇴 처리 시작 - 이메일: " + user.getEmail());
+            
+            // 탈퇴 이벤트 발행 (삭제 전에 먼저 실행)
+            user.Withdrawal();
+            
+            // 실제 사용자 데이터 삭제
+            userRepository.delete(user);
+            
+            System.out.println("회원탈퇴 완료 - 사용자 ID: " + userId);
+            return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+            
+        } catch (Exception e) {
+            System.err.println("회원 탈퇴 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 탈퇴 중 오류가 발생했습니다.");
         }
-
-        User user = userOpt.get();
-        user.setStatus("DELETED");
-        userRepository.save(user);
-
-        user.Withdrawal();
-
-        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
 }
 //>>> Clean Arch / Inbound Adaptor
