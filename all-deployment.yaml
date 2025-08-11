@@ -19,7 +19,6 @@ spec:
         agentpool: userpool
       containers:
       - name: ppl-gen-backend-container
-        # ✅ :latest 대신 CI/CD에서 주입할 고유 태그 플레이스홀더를 사용합니다.
         image: kt16big.azurecr.io/ppl-gen-backend:${IMAGE_TAG}
         ports:
         - containerPort: 8000
@@ -388,7 +387,7 @@ spec:
     targetPort: 8000
 ---
 # ===================================================
-# 17. NGINX 인그레스(Ingress) 규칙
+# 17. NGINX 인그레스(Ingress) 규칙 (게이트웨이/루트)
 # ===================================================
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -415,3 +414,99 @@ spec:
             name: auth-frontend-service
             port:
               number: 80
+      # ✅ [추가] 웹툰 대시보드 프론트엔드 라우팅
+      - path: /webtoon
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-dashboard-frontend-service
+            port:
+              number: 80
+
+
+# ===================================================
+# 18. 웹툰 대시보드 - 백엔드(FastAPI) 배포 (Ingress 없음)
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoon-dashboard-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webtoon-dashboard-backend
+  template:
+    metadata:
+      labels:
+        app: webtoon-dashboard-backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: webtoon-dashboard-backend-container
+        image: kt16big.azurecr.io/webtoon-dashboard-backend:${IMAGE_TAG}
+        ports:
+        - containerPort: 8000
+        workingDir: /app
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+---
+# ===================================================
+# 19. 웹툰 대시보드 - 백엔드 서비스 (ClusterIP)
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoon-dashboard-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: webtoon-dashboard-backend
+  ports:
+  - protocol: TCP
+    port: 8002
+    targetPort: 8000
+---
+# ===================================================
+# 20. 웹툰 대시보드 - 프론트엔드(React) 배포 (Ingress 없음)
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoon-dashboard-frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webtoon-dashboard-frontend
+  template:
+    metadata:
+      labels:
+        app: webtoon-dashboard-frontend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: webtoon-dashboard-frontend-container
+        image: kt16big.azurecr.io/webtoon-dashboard-frontend:${IMAGE_TAG}
+        ports:
+        - containerPort: 80
+        workingDir: /usr/share/nginx/html
+---
+# ===================================================
+# 21. 웹툰 대시보드 - 프론트엔드 서비스 (ClusterIP)
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoon-dashboard-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: webtoon-dashboard-frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80

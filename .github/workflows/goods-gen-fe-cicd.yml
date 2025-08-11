@@ -8,6 +8,7 @@ on:
     paths:
       - 'goods-gen-react/frontend/**'
       - '.github/workflows/goods-gen-fe-cicd.yml'
+      - 'all-deployment.yaml'         # 3. 공용 배포 파일
   pull_request:
     branches: [ "img-gen-cicd" ]
     paths:

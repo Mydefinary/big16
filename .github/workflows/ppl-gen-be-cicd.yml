@@ -9,6 +9,7 @@ on:
     paths:
       - 'ppl-gen-react/backend/**'  # github repository에 올린 경로, folder
       - '.github/workflows/ppl-gen-be-cicd.yml' # 워크플로우 파일 자체가 변경될 때도 실행
+      - 'all-deployment.yaml'         # 3. 공용 배포 파일
   pull_request:
     branches: [ "img-gen-cicd" ]
     paths:
