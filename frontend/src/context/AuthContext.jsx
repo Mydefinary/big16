@@ -1,4 +1,7 @@
+// /src/context/AuthContext.jsx
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { authAPI } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -11,93 +14,131 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
-  const [refreshToken, setRefreshToken] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userInfo, setUserInfo] = useState(null);
 
-  // 토큰 유효성 검사 함수
-  const isTokenValid = (token) => {
-    if (!token) return false;
-    
+  // 🎯 쿠키 기반 인증 체크 함수
+  const checkAuthentication = async () => {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const currentTime = Date.now() / 1000;
-      return payload.exp > currentTime;
+      console.log('🔍 인증 상태 확인 중...');
+      
+      // 서버의 /auths/me API 호출 (쿠키의 accessToken으로 인증)
+      const response = await authAPI.me();
+      
+      console.log('✅ 인증 확인 성공:', response.data);
+      setIsLoggedIn(true);
+      setUserInfo(response.data);
+      
+      return true;
     } catch (error) {
-      console.error('Token validation error:', error);
+      console.log('❌ 인증 확인 실패:', error.response?.status);
+      setIsLoggedIn(false);
+      setUserInfo(null);
+      
       return false;
     }
   };
 
+  // 🎯 앱 시작 시 인증 상태 확인
   useEffect(() => {
-    // 앱 시작시 localStorage에서 토큰 확인
-    const savedToken = localStorage.getItem('accessToken');
-    const savedRefreshToken = localStorage.getItem('refreshToken');
-    
-    // 토큰이 있고 유효한 경우에만 상태에 설정
-    if (savedToken && isTokenValid(savedToken)) {
-      setToken(savedToken);
-      if (savedRefreshToken) {
-        setRefreshToken(savedRefreshToken);
-      }
-    } else {
-      // 유효하지 않은 토큰은 제거
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-    }
-    
-    setLoading(false);
+    const initializeAuth = async () => {
+      await checkAuthentication();
+      setLoading(false);
+    };
+
+    initializeAuth();
+
+    // 🎯 커스텀 이벤트 리스너 등록 (토큰 갱신/만료 시 사용)
+    const handleTokenRefreshed = () => {
+      console.log('🔄 토큰 갱신됨 - 인증 상태 재확인');
+      checkAuthentication();
+    };
+
+    const handleAuthRequired = () => {
+      console.log('🚪 로그인 필요 - 로그아웃 처리');
+      setIsLoggedIn(false);
+      setUserInfo(null);
+    };
+
+    window.addEventListener('tokenRefreshed', handleTokenRefreshed);
+    window.addEventListener('authRequired', handleAuthRequired);
+
+    return () => {
+      window.removeEventListener('tokenRefreshed', handleTokenRefreshed);
+      window.removeEventListener('authRequired', handleAuthRequired);
+    };
   }, []);
 
-  const login = (accessToken, refreshTokenValue) => {
-    // 새 토큰의 유효성 검사
-    if (!isTokenValid(accessToken)) {
-      console.error('Trying to login with invalid token');
-      return false;
+  // 🎯 로그인 함수 (쿠키는 서버에서 자동 설정됨)
+  const login = async (credentials) => {
+    try {
+      console.log('🔐 로그인 시도...');
+      
+      const response = await authAPI.login(credentials);
+      
+      console.log('✅ 로그인 성공:', response.data);
+      
+      // 쿠키는 서버에서 자동으로 설정되므로 인증 상태만 업데이트
+      setIsLoggedIn(true);
+      
+      // 사용자 정보 새로 가져오기
+      await checkAuthentication();
+      
+      return true;
+    } catch (error) {
+      console.error('❌ 로그인 실패:', error);
+      setIsLoggedIn(false);
+      setUserInfo(null);
+      throw error;
     }
-
-    setToken(accessToken);
-    setRefreshToken(refreshTokenValue);
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshTokenValue);
-    return true;
   };
 
-  const logout = () => {
-    setToken(null);
-    setRefreshToken(null);
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-  };
-
-  // 토큰 업데이트 함수 (리프레시 시 사용)
-  const updateTokens = (newAccessToken, newRefreshToken) => {
-    if (!isTokenValid(newAccessToken)) {
-      console.error('Trying to update with invalid token');
-      logout();
-      return false;
+  // 🎯 로그아웃 함수
+  const logout = async () => {
+    try {
+      console.log('🚪 로그아웃 시도...');
+      
+      await authAPI.logout();
+      
+      console.log('✅ 로그아웃 성공');
+    } catch (error) {
+      console.error('❌ 로그아웃 API 오류 (쿠키는 제거됨):', error);
+    } finally {
+      // API 성공/실패와 관계없이 로컬 상태는 초기화
+      setIsLoggedIn(false);
+      setUserInfo(null);
     }
-
-    setToken(newAccessToken);
-    setRefreshToken(newRefreshToken);
-    localStorage.setItem('accessToken', newAccessToken);
-    localStorage.setItem('refreshToken', newRefreshToken);
-    return true;
   };
 
+  // 🎯 인증 상태 확인 함수 (단순한 boolean 반환)
   const isAuthenticated = () => {
-    return token && isTokenValid(token);
+    return isLoggedIn;
+  };
+
+  // 🎯 사용자 정보 새로고침
+  const refreshUserInfo = async () => {
+    if (isLoggedIn) {
+      await checkAuthentication();
+    }
   };
 
   const value = {
-    token,
-    refreshToken,
+    // 상태
+    isLoggedIn,
+    loading,
+    userInfo,
+    
+    // 함수들
     login,
     logout,
-    updateTokens,
     isAuthenticated,
-    isTokenValid,
-    loading
+    checkAuthentication,
+    refreshUserInfo,
+    
+    // 레거시 지원 (기존 코드와의 호환성)
+    token: isLoggedIn ? 'cookie-based' : null,
+    refreshToken: isLoggedIn ? 'cookie-based' : null,
   };
 
   return (

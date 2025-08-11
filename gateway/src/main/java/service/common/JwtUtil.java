@@ -48,7 +48,6 @@ public class JwtUtil {
             return true;
             
         } catch (JwtException e) {
-            debugSecretKey();
             System.out.println("❌ JWT Exception: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             return false;
         } catch (IllegalArgumentException e) {

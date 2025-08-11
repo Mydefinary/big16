@@ -104,7 +104,6 @@ public class JwtUtil {
 
     // 내부: 시크릿 체크
     private static void checkSecret() {
-        debugSecretKey();
         if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
             throw new IllegalStateException("JWT_SECRET 환경변수가 설정되어 있지 않습니다.");
         }

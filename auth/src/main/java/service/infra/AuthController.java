@@ -3,6 +3,7 @@ package service.infra;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Cookie;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,6 @@ import java.util.HashMap;
 import service.common.JwtUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
-// import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.mindrot.jbcrypt.BCrypt;
 
 //<<< Clean Arch / Inbound Adaptor
@@ -115,57 +115,17 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginCommand command) {
-        try {
-            Auth auth = authRepository.findByLoginId(command.getLoginId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
-            
-            if (!auth.isVerified()){
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("로그인 실패 : 이메일 미인증 상태");
-            }
-            auth.verifyPassword(command.getPassword());
-            
-            // Access Token과 Refresh Token 생성
-            String accessToken = JwtUtil.generateToken(auth.getUserId());
-            String refreshToken = JwtUtil.generateRefreshToken(auth.getUserId());
-            
-            // 토큰 정보 저장
-            auth.updateTokens(accessToken, refreshToken);
-            authRepository.save(auth);
-
-            // 로그인 성공 이벤트 발행
-            LoginSuccessed event = new LoginSuccessed(auth, accessToken);
-            event.publish();
-
-            Map<String, String> tokens = new HashMap<>();
-            tokens.put("accessToken", accessToken);
-            tokens.put("refreshToken", refreshToken);
-            tokens.put("tokenType", "Bearer");
-            
-            return ResponseEntity.ok(tokens);
-        } catch (IllegalArgumentException e) {
-            // 로그인 실패 이벤트 발행 해야하는데 auth를 
-            // 못불러온거라 기능도 없으니 그냥 주석 처리
-            // LoginFailed event = new LoginFailed(auth);
-            // event.publish();
-
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("로그인 실패: " + e.getMessage());
-        }
-    }
-
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest request) {
-        String refreshToken = request.getRefreshToken();
-        
-        if (refreshToken == null || refreshToken.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Refresh Token이 필요합니다.");
-        }
-        
+    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         try {
+            // ✅ 쿠키에서 Refresh Token 가져오기
+            String refreshToken = getTokenFromCookie(request, "refreshToken");
+            
+            if (refreshToken == null || refreshToken.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Refresh Token이 필요합니다.");
+            }
+            
             // Refresh Token 유효성 검증
             if (!JwtUtil.validateToken(refreshToken)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -195,12 +155,29 @@ public class AuthController {
             auth.updateTokens(newAccessToken, newRefreshToken);
             authRepository.save(auth);
             
-            Map<String, String> tokens = new HashMap<>();
-            tokens.put("accessToken", newAccessToken);
-            tokens.put("refreshToken", newRefreshToken);
-            tokens.put("tokenType", "Bearer");
+            // ✅ 새로운 토큰들을 쿠키로 설정
+            Cookie accessTokenCookie = new Cookie("accessToken", newAccessToken);
+            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setSecure(false); // 개발환경: false, 프로덕션: true
+            accessTokenCookie.setPath("/");
+            accessTokenCookie.setMaxAge(3600); // 1시간
+                
+            Cookie refreshTokenCookie = new Cookie("refreshToken", newRefreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(false); // 개발환경: false, 프로덕션: true
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(604800); // 7일
+                
+            // 쿠키 추가
+            response.addCookie(accessTokenCookie);
+            response.addCookie(refreshTokenCookie);
             
-            return ResponseEntity.ok(tokens);
+            // ✅ 프론트엔드에는 성공 메시지만 반환
+            Map<String, String> responseBody = new HashMap<>();
+            responseBody.put("message", "토큰 갱신 성공");
+            responseBody.put("tokenType", "Bearer");
+            
+            return ResponseEntity.ok(responseBody);
             
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -208,16 +185,75 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody LogoutRequest request) {
-        String refreshToken = request.getRefreshToken();
-        
-        if (refreshToken == null || refreshToken.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Refresh Token이 필요합니다.");
-        }
-        
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginCommand command, HttpServletResponse response) {
         try {
+            Auth auth = authRepository.findByLoginId(command.getLoginId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
+            
+            if (!auth.isVerified()){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("로그인 실패 : 이메일 미인증 상태");
+            }
+            auth.verifyPassword(command.getPassword());
+            
+            // Access Token과 Refresh Token 생성
+            String accessToken = JwtUtil.generateToken(auth.getUserId());
+            String refreshToken = JwtUtil.generateRefreshToken(auth.getUserId());
+            
+            // 토큰 정보 저장
+            auth.updateTokens(accessToken, refreshToken);
+            authRepository.save(auth);
+
+            // ✅ MVC에서 Cookie 객체 사용
+            Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setSecure(false); // 개발환경: false, 프로덕션: true
+            accessTokenCookie.setPath("/");
+            accessTokenCookie.setMaxAge(3600); // 1시간 (초 단위)
+                
+            Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(false); // 개발환경: false, 프로덕션: true
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(604800); // 7일 (초 단위)
+                
+            // 쿠키 추가
+            response.addCookie(accessTokenCookie);
+            response.addCookie(refreshTokenCookie);
+
+            // 로그인 성공 이벤트 발행
+            LoginSuccessed event = new LoginSuccessed(auth, accessToken);
+            event.publish();
+
+            // ✅ 프론트엔드에는 성공 메시지만 반환 (토큰은 쿠키로 자동 저장됨)
+            Map<String, String> response_body = new HashMap<>();
+            response_body.put("message", "로그인 성공");
+            response_body.put("tokenType", "Bearer");
+            
+            return ResponseEntity.ok(response_body);
+        } catch (IllegalArgumentException e) {
+            // 로그인 실패 이벤트 발행 해야하는데 auth를 
+            // 못불러온거라 기능도 없으니 그냥 주석 처리
+            // LoginFailed event = new LoginFailed(auth);
+            // event.publish();
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("로그인 실패: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            // ✅ 쿠키에서 Refresh Token 가져오기
+            String refreshToken = getTokenFromCookie(request, "refreshToken");
+            
+            if (refreshToken == null || refreshToken.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Refresh Token이 필요합니다.");
+            }
+            
             // Refresh Token에서 userId 추출 (만료되어도 추출은 가능)
             Long userId = JwtUtil.getUserIdFromToken(refreshToken);
             
@@ -234,11 +270,45 @@ public class AuthController {
                 System.out.println("로그아웃 완료: userId = " + userId);
             }
             
+            // ✅ MVC에서 쿠키 삭제
+            Cookie deleteAccessToken = new Cookie("accessToken", "");
+            deleteAccessToken.setHttpOnly(true);
+            deleteAccessToken.setSecure(false);
+            deleteAccessToken.setPath("/");
+            deleteAccessToken.setMaxAge(0); // 즉시 만료
+                
+            Cookie deleteRefreshToken = new Cookie("refreshToken", "");
+            deleteRefreshToken.setHttpOnly(true);
+            deleteRefreshToken.setSecure(false);
+            deleteRefreshToken.setPath("/");
+            deleteRefreshToken.setMaxAge(0); // 즉시 만료
+                
+            // 쿠키 삭제
+            response.addCookie(deleteAccessToken);
+            response.addCookie(deleteRefreshToken);
+            
             return ResponseEntity.ok("로그아웃이 완료되었습니다.");
             
         } catch (Exception e) {
-            // 토큰이 만료되거나 잘못되어도 로그아웃은 성공으로 처리
+            // 토큰이 만료되거나 잘못되어도 로그아웃은 성공으로 처리하고 쿠키는 삭제
             System.err.println("로그아웃 처리 중 오류: " + e.getMessage());
+            
+            // ✅ 오류가 있어도 쿠키는 삭제
+            Cookie deleteAccessToken = new Cookie("accessToken", "");
+            deleteAccessToken.setHttpOnly(true);
+            deleteAccessToken.setSecure(false);
+            deleteAccessToken.setPath("/");
+            deleteAccessToken.setMaxAge(0);
+                
+            Cookie deleteRefreshToken = new Cookie("refreshToken", "");
+            deleteRefreshToken.setHttpOnly(true);
+            deleteRefreshToken.setSecure(false);
+            deleteRefreshToken.setPath("/");
+            deleteRefreshToken.setMaxAge(0);
+                
+            response.addCookie(deleteAccessToken);
+            response.addCookie(deleteRefreshToken);
+            
             return ResponseEntity.ok("로그아웃이 완료되었습니다.");
         }
     }
@@ -273,6 +343,32 @@ public class AuthController {
             System.err.println("전체 로그아웃 처리 중 오류: " + e.getMessage());
             return ResponseEntity.ok("로그아웃이 완료되었습니다.");
         }
+    }
+
+    // ✅ MVC용 쿠키에서 토큰을 가져오는 헬퍼 메서드
+    private String getTokenFromCookie(HttpServletRequest request, String cookieName) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (cookieName.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(HttpServletRequest request) {
+        String token = getTokenFromCookie(request, "accessToken");
+        if (token != null && JwtUtil.validateToken(token)) {
+            Long userId = JwtUtil.getUserIdFromToken(token);
+            
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("userId", userId);
+            
+            return ResponseEntity.ok(userInfo);
+        }
+        return ResponseEntity.status(401).body("Unauthorized");
     }
 }
 //>>> Clean Arch / Inbound Adaptor

@@ -10,42 +10,53 @@ spring:
         - id: auth-public
           uri: http://localhost:8082
           predicates:
-            - Path=/auths/login,/auths/refresh,/auths/verify-code,/auths/reset-password, /auths/resend-code
+            - Path=/auths/login,/auths/refresh,/auths/verify-code,/auths/reset-password,/auths/resend-code
           # 필터 없음 (인증 불필요)
+          
         - id: auth-private
           uri: http://localhost:8082
           predicates:
             - Path=/auths/**
           filters:
             - name: JwtAuthenticationFilter
+            
         - id: user-public
           uri: http://localhost:8083
           predicates:
             - Path=/users/register,/users/check-email,/users/find-id
           # 필터 없음
+          
         - id: user-private
           uri: http://localhost:8083
           predicates:
             - Path=/users/**
           filters:
             - name: JwtAuthenticationFilter
+            
+        # 🎯 프론트엔드 라우트는 JWT 필터 제거 (정적 파일이므로)
         - id: frontend
           uri: http://localhost:8080
           predicates:
             - Path=/**
-          filters:
-            - name: JwtAuthenticationFilter
+          # 필터 제거! 정적 파일에는 JWT 검증이 불필요
       #>>> API Gateway / Routes
+      
       globalcors:
-        corsConfigurations:
+        cors-configurations:  # 🔧 오타 수정: corsConfigurations -> cors-configurations
           '[/**]':
-            allowedOrigins:
+            allowed-origins:  # 🔧 camelCase -> kebab-case
+              - "http://localhost:8080"    # Vite 개발서버 (커스텀 포트)
+            allowed-methods:
+              - "GET"
+              - "POST" 
+              - "PUT"
+              - "DELETE"
+              - "PATCH"
+              - "OPTIONS"
+            allowed-headers:
               - "*"
-            allowedMethods:
-              - "*"
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
+            allow-credentials: true  # 🔧 camelCase -> kebab-case
+            max-age: 3600  # 🎯 CORS preflight 캐시 시간
 
 ---
 spring:
@@ -53,34 +64,54 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: auth
+        # 🎯 Docker 환경에서도 public/private 경로 분리
+        - id: auth-public
+          uri: http://auth:8080
+          predicates:
+            - Path=/auths/login,/auths/refresh,/auths/verify-code,/auths/reset-password,/auths/resend-code
+            
+        - id: auth-private
           uri: http://auth:8080
           predicates:
             - Path=/auths/**
           filters:
             - name: JwtAuthenticationFilter
-        - id: user
+            
+        - id: user-public
+          uri: http://user:8080
+          predicates:
+            - Path=/users/register,/users/check-email,/users/find-id
+            
+        - id: user-private
           uri: http://user:8080
           predicates:
             - Path=/users/**
           filters:
             - name: JwtAuthenticationFilter
+            
         - id: frontend
           uri: http://frontend:8080
           predicates:
             - Path=/**
-          filters:
-            - name: JwtAuthenticationFilter
+          # Docker 환경에서도 정적 파일에는 JWT 필터 없음
+          
       globalcors:
-        corsConfigurations:
+        cors-configurations:
           '[/**]':
-            allowedOrigins:
+            allowed-origins:
+              - "http://localhost:8088"  # Gateway 포트
+              - "http://frontend:8080"   # Docker 내부 통신
+            allowed-methods:
+              - "GET"
+              - "POST"
+              - "PUT" 
+              - "DELETE"
+              - "PATCH"
+              - "OPTIONS"
+            allowed-headers:
               - "*"
-            allowedMethods:
-              - "*"
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
+            allow-credentials: true
+            max-age: 3600
 
 server:
   port: 8080

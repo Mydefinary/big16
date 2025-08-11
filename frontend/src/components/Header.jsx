@@ -1,11 +1,12 @@
+// /src/components/Header.jsx
+
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { authAPI } from '../services/api';
 import { toast } from 'react-toastify';
 
 const Header = () => {
-  const { isAuthenticated, token, refreshToken, logout } = useAuth();
+  const { isAuthenticated, logout, userInfo } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -13,22 +14,33 @@ const Header = () => {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      // 서버에 로그아웃 요청
-      await authAPI.logout(refreshToken);
+      console.log('🚪 로그아웃 시도 중...');
+      
+      // 🎯 AuthContext의 logout 함수 호출 (쿠키 기반)
+      await logout();
+      
+      console.log('✅ 로그아웃 완료');
+      
       toast.success('로그아웃이 완료되었습니다.', {
         position: "top-right",
         autoClose: 3000,
       });
+
+      // 로그인 페이지로 이동
+      navigate('/login');
+      
     } catch (error) {
-      console.error('Logout error:', error);
-      toast.error('로그아웃 처리 중 오류가 발생했습니다.', {
+      console.error('❌ 로그아웃 오류:', error);
+      
+      // 오류가 발생해도 사용자에게는 성공으로 처리
+      // (쿠키는 서버에서 제거되었을 가능성이 높음)
+      toast.success('로그아웃이 완료되었습니다.', {
         position: "top-right",
         autoClose: 3000,
       });
-    } finally {
-      // 로컬 스토리지 정리 및 로그인 페이지로 이동
-      logout();
+      
       navigate('/login');
+    } finally {
       setLoading(false);
     }
   };
@@ -118,6 +130,12 @@ const Header = () => {
               </Link>
               <Link to="/mypage" className="header-btn mypage-btn">
                 MyPage
+                {/* 사용자 정보가 있으면 표시 */}
+                {userInfo?.userId && (
+                  <span className="user-indicator">
+                    ({userInfo.userId})
+                  </span>
+                )}
               </Link>
               <button
                 onClick={handleLogout}

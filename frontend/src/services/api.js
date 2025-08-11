@@ -8,70 +8,52 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10초 타임아웃 추가
+  withCredentials: true, // ✅ 쿠키 포함
+  timeout: 10000,
 });
 
 // 토큰 갱신 중인지 추적하는 변수
 let isRefreshing = false;
 let failedQueue = [];
 
-const processQueue = (error, token = null) => {
+const processQueue = (error, success = false) => {
   failedQueue.forEach(prom => {
     if (error) {
       prom.reject(error);
     } else {
-      prom.resolve(token);
+      prom.resolve(success);
     }
   });
   
   failedQueue = [];
 };
 
-// 토큰 유효성 검사 함수
-const isTokenValid = (token) => {
-  if (!token) return false;
-  
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const currentTime = Date.now() / 1000;
-    // 5분 여유를 두고 체크
-    return payload.exp > (currentTime + 300);
-  } catch (error) {
-    console.error('Token validation error:', error);
-    return false;
-  }
-};
-
-// 토큰 갱신 함수
+// 토큰 갱신 함수 (쿠키 기반)
 const refreshTokenFunction = async () => {
-  const refreshToken = localStorage.getItem('refreshToken');
-  if (!refreshToken) {
-    throw new Error('No refresh token available');
-  }
-
   try {
-    // 토큰 갱신 시 별도의 axios 인스턴스 사용 (무한루프 방지)
-    const refreshResponse = await axios.post(`${API_BASE_URL}/auths/refresh`, {
-      refreshToken: refreshToken
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
+    console.log('🔄 토큰 갱신 시도 중...');
+    
+    const refreshResponse = await axios.post(
+      `${API_BASE_URL}/auths/refresh`, 
+      {}, // 빈 body (서버에서 쿠키의 refreshToken 확인)
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
       }
-    });
+    );
     
-    const { accessToken, refreshToken: newRefreshToken } = refreshResponse.data;
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', newRefreshToken);
+    console.log('✅ 토큰 갱신 성공');
     
-    // AuthContext에 새 토큰 알림
-    window.dispatchEvent(new CustomEvent('tokenRefreshed', {
-      detail: { accessToken, refreshToken: newRefreshToken }
-    }));
+    // AuthContext에 토큰 갱신 알림
+    window.dispatchEvent(new CustomEvent('tokenRefreshed'));
     
-    return accessToken;
+    return true;
   } catch (error) {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    console.error('❌ 토큰 갱신 실패:', error.response?.data || error.message);
+    
+    // AuthContext에 로그아웃 알림
     window.dispatchEvent(new CustomEvent('authRequired'));
     throw error;
   }
@@ -79,73 +61,12 @@ const refreshTokenFunction = async () => {
 
 // 요청 인터셉터
 api.interceptors.request.use(
-  async (config) => {
-    // 디버깅 로그
+  (config) => {
     console.log(`🔍 API Request: ${config.method?.toUpperCase()} ${config.url}`);
-    
-    const token = localStorage.getItem('accessToken');
-    
-    if (token) {
-      if (isTokenValid(token)) {
-        config.headers.Authorization = `Bearer ${token}`;
-        console.log('✅ Valid token added to request');
-      } else {
-        console.log('⚠️ Token expired, attempting refresh...');
-        
-        if (isRefreshing) {
-          // 이미 토큰 갱신 중이면 대기
-          return new Promise((resolve, reject) => {
-            failedQueue.push({ resolve, reject });
-          }).then(token => {
-            config.headers.Authorization = `Bearer ${token}`;
-            return config;
-          }).catch(err => {
-            return Promise.reject(err);
-          });
-        }
-
-        isRefreshing = true;
-
-        try {
-          const newToken = await refreshTokenFunction();
-          processQueue(null, newToken);
-          config.headers.Authorization = `Bearer ${newToken}`;
-          console.log('✅ Token refreshed and added to request');
-        } catch (refreshError) {
-          processQueue(refreshError, null);
-          return Promise.reject(refreshError);
-        } finally {
-          isRefreshing = false;
-        }
-      }
-    } else {
-      console.log('❌ No token found');
-      // 인증이 필요한 엔드포인트인지 확인
-      const publicEndpoints = [
-        '/auths/login',
-        '/auths/refresh',
-        '/auths/verify-code',
-        '/auths/reset-password',
-        '/auths/resend-code',
-        '/users/register',
-        '/users/check-email',
-        '/users/find-id'
-      ];
-      
-      const isPublicEndpoint = publicEndpoints.some(endpoint => 
-        config.url.includes(endpoint)
-      );
-      
-      if (!isPublicEndpoint) {
-        window.dispatchEvent(new CustomEvent('authRequired'));
-        return Promise.reject(new Error('No authentication token'));
-      }
-    }
-    
     return config;
   },
   (error) => {
-    console.error('Request interceptor error:', error);
+    console.error('❌ Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
@@ -162,13 +83,24 @@ api.interceptors.response.use(
     console.error(`❌ API Error: ${error.response?.status} ${originalRequest?.url}`, error.response?.data);
     
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // 공개 엔드포인트는 토큰 갱신 시도하지 않음
+      const publicEndpoints = ['/auths/login', '/auths/refresh', '/users/register'];
+      const isPublicEndpoint = publicEndpoints.some(endpoint => 
+        originalRequest.url?.includes(endpoint)
+      );
+      
+      if (isPublicEndpoint) {
+        console.log('🔓 공개 엔드포인트 오류 - 토큰 갱신 시도하지 않음');
+        return Promise.reject(error);
+      }
+      
       originalRequest._retry = true;
       
       if (isRefreshing) {
+        console.log('⏳ 토큰 갱신 대기 중...');
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then(token => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
+        }).then(() => {
           return api(originalRequest);
         }).catch(err => {
           return Promise.reject(err);
@@ -178,12 +110,14 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const newToken = await refreshTokenFunction();
-        processQueue(null, newToken);
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        await refreshTokenFunction();
+        processQueue(null, true);
+        
+        console.log('🔄 원본 요청 재시도');
         return api(originalRequest);
       } catch (refreshError) {
-        processQueue(refreshError, null);
+        console.error('❌ 토큰 갱신 실패, 모든 대기 중인 요청 거부');
+        processQueue(refreshError, false);
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -196,32 +130,79 @@ api.interceptors.response.use(
 
 // Auth API
 export const authAPI = {
-  login: (credentials) => api.post('/auths/login', credentials),
-  logout: (refreshToken) => api.post('/auths/logout', { refreshToken }),
-  refreshToken: (refreshToken) => api.post('/auths/refresh', { refreshToken }),
-  verifyCode: (email, code) => api.post('/auths/verify-code', { email, code }),
-  resetPassword: (newPassword, emailToken) =>
-    api.patch(
-      '/auths/reset-password',
-      { newPassword },
-      {
-        headers: {
-          'X-User-Email': emailToken,
-        },
-      }
-    ),
-  changePassword: (currentPassword, newPassword) => 
-    api.patch('/auths/user/password-change', { currentPassword, newPassword }),
-  resendCode: (email) => api.post('/auths/resend-code', { email }),
+  login: (credentials) => {
+    console.log('🔐 로그인 시도:', credentials?.loginId);
+    if (!credentials) {
+      return Promise.reject(new Error('로그인 정보가 필요합니다'));
+    }
+    return api.post('/auths/login', credentials);
+  },
+  
+  logout: () => {
+    console.log('🚪 로그아웃 시도');
+    return api.post('/auths/logout');
+  },
+  
+  me: () => {
+    console.log('👤 사용자 정보 조회');
+    return api.get('/auths/me');
+  },
+  
+  refreshToken: () => {
+    console.log('🔄 토큰 갱신 API 직접 호출');
+    return api.post('/auths/refresh', {}); // 빈 body
+  },
+  
+  verifyCode: (email, code) => {
+    console.log('🔢 인증 코드 검증:', email);
+    return api.post('/auths/verify-code', { email, code });
+  },
+  
+  resetPassword: (newPassword, emailToken) => {
+    console.log('🔑 비밀번호 재설정');
+    return api.patch('/auths/reset-password', { newPassword }, {
+      headers: {
+        'X-User-Email': emailToken,
+      },
+    });
+  },
+  
+  changePassword: (currentPassword, newPassword) => {
+    console.log('🔐 비밀번호 변경');
+    return api.patch('/auths/user/password-change', { 
+      currentPassword, 
+      newPassword 
+    });
+  },
+  
+  resendCode: (email) => {
+    console.log('📧 인증 코드 재발송:', email);
+    return api.post('/auths/resend-code', { email });
+  },
 };
 
 // User API
 export const userAPI = {
-  register: (userData) => api.post('/users/register', userData),
-  findId: (email) => api.get(`/users/find-id?email=${email}`),
-  checkEmail: (email) => api.get(`/users/check-email?email=${email}`),
+  register: (userData) => {
+    console.log('👤 회원가입 시도:', userData?.email);
+    if (!userData) {
+      return Promise.reject(new Error('회원가입 정보가 필요합니다'));
+    }
+    return api.post('/users/register', userData);
+  },
+  
+  findId: (email) => {
+    console.log('🔍 아이디 찾기:', email);
+    return api.get(`/users/find-id?email=${email}`);
+  },
+  
+  checkEmail: (email) => {
+    console.log('📧 이메일 중복 확인:', email);
+    return api.get(`/users/check-email?email=${email}`);
+  },
+  
   deactivate: () => {
-    console.log('🗑️ Attempting account deletion...');
+    console.log('🗑️ 계정 비활성화 시도');
     return api.patch('/users/deactivate');
   },
 };

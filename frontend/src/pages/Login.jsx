@@ -1,7 +1,8 @@
+// /src/pages/Login.jsx
+
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { authAPI } from '../services/api';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -14,6 +15,10 @@ const Login = () => {
   
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // 로그인 후 리다이렉트할 경로 결정
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const handleChange = (e) => {
     setFormData({
@@ -27,17 +32,39 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await authAPI.login(formData);
-      const { accessToken, refreshToken } = response.data;
+      console.log('🔐 로그인 요청:', formData.loginId);
       
-      login(accessToken, refreshToken);
-      navigate('/dashboard');
+      // 🎯 AuthContext의 login 함수 호출 (쿠키 기반)
+      await login(formData);
+      
+      console.log('✅ 로그인 성공 - 리다이렉트:', from);
+      
+      toast.success('로그인에 성공했습니다!', {
+        position: "top-right",
+        autoClose: 2000,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
+      // 이전 페이지 또는 대시보드로 이동
+      navigate(from, { replace: true });
+      
     } catch (err) {
-      console.error('Login error:', err);
-      // const message = err.response?.data?.message || '로그인에 실패했습니다.';
-      const message =typeof err.response?.data === 'string' 
-      ? err.response.data 
-      : err.response?.data?.message || '로그인에 실패했습니다.'
+      console.error('❌ 로그인 실패:', err);
+      
+      // 에러 메시지 처리
+      let message = '로그인에 실패했습니다.';
+      
+      if (err.response?.data) {
+        if (typeof err.response.data === 'string') {
+          message = err.response.data;
+        } else if (err.response.data.message) {
+          message = err.response.data.message;
+        }
+      } else if (err.message) {
+        message = err.message;
+      }
+
       toast.error(message, {
         position: "top-right",
         autoClose: 5000,
@@ -65,6 +92,7 @@ const Login = () => {
               onChange={handleChange}
               required
               placeholder="아이디를 입력하세요"
+              disabled={loading}
             />
           </div>
 
@@ -78,6 +106,7 @@ const Login = () => {
               onChange={handleChange}
               required
               placeholder="비밀번호를 입력하세요"
+              disabled={loading}
             />
           </div>
 
@@ -95,9 +124,22 @@ const Login = () => {
           <Link to="/find-password" className="link">비밀번호 찾기</Link>
           <Link to="/register" className="link">회원가입</Link>
         </div>
+
+        {/* 리다이렉트 정보 표시 (개발 중에만) */}
+        {process.env.NODE_ENV === 'development' && from !== '/dashboard' && (
+          <div style={{ 
+            marginTop: '20px', 
+            padding: '10px', 
+            backgroundColor: '#f0f0f0', 
+            borderRadius: '4px',
+            fontSize: '12px',
+            color: '#666'
+          }}>
+            로그인 후 {from} 페이지로 이동됩니다.
+          </div>
+        )}
       </div>
 
-      {/* ToastContainer는 최상단에 한 번만 넣으면 됩니다 */}
       <ToastContainer />
     </div>
   );
