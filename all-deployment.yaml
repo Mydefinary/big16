@@ -447,18 +447,20 @@ spec:
 # ===================================================
 # 19. 웹툰 대시보드 - 백엔드 서비스 (ClusterIP)
 # ===================================================
+# backend-service-nodeport.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: webtoon-dashboard-backend-service
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: webtoon-dashboard-backend
   ports:
-  - protocol: TCP
-    port: 8002
-    targetPort: 8000
+    - protocol: TCP
+      port: 8000        # 클러스터 내부 포트
+      targetPort: 8000  # 컨테이너 포트
+      nodePort: 30081   # 외부 접근 포트
 ---
 # ===================================================
 # 20. 웹툰 대시보드 - 프론트엔드(React) 배포 (Ingress 없음)
@@ -489,15 +491,17 @@ spec:
 # ===================================================
 # 21. 웹툰 대시보드 - 프론트엔드 서비스 (ClusterIP)
 # ===================================================
+# frontend-service-nodeport.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: webtoon-dashboard-frontend-service
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: webtoon-dashboard-frontend
   ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 80
+    - protocol: TCP
+      port: 80        # 클러스터 내부 포트
+      targetPort: 80  # 컨테이너 포트
+      nodePort: 30080 # 외부 접근 포트 (30000~32767 범위)
