@@ -56,6 +56,22 @@ spring:
             - name: JwtAuthenticationFilter
             - StripPrefix=2
 
+        # ===================================================
+        # 5. ✅ [신규 추가] 웹툰 대시보드 서비스 라우팅
+        # ===================================================
+        - id: webtoon-dashboard-service
+          # 목적지: webtoon-dashboard-backend-service (Kubernetes 서비스 이름)
+          uri: lb://webtoon-dashboard-backend-service
+          predicates:
+            # /api/webtoon/ 으로 시작하는 모든 요청을 이 규칙에 매칭
+            - Path=/api/webtoon/**
+          filters:
+            # JWT 인증이 필요하다면 필터 추가
+            - name: JwtAuthenticationFilter
+            # 백엔드로 보내기 전, 경로에서 앞의 2개 세그먼트(/api/webtoon)를 제거
+            # 예: /api/webtoon/episodes -> /episodes
+            - StripPrefix=2
+
       # 모든 라우팅 규칙에 공통으로 적용될 설정
       default-filters:
         # 커스텀 JWT 인증 필터의 인자(Argument)를 정의합니다.
