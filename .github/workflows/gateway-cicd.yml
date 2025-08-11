@@ -1,54 +1,43 @@
-# .github/workflows/gateway-cicd.yml
-
+# 워크플로우 이름
 name: 'CI/CD for Gateway Service'
 
 on:
   push:
-    branches: [ "login-cicd" ] # CI/CD를 적용할 브랜치 이름입니다. 필요시 'main' 등으로 변경하세요.
+    branches: [ "login-cicd" ] # CI/CD를 적용할 브랜치
     paths:
-      - 'gateway/**' # 이 경로에 변경이 있을 때만 워크플로우가 실행됩니다.
-      - '.github/workflows/gateway-cicd.yml'
-
-  pull_request:
-    branches: [ "login-cicd" ]
-    paths:
-      - 'gateway/**'
+      - 'gateway/**'                    # 1. 게이트웨이 서비스의 소스코드 경로
+      - '.github/workflows/gateway-cicd.yml' # 2. 워크플로우 파일 자신
+      - 'all-deployment.yaml'         # 3. 공용 배포 파일
 
 # 워크플로우 전체에서 사용할 환경 변수
 env:
   ACR_NAME: "kt16big"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
-  # --- 서비스별 설정 변수 ---
-  IMAGE_NAME: "gateway"                         # ACR에 저장될 Docker 이미지 이름
-  WORKING_DIR: "gateway"                        # Dockerfile이 위치한 소스코드 폴더
-  DEPLOYMENT_NAME: "gateway-deployment"         # AKS에 배포된 Deployment 리소스의 이름
-  CONTAINER_NAME: "gateway-container"           # Deployment YAML 파일에 정의된 컨테이너의 이름
+  # --- 서비스별로 이 부분만 수정 ---
+  IMAGE_NAME: "gateway"
+  WORKING_DIR: "gateway"
+  DEPLOYMENT_NAME: "gateway-deployment"
   MANIFEST_FILE: "all-deployment.yaml"
 
 jobs:
   build-and-push-to-acr:
-    # ✅ gateway 폴더나 워크플로우 파일이 변경되었을 때만 실행
+    # 소스코드나 Dockerfile이 변경되었을 때만 이미지 빌드 실행
     if: |
-      contains(join(github.event.commits.*.modified, ' '), 'gateway/') ||
-      contains(join(github.event.commits.*.modified, ' '), '.github/workflows/gateway-cicd.yml')
+      contains(join(github.event.commits.*.modified, ' '), '${{ env.WORKING_DIR }}/')
     runs-on: ubuntu-latest
     steps:
-      # 1. GitHub 리포지토리 코드 가져오기
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Azure CLI 로그인
       - name: Log in to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # 3. Azure Container Registry(ACR) 로그인
       - name: Log in to ACR
         run: az acr login --name ${{ env.ACR_NAME }}
 
-      # 4. Docker 이미지 빌드 및 ACR로 푸시
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -57,31 +46,32 @@ jobs:
           push: true
           tags: |
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
 
   deploy-to-aks:
+    needs: build-and-push-to-acr
+    if: always()
     runs-on: ubuntu-latest
-    needs: build-and-push-to-acr # build-and-push-to-acr 작업이 성공해야 실행
     steps:
-      # 1. GitHub 리포지토리 코드 가져오기
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Azure CLI 로그인
       - name: Log in to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # 3. AKS 클러스터 컨텍스트 설정
       - name: Set AKS context
         uses: azure/aks-set-context@v3
         with:
           resource-group: ${{ env.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
 
-      # 4. kubectl set image 명령어로 AKS에 새 이미지 배포
-      - name: Deploy to AKS by setting image
+      - name: Deploy to AKS
         run: |
-          kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \
-            ${{ env.CONTAINER_NAME }}=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          if [ "${{ needs.build-and-push-to-acr.result }}" == "success" ]; then
+            echo "New image detected. Updating image tag in manifest..."
+            sed -i "s|${{ env.IMAGE_NAME }}:\${IMAGE_TAG}|${{ env.IMAGE_NAME }}:${{ github.sha }}|g" ${{ env.MANIFEST_FILE }}
+          else
+            echo "No new image built. Applying manifest as is."
+          fi
+          kubectl apply -f ${{ env.MANIFEST_FILE }}
