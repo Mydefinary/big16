@@ -1,0 +1,11 @@
+com\example\boardapp\service\PostService.class
+com\example\boardapp\BoardAppApplication.class
+com\example\boardapp\domain\Comment.class
+com\example\boardapp\dto\PostResponseDto.class
+com\example\boardapp\dto\PostListDto.class
+com\example\boardapp\controller\CommentController.class
+com\example\boardapp\domain\Post.class
+com\example\boardapp\config\IpRateLimitFilter.class
+com\example\boardapp\controller\PostController.class
+com\example\boardapp\repository\CommentRepository.class
+com\example\boardapp\repository\PostRepository.class
