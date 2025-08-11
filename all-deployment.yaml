@@ -208,7 +208,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: api-keys-secret
-                  key: JWT_SECRET
+                  key: JWT_SECRET_KEY
             - name: spring.datasource.url
               valueFrom:
                 secretKeyRef:
