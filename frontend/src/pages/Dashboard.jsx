@@ -4,7 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+function base64UrlDecode(str) {
+  let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (base64.length % 4) {
+    base64 += '=';
+  }
+  return atob(base64);
+}
 const Dashboard = () => {
   const { token, refreshToken, logout, updateTokens } = useAuth();
   const [tokenInfo, setTokenInfo] = useState(null);
@@ -12,10 +18,21 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // JWT 토큰 파싱하여 정보 추출
+    console.log("token:", token);
+
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const parts = token.split('.');
+        console.log("token parts:", parts);
+
+        if (parts.length !== 3) {
+          throw new Error('토큰 형식이 올바르지 않습니다.');
+        }
+
+        const payloadPart = parts[1];
+        const decodedPayload = base64UrlDecode(payloadPart);
+        const payload = JSON.parse(decodedPayload);
+
         setTokenInfo({
           userId: payload.sub,
           issuedAt: new Date(payload.iat * 1000).toLocaleString(),
@@ -31,6 +48,8 @@ const Dashboard = () => {
       }
     }
   }, [token]);
+
+
 
   // 토큰 리프레시 이벤트 리스너
   useEffect(() => {
