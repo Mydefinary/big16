@@ -416,7 +416,7 @@ spec:
               number: 80
 
 # ===================================================
-# 18. 웹툰 대시보드 - 백엔드(FastAPI) 배포 (Ingress 없음)
+# 18. 웹툰 대시보드 - 백엔드(FastAPI) 배포
 # ===================================================
 apiVersion: apps/v1
 kind: Deployment
@@ -435,19 +435,19 @@ spec:
       nodeSelector:
         agentpool: userpool
       containers:
-      - name: webtoon-dashboard-backend-container
-        image: kt16big.azurecr.io/webtoon-dashboard-backend:${IMAGE_TAG}
-        ports:
-        - containerPort: 8000
-        workingDir: /app
-        env:
-        - name: ENVIRONMENT
-          value: "production"
+        - name: webtoon-dashboard-backend-container
+          image: kt16big.azurecr.io/webtoon-dashboard-backend:${IMAGE_TAG}
+          ports:
+            - containerPort: 8000
+          workingDir: /app
+          env:
+            - name: ENVIRONMENT
+              value: "production"
+
 ---
 # ===================================================
-# 19. 웹툰 대시보드 - 백엔드 서비스 (ClusterIP)
+# 19. 웹툰 대시보드 - 백엔드 서비스 (NodePort)
 # ===================================================
-# backend-service-nodeport.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -458,12 +458,13 @@ spec:
     app: webtoon-dashboard-backend
   ports:
     - protocol: TCP
-      port: 8000        # 클러스터 내부 포트
+      port: 8000        # Service 포트
       targetPort: 8000  # 컨테이너 포트
-      nodePort: 30081   # 외부 접근 포트
+      nodePort: 30081   # 외부 접근 포트 (30000~32767)
+
 ---
 # ===================================================
-# 20. 웹툰 대시보드 - 프론트엔드(React) 배포 (Ingress 없음)
+# 20. 웹툰 대시보드 - 프론트엔드(React) 배포
 # ===================================================
 apiVersion: apps/v1
 kind: Deployment
@@ -482,16 +483,16 @@ spec:
       nodeSelector:
         agentpool: userpool
       containers:
-      - name: webtoon-dashboard-frontend-container
-        image: kt16big.azurecr.io/webtoon-dashboard-frontend:${IMAGE_TAG}
-        ports:
-        - containerPort: 80
-        workingDir: /usr/share/nginx/html
+        - name: webtoon-dashboard-frontend-container
+          image: kt16big.azurecr.io/webtoon-dashboard-frontend:${IMAGE_TAG}
+          ports:
+            - containerPort: 80
+          workingDir: /usr/share/nginx/html
+
 ---
 # ===================================================
-# 21. 웹툰 대시보드 - 프론트엔드 서비스 (ClusterIP)
+# 21. 웹툰 대시보드 - 프론트엔드 서비스 (NodePort)
 # ===================================================
-# frontend-service-nodeport.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -502,6 +503,7 @@ spec:
     app: webtoon-dashboard-frontend
   ports:
     - protocol: TCP
-      port: 80        # 클러스터 내부 포트
+      port: 80        # Service 포트
       targetPort: 80  # 컨테이너 포트
-      nodePort: 30080 # 외부 접근 포트 (30000~32767 범위)
+      nodePort: 30080 # 외부 접근 포트
+
