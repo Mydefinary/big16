@@ -1,86 +1,66 @@
+# 서버 포트 설정 (gateway-deployment에서 8000번 포트를 사용)
 server:
-  port: 8088
+  port: 8000
 
----
+# Spring Cloud Gateway 설정
 spring:
-  profiles: default
-  cloud:
-    gateway: #<<< API Gateway / Routes
-      routes:
-        - id: auth-public
-          uri: http://localhost:8082
-          predicates:
-            - Path=/auths/login,/auths/refresh,/auths/verify-code,/auths/reset-password, /auths/resend-code
-          # 필터 없음 (인증 불필요)
-        - id: auth-private
-          uri: http://localhost:8082
-          predicates:
-            - Path=/auths/**
-          filters:
-            - name: JwtAuthenticationFilter
-        - id: user-public
-          uri: http://localhost:8083
-          predicates:
-            - Path=/users/register,/users/check-email,/users/find-id
-          # 필터 없음
-        - id: user-private
-          uri: http://localhost:8083
-          predicates:
-            - Path=/users/**
-          filters:
-            - name: JwtAuthenticationFilter
-        - id: frontend
-          uri: http://localhost:8080
-          predicates:
-            - Path=/**
-          filters:
-            - name: JwtAuthenticationFilter
-      #>>> API Gateway / Routes
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins:
-              - "*"
-            allowedMethods:
-              - "*"
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
-
----
-spring:
-  profiles: docker
   cloud:
     gateway:
+      # 라우팅 규칙 정의
       routes:
-        - id: auth
-          uri: http://auth:8080
+        # ===================================================
+        # 1. 인증/인가 (Auth) 서비스 라우팅
+        # ===================================================
+        - id: auth-service
+          # 목적지: auth-backend-service (Kubernetes 서비스 이름)
+          uri: lb://auth-backend-service
           predicates:
-            - Path=/auths/**
+            # /api/auth/ 로 시작하는 모든 요청을 이 규칙에 매칭
+            - Path=/api/auth/**
           filters:
-            - name: JwtAuthenticationFilter
-        - id: user
-          uri: http://user:8080
-          predicates:
-            - Path=/users/**
-          filters:
-            - name: JwtAuthenticationFilter
-        - id: frontend
-          uri: http://frontend:8080
-          predicates:
-            - Path=/**
-          filters:
-            - name: JwtAuthenticationFilter
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins:
-              - "*"
-            allowedMethods:
-              - "*"
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
+            # 백엔드로 보내기 전, 경로에서 앞의 2개 세그먼트(/api/auth)를 제거
+            # 예: /api/auth/login -> /login
+            - StripPrefix=2
 
-server:
-  port: 8080
+        # ===================================================
+        # 2. 사용자 정보 (User) 서비스 라우팅
+        # ===================================================
+        - id: user-service
+          uri: lb://user-backend-service
+          predicates:
+            - Path=/api/users/**
+          filters:
+            # JWT 인증 필터를 먼저 거친 후, 경로를 재작성
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+
+        # ===================================================
+        # 3. PPL 생성기 서비스 라우팅
+        # ===================================================
+        - id: ppl-gen-service
+          uri: lb://ppl-gen-backend-service
+          predicates:
+            - Path=/api/ppl-gen/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+
+        # ===================================================
+        # 4. 굿즈 생성기 서비스 라우팅
+        # ===================================================
+        - id: goods-gen-service
+          uri: lb://goods-gen-backend-service
+          predicates:
+            - Path=/api/goods-gen/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+
+      # 모든 라우팅 규칙에 공통으로 적용될 설정
+      default-filters:
+        # 커스텀 JWT 인증 필터의 인자(Argument)를 정의합니다.
+        # 이 필터는 각 라우트의 filters 목록에 명시적으로 추가될 때만 활성화됩니다.
+        - name: JwtAuthenticationFilter
+          args:
+            # 환경 변수에서 JWT 비밀 키를 가져와 필터에 전달
+            secretKey: ${JWT_SECRET}
