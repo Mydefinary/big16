@@ -1671,7 +1671,8 @@ body {
 
 .hero-section {
   text-align: center;
-  margin-bottom: 60px;
+  margin-top : 60px;
+  margin-bottom: 30px;
 }
 
 .hero-title {
@@ -1705,7 +1706,6 @@ body {
   max-width: 800px;        /* 원하는 최대 너비 */
   margin-left: auto;       /* 왼쪽 여백 자동 → 가운데 정렬 */
   margin-right: auto;      /* 오른쪽 여백 자동 → 가운데 정렬 */
-  padding: 32px; 
 }
 
 .intro-section,
@@ -2334,6 +2334,7 @@ body {
   justify-content: space-between;
   padding: 16px 0;
   border-bottom: 1px solid #e5e7eb;
+  min-height: 60px;
 }
 
 .setting-item:last-child {
@@ -2356,6 +2357,27 @@ body {
   line-height: 1.5;
 }
 
+/* 버튼 영역을 절대 위치로 고정 */
+.setting-button-area {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100px; /* 고정 너비 */
+  display: flex;
+  justify-content: center;
+}
+
+/* setting-item을 relative로 설정해서 절대 위치의 기준점으로 만들기 */
+.setting-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #e5e7eb;
+  min-height: 60px;
+  position: relative; /* 추가 */
+}
+
 .setting-btn {
   padding: 8px 16px;
   border: none;
@@ -2364,6 +2386,7 @@ body {
   font-size: 14px;
   font-weight: 500;
   transition: all 0.2s ease;
+  width: 100px; /* 고정 너비 */
 }
 
 .setting-btn.primary {
@@ -2384,6 +2407,45 @@ body {
 .setting-btn.danger:hover {
   background: #dc2626;
   transform: translateY(-1px);
+}
+
+/* 반응형에서도 동일하게 적용 */
+@media (max-width: 768px) {
+  .setting-item {
+    flex-direction: row; /* 모바일에서도 가로 배치 유지 */
+    align-items: center;
+    min-height: 80px;
+  }
+  
+  .setting-info {
+    margin-left: 110px; /* 모바일에서 약간 더 여백 */
+  }
+  
+  .setting-button-area {
+    width: 90px;
+  }
+  
+  .setting-btn {
+    width: 90px;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .setting-info {
+    margin-right: 100px;
+  }
+  
+  .setting-button-area {
+    width: 80px;
+  }
+  
+  .setting-btn {
+    width: 80px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
 }
 
 /* Toggle Switch */
@@ -2583,4 +2645,318 @@ input:checked + .slider:before {
 .activity-section > *,
 .settings-section > * {
   animation: fadeIn 0.5s ease-out;
+}
+
+.password-change-form{
+  margin-top: 10px;
+}
+
+.password-change-form {
+  margin-top: 10px;
+}
+
+.password-change-form .form-group{
+  margin-left: 100px;
+  margin-right: 100px;
+}
+
+.password-change-form .form-actions .save-btn{
+  margin-right: 10px;
+}
+
+.password-change-form .form-actions .cancel-btn{
+  margin-left: 10px;
+}
+
+/* 커스텀 모달 스타일 - 기존 CSS 파일에 추가하세요 */
+
+/* 모달 오버레이 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeInOverlay 0.3s ease-out;
+  backdrop-filter: blur(4px);
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 모달 컨테이너 */
+.modal-container {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: slideInModal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideInModal {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 모달 헤더 */
+.modal-header {
+  padding: 30px 30px 20px 30px;
+  text-align: center;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-bottom: 1px solid #fecaca;
+}
+
+.modal-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  animation: bounce 1s ease-out;
+}
+
+.modal-icon.danger {
+  color: #ef4444;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #dc2626;
+  margin-bottom: 8px;
+}
+
+.modal-subtitle {
+  font-size: 16px;
+  color: #991b1b;
+  font-weight: 500;
+}
+
+/* 모달 내용 */
+.modal-content {
+  padding: 30px;
+}
+
+.modal-message {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #374151;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.modal-message.primary {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 16px;
+}
+
+.modal-message.warning {
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 12px;
+  padding: 16px;
+  color: #92400e;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.warning-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0 0;
+}
+
+.warning-list li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.warning-list li::before {
+  content: '⚠️';
+  margin-right: 8px;
+}
+
+/* 모달 액션 버튼들 */
+.modal-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.modal-btn {
+  flex: 1;
+  max-width: 160px;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  transform: translate(-50%, -50%);
+}
+
+.modal-btn:hover::before {
+  width: 200%;
+  height: 200%;
+}
+
+.modal-btn.cancel {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  color: white;
+  border: 2px solid transparent;
+}
+
+.modal-btn.cancel:hover {
+  background: linear-gradient(135deg, #4b5563, #374151);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(107, 114, 128, 0.4);
+}
+
+.modal-btn.danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border: 2px solid transparent;
+}
+
+.modal-btn.danger:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.5);
+}
+
+.modal-btn:disabled {
+  background: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.modal-btn:disabled::before {
+  display: none;
+}
+
+/* 로딩 상태 */
+.modal-btn.loading {
+  position: relative;
+  color: transparent;
+}
+
+.modal-btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  transform: translate(-50%, -50%);
+  color: white;
+}
+
+@keyframes spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 640px) {
+  .modal-container {
+    width: 95%;
+    margin: 20px;
+    border-radius: 16px;
+  }
+  
+  .modal-header {
+    padding: 24px 20px 16px 20px;
+  }
+  
+  .modal-content {
+    padding: 20px;
+  }
+  
+  .modal-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+  
+  .modal-title {
+    font-size: 20px;
+  }
+  
+  .modal-subtitle {
+    font-size: 14px;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .modal-btn {
+    max-width: none;
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+  
+  .modal-message {
+    font-size: 15px;
+  }
 }

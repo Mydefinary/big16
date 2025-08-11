@@ -56,6 +56,7 @@ public class AuthController {
 
         // 실제 서비스 로직에 위임
         auth.resetPassword(newPassword);
+        auth.setEmailToken(null);
 
         // 비밀번호 재설정 후 토큰 초기화
         auth.invalidateTokens();                                                
@@ -101,11 +102,13 @@ public class AuthController {
         Auth auth = authOpt.get();
         boolean valid = auth.verifyCode(code);
         if (valid) {
+            // 비밀번호 재설정 일때
             if ("PASSWORD_RESET".equals(auth.getPurpose())){
                 String emailToken = JwtUtil.generateEmailToken(email);
                 auth.setEmailToken(emailToken);
                 return ResponseEntity.ok().header("X-Email-Token", emailToken).build();
             }
+            // 아이디 찾기 일때
             return ResponseEntity.ok("인증 성공");
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("인증에 실패했습니다. 코드를 확인해주세요.");
