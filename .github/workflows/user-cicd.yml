@@ -21,7 +21,7 @@ env:
   # --- 서비스별 설정 변수 ---
   IMAGE_NAME: "user"                            # ACR에 저장될 Docker 이미지 이름
   WORKING_DIR: "user"                           # Dockerfile이 위치한 소스코드 폴더
-  DEPLOYMENT_NAME: "user-deployment"            # AKS에 배포된 Deployment 리소스의 이름
+  DEPLOYMENT_NAME: "user-backend-deployment"            # AKS에 배포된 Deployment 리소스의 이름
   CONTAINER_NAME: "user-container"              # Deployment YAML 파일에 정의된 컨테이너의 이름
 
 jobs:
