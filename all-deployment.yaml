@@ -208,7 +208,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: api-keys-secret
-              key: JWT_SECRET
+              key: JWT_SECRET_KEY
         - name: spring.datasource.url
           valueFrom:
             secretKeyRef:
@@ -321,7 +321,7 @@ spec:
       - name: auth-frontend-container
         image: kt16big.azurecr.io/auth-frontend:${IMAGE_TAG}
         ports:
-        - containerPort: 3000
+        - containerPort: 8080
 ---
 # ===================================================
 # 14. 로그인/회원가입 프론트엔드 서비스
@@ -337,7 +337,7 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-    targetPort: 3000
+    targetPort: 8080
 ---
 # ===================================================
 # 15. API 게이트웨이 배포
@@ -368,7 +368,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: api-keys-secret
-              key: JWT_SECRET
+              key: JWT_SECRET_KEY
 ---
 # ===================================================
 # 16. API 게이트웨이 서비스
@@ -414,9 +414,18 @@ spec:
             name: auth-frontend-service
             port:
               number: 80
+      # ✅ [추가] 웹툰 대시보드 프론트엔드 라우팅
+      - path: /webtoon
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-dashboard-frontend-service
+            port:
+              number: 80
+
 
 # ===================================================
-# 18. 웹툰 대시보드 - 백엔드(FastAPI) 배포
+# 18. 웹툰 대시보드 - 백엔드(FastAPI) 배포 (Ingress 없음)
 # ===================================================
 apiVersion: apps/v1
 kind: Deployment
@@ -435,36 +444,33 @@ spec:
       nodeSelector:
         agentpool: userpool
       containers:
-        - name: webtoon-dashboard-backend-container
-          image: kt16big.azurecr.io/webtoon-dashboard-backend:${IMAGE_TAG}
-          ports:
-            - containerPort: 8000
-          workingDir: /app
-          env:
-            - name: ENVIRONMENT
-              value: "production"
-
+      - name: webtoon-dashboard-backend-container
+        image: kt16big.azurecr.io/webtoon-dashboard-backend:${IMAGE_TAG}
+        ports:
+        - containerPort: 8000
+        workingDir: /app
+        env:
+        - name: ENVIRONMENT
+          value: "production"
 ---
 # ===================================================
-# 19. 웹툰 대시보드 - 백엔드 서비스 (NodePort)
+# 19. 웹툰 대시보드 - 백엔드 서비스 (ClusterIP)
 # ===================================================
 apiVersion: v1
 kind: Service
 metadata:
   name: webtoon-dashboard-backend-service
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: webtoon-dashboard-backend
   ports:
-    - protocol: TCP
-      port: 8000        # Service 포트
-      targetPort: 8000  # 컨테이너 포트
-      nodePort: 30081   # 외부 접근 포트 (30000~32767)
-
+  - protocol: TCP
+    port: 8002
+    targetPort: 8000
 ---
 # ===================================================
-# 20. 웹툰 대시보드 - 프론트엔드(React) 배포
+# 20. 웹툰 대시보드 - 프론트엔드(React) 배포 (Ingress 없음)
 # ===================================================
 apiVersion: apps/v1
 kind: Deployment
@@ -483,27 +489,24 @@ spec:
       nodeSelector:
         agentpool: userpool
       containers:
-        - name: webtoon-dashboard-frontend-container
-          image: kt16big.azurecr.io/webtoon-dashboard-frontend:${IMAGE_TAG}
-          ports:
-            - containerPort: 80
-          workingDir: /usr/share/nginx/html
-
+      - name: webtoon-dashboard-frontend-container
+        image: kt16big.azurecr.io/webtoon-dashboard-frontend:${IMAGE_TAG}
+        ports:
+        - containerPort: 80
+        workingDir: /usr/share/nginx/html
 ---
 # ===================================================
-# 21. 웹툰 대시보드 - 프론트엔드 서비스 (NodePort)
+# 21. 웹툰 대시보드 - 프론트엔드 서비스 (ClusterIP)
 # ===================================================
 apiVersion: v1
 kind: Service
 metadata:
   name: webtoon-dashboard-frontend-service
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: webtoon-dashboard-frontend
   ports:
-    - protocol: TCP
-      port: 80        # Service 포트
-      targetPort: 80  # 컨테이너 포트
-      nodePort: 30080 # 외부 접근 포트
-
+  - protocol: TCP
+    port: 80
+    targetPort: 80
