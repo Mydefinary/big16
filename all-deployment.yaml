@@ -184,7 +184,7 @@ spec:
     targetPort: 3000
 ---
 # ===================================================
-# 9. NGINX 인그레스(Ingress) 규칙
+# 9. ✅ [수정] NGINX 인그레스(Ingress) 규칙
 # ===================================================
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -193,6 +193,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+    # 정규식을 사용하므로 rewrite-target을 다시 활성화합니다.
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
@@ -200,7 +201,8 @@ spec:
       paths:
       # PPL 생성기 FE
       - path: /ppl-gen(/|$)(.*)
-        pathType: Prefix
+        # ✅ pathType을 ImplementationSpecific으로 변경
+        pathType: ImplementationSpecific
         backend:
           service:
             name: ppl-gen-frontend-service
@@ -208,7 +210,8 @@ spec:
               number: 80
       # PPL 생성기 BE
       - path: /api/ppl-gen(/|$)(.*)
-        pathType: Prefix
+        # ✅ pathType을 ImplementationSpecific으로 변경
+        pathType: ImplementationSpecific
         backend:
           service:
             name: ppl-gen-backend-service
@@ -216,7 +219,8 @@ spec:
               number: 8000
       # 굿즈 생성기 FE
       - path: /goods-gen(/|$)(.*)
-        pathType: Prefix
+        # ✅ pathType을 ImplementationSpecific으로 변경
+        pathType: ImplementationSpecific
         backend:
           service:
             name: goods-gen-frontend-service
@@ -224,7 +228,8 @@ spec:
               number: 80
       # 굿즈 생성기 BE
       - path: /api/goods-gen(/|$)(.*)
-        pathType: Prefix
+        # ✅ pathType을 ImplementationSpecific으로 변경
+        pathType: ImplementationSpecific
         backend:
           service:
             name: goods-gen-backend-service

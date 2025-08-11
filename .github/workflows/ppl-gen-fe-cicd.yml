@@ -21,10 +21,11 @@ on:
 # 이 워크플로우의 모든 잡(job)에서 공통적으로 사용할 환경 변수를 설정합니다.
 env:
   ACR_NAME: "kt16big" # 이미지를 푸시할 Azure Container Registry의 이름
-  IMAGE_NAME: "ppl-gen-fe" # ACR에 저장될 Docker 이미지의 이름
+  IMAGE_NAME: "ppl-gen-frontend" # ACR에 저장될 Docker 이미지의 이름
   WORKING_DIR: "ppl-gen-react/frontend" # 작업 대상 폴더 (Dockerfile이 있는 위치)
   AKS_CLUSTER_NAME: "kt16big-aks" # aks cluser name
   AKS_RESOURCE_GROUP: "kt16big" # 리소스 그룹
+  DEPLOYMENT_NAME: "ppl-gen-frontend-deployment"  # ✅ 배포할 리소스의 이름을 변수로 추가
 
 # 실제 작업(task)들의 묶음인 잡(job)을 정의합니다.
 jobs:
@@ -84,17 +85,8 @@ jobs:
           resource-group: ${{ env.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
 
-      # 4. Manifest 파일을 사용하여 AKS에 배포 (⭐️ 핵심 변경 사항)
-      - name: Deploy to AKS using all-deployment.yaml
-        uses: azure/k8s-deploy@v4
-        with:
-          action: 'deploy'
-          # ✅ 배포 파일 경로를 all-deployment.yaml로 지정합니다.
-          #    (파일이 리포지토리 루트에 있다면 경로를 맞게 수정하세요)
-          manifests: |
-            ./all-deployment.yaml
-          # ✅ 교체할 이미지 정보를 명확히 전달합니다.
-          #    이 액션은 manifests 파일에서 'kt16big.azurecr.io/ppl-gen-backend' 이미지를 찾아
-          #    태그를 :${{ github.sha }} 로 교체하여 적용합니다.
-          images: |
-            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      # ✅ [수정] kubectl을 사용하여 특정 Deployment의 이미지만 교체
+      - name: Deploy to AKS by setting image
+        run: |
+          kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \
+            ppl-gen-frontend-container=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
