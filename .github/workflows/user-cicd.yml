@@ -24,7 +24,7 @@ jobs:
   build-and-push-to-acr:
     # 소스코드나 Dockerfile이 변경되었을 때만 이미지 빌드 실행
     if: |
-      contains(join(github.event.commits.*.modified, ' '), '${{ env.WORKING_DIR }}/')
+      contains(join(github.event.commits.*.modified, ' '), 'user/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
