@@ -35,19 +35,36 @@ spring:
           order: 0
 
         # ===================================================
-        # 2. 사용자 정보 (User) 서비스 라우팅 분리 및 우선순위 지정
+        # 2. ✅ [수정] 사용자 정보 (User) 서비스 라우팅 분리 및 개별 경로 지정
         # ===================================================
-        # 2-1. 회원가입 등 인증이 필요 없는 User API 경로
-        - id: user-public-routes
+        # 2-1. 회원가입 경로 (인증 불필요)
+        - id: user-register-route
           uri: lb://user-backend-service
           predicates:
-            # ✅ [수정] 정규표현식을 사용하여 여러 공개 경로를 한 번에 지정합니다.
-            - Path=/api/users/{segment:(register|check-email|find-id)}
+            - Path=/api/users/register
           filters:
-            - StripPrefix=1 # 인증 필터 없음
+            - StripPrefix=1
           order: 1
 
-        # 2-2. 인증이 필요한 User API 경로 (예: 내 정보 조회, 탈퇴 등)
+        # 2-2. 이메일 중복 확인 경로 (인증 불필요)
+        - id: user-check-email-route
+          uri: lb://user-backend-service
+          predicates:
+            - Path=/api/users/check-email
+          filters:
+            - StripPrefix=1
+          order: 1
+
+        # 2-3. 아이디 찾기 경로 (인증 불필요)
+        - id: user-find-id-route
+          uri: lb://user-backend-service
+          predicates:
+            - Path=/api/users/find-id
+          filters:
+            - StripPrefix=1
+          order: 1
+
+        # 2-4. 인증이 필요한 나머지 User API 경로
         - id: user-secure-routes
           uri: lb://user-backend-service
           predicates:
