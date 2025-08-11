@@ -398,8 +398,22 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "200m"
 spec:
   rules:
-  - http:
+    - http:
       paths:
+      - path: /api/webtoon-highlight
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-hl-backend-service
+            port:
+              number: 8003
+      - path: /webtoon-highlight
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-hl-frontend-service
+            port:
+              number: 3003
       - path: /api
         pathType: Prefix
         backend:
@@ -414,6 +428,7 @@ spec:
             name: auth-frontend-service
             port:
               number: 80
+
 
 # ===================================================
 # 18. 웹툰 대시보드 - 백엔드(FastAPI) 배포 (Ingress 없음)
@@ -501,3 +516,91 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 80
+
+# ===================================================
+# 22. 웹툰 하이라이트 - 백엔드(FastAPI) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoon-hl-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webtoon-hl-backend
+  template:
+    metadata:
+      labels:
+        app: webtoon-hl-backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: webtoon-hl-backend-container
+        image: kt16big.azurecr.io/webtoon-hl-backend:${IMAGE_TAG}
+        ports:
+        - containerPort: 8000
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: OPENAI_API_KEY
+
+# ===================================================
+# 23. 웹툰 하이라이트 - 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoon-hl-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: webtoon-hl-backend
+  ports:
+  - protocol: TCP
+    port: 8003       # Ingress가 붙는 "서비스 포트"
+    targetPort: 8000 # 컨테이너 내부(uvicorn) 포트
+
+# ===================================================
+# 24. 웹툰 하이라이트 - 프론트엔드(React) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoon-hl-frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webtoon-hl-frontend
+  template:
+    metadata:
+      labels:
+        app: webtoon-hl-frontend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: webtoon-hl-frontend-container
+        image: kt16big.azurecr.io/webtoon-hl-frontend:${IMAGE_TAG}
+        ports:
+        - containerPort: 80
+
+# ===================================================
+# 25. 웹툰 하이라이트 - 프론트엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoon-hl-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: webtoon-hl-frontend
+  ports:
+  - protocol: TCP
+    port: 3003     # Ingress가 붙는 "서비스 포트"
+    targetPort: 80 # 컨테이너 내부(Nginx) 포트
