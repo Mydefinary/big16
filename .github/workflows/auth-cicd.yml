@@ -1,11 +1,11 @@
-# 워크플로우 이름 (예: 'CI/CD for Auth Service')
+# 워크플로우 이름
 name: 'CI/CD for Auth Service'
 
 on:
   push:
     branches: [ "login-cicd" ] # CI/CD를 적용할 브랜치
     paths:
-      - 'auth/**'                     # 1. 해당 서비스의 소스코드 경로
+      - 'auth/**'                     # 1. 인증 서비스의 소스코드 경로
       - '.github/workflows/auth-cicd.yml' # 2. 워크플로우 파일 자신
       - 'all-deployment.yaml'         # 3. 공용 배포 파일
 
@@ -22,6 +22,7 @@ env:
 
 jobs:
   build-and-push-to-acr:
+    # if 조건문을 제거하여 항상 빌드하도록 수정
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -45,10 +46,7 @@ jobs:
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
   deploy-to-aks:
-    # ✅ build-and-push-to-acr 잡의 성공 여부와 관계없이 항상 실행
-    # (all-deployment.yaml만 변경되어도 배포는 해야 하므로)
     needs: build-and-push-to-acr
-    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -67,13 +65,9 @@ jobs:
 
       - name: Deploy to AKS
         run: |
-          # build 잡이 성공적으로 실행된 경우(새 이미지가 만들어진 경우)에만 이미지 태그를 교체
-          if [ "${{ needs.build-and-push-to-acr.result }}" == "success" ]; then
-            echo "New image detected. Updating image tag in manifest..."
-            sed -i "s|${{ env.IMAGE_NAME }}:\${IMAGE_TAG}|${{ env.IMAGE_NAME }}:${{ github.sha }}|g" ${{ env.MANIFEST_FILE }}
-          else
-            echo "No new image built. Applying manifest as is."
-          fi
-
-          # 수정되었거나, 혹은 그대로인 매니페스트 파일을 AKS에 적용
+          # if 조건 없이 항상 이미지 태그를 교체하고 배포하도록 단순화
+          echo "Updating image tag in manifest..."
+          sed -i "s|${{ env.IMAGE_NAME }}:\${IMAGE_TAG}|${{ env.IMAGE_NAME }}:${{ github.sha }}|g" ${{ env.MANIFEST_FILE }}
+          
+          echo "Applying updated manifest..."
           kubectl apply -f ${{ env.MANIFEST_FILE }}

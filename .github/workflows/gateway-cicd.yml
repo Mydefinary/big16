@@ -22,6 +22,7 @@ env:
 
 jobs:
   build-and-push-to-acr:
+    # if 조건문을 제거하여 항상 빌드하도록 수정
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -46,7 +47,6 @@ jobs:
 
   deploy-to-aks:
     needs: build-and-push-to-acr
-    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -65,10 +65,9 @@ jobs:
 
       - name: Deploy to AKS
         run: |
-          if [ "${{ needs.build-and-push-to-acr.result }}" == "success" ]; then
-            echo "New image detected. Updating image tag in manifest..."
-            sed -i "s|${{ env.IMAGE_NAME }}:\${IMAGE_TAG}|${{ env.IMAGE_NAME }}:${{ github.sha }}|g" ${{ env.MANIFEST_FILE }}
-          else
-            echo "No new image built. Applying manifest as is."
-          fi
+          # if 조건 없이 항상 이미지 태그를 교체하고 배포하도록 단순화
+          echo "Updating image tag in manifest..."
+          sed -i "s|${{ env.IMAGE_NAME }}:\${IMAGE_TAG}|${{ env.IMAGE_NAME }}:${{ github.sha }}|g" ${{ env.MANIFEST_FILE }}
+          
+          echo "Applying updated manifest..."
           kubectl apply -f ${{ env.MANIFEST_FILE }}

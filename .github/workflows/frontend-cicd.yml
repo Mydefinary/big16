@@ -46,8 +46,8 @@ jobs:
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
   deploy-to-aks:
+    # ✅ build-and-push-to-acr 잡은 이제 항상 실행되므로, needs만으로 충분합니다.
     needs: build-and-push-to-acr
-    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -66,10 +66,9 @@ jobs:
 
       - name: Deploy to AKS
         run: |
-          if [ "${{ needs.build-and-push-to-acr.result }}" == "success" ]; then
-            echo "New image detected. Updating image tag in manifest..."
-            sed -i "s|${{ env.IMAGE_NAME }}:\${IMAGE_TAG}|${{ env.IMAGE_NAME }}:${{ github.sha }}|g" ${{ env.MANIFEST_FILE }}
-          else
-            echo "No new image built. Applying manifest as is."
-          fi
+          # ✅ 이제 build 잡은 항상 성공하므로, if 조건 없이 바로 sed를 실행합니다.
+          echo "Updating image tag in manifest..."
+          sed -i "s|${{ env.IMAGE_NAME }}:\${IMAGE_TAG}|${{ env.IMAGE_NAME }}:${{ github.sha }}|g" ${{ env.MANIFEST_FILE }}
+          
+          echo "Applying updated manifest..."
           kubectl apply -f ${{ env.MANIFEST_FILE }}
