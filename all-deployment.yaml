@@ -1,0 +1,503 @@
+# ===================================================
+# 1. PPL 생성기 - 백엔드(FastAPI) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ppl-gen-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ppl-gen-backend
+  template:
+    metadata:
+      labels:
+        app: ppl-gen-backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: ppl-gen-backend-container
+        image: kt16big.azurecr.io/ppl-gen-backend:${IMAGE_TAG}
+        ports:
+        - containerPort: 8000
+        env:
+        - name: REPLICATE_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: REPLICATE_API_TOKEN
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: OPENAI_API_KEY
+---
+# ===================================================
+# 2. PPL 생성기 - 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: ppl-gen-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: ppl-gen-backend
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+---
+# ===================================================
+# 3. PPL 생성기 - 프론트엔드(React) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ppl-gen-frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ppl-gen-frontend
+  template:
+    metadata:
+      labels:
+        app: ppl-gen-frontend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: ppl-gen-frontend-container
+        image: kt16big.azurecr.io/ppl-gen-frontend:${IMAGE_TAG}
+        ports:
+        - containerPort: 3000
+---
+# ===================================================
+# 4. PPL 생성기 - 프론트엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: ppl-gen-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: ppl-gen-frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+---
+# ===================================================
+# 5. 굿즈 생성기 - 백엔드(FastAPI) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goods-gen-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goods-gen-backend
+  template:
+    metadata:
+      labels:
+        app: goods-gen-backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: goods-gen-backend-container
+        image: kt16big.azurecr.io/goods-gen-backend:${IMAGE_TAG}
+        ports:
+        - containerPort: 8001
+        env:
+        - name: BFL_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: BFL_API_KEY
+---
+# ===================================================
+# 6. 굿즈 생성기 - 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: goods-gen-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: goods-gen-backend
+  ports:
+  - protocol: TCP
+    port: 8001
+    targetPort: 8001
+---
+# ===================================================
+# 7. 굿즈 생성기 - 프론트엔드(React) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goods-gen-frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goods-gen-frontend
+  template:
+    metadata:
+      labels:
+        app: goods-gen-frontend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: goods-gen-frontend-container
+        image: kt16big.azurecr.io/goods-gen-frontend:${IMAGE_TAG}
+        ports:
+        - containerPort: 3000
+---
+# ===================================================
+# 8. 굿즈 생성기 - 프론트엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: goods-gen-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: goods-gen-frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+---
+# ===================================================
+# 9. 통합 인증(Auth) 백엔드 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-backend
+  template:
+    metadata:
+      labels:
+        app: auth-backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: auth-backend-container
+        image: kt16big.azurecr.io/auth-backend:${IMAGE_TAG}
+        ports:
+        - containerPort: 8080
+        env:
+        - name: jwt.secret
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: JWT_SECRET
+        - name: spring.datasource.url
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: DB_URL
+        - name: spring.datasource.username
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: DB_USER
+        - name: spring.datasource.password
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: DB_PASSWORD
+---
+# ===================================================
+# 10. 통합 인증(Auth) 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: auth-backend
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+---
+# ===================================================
+# 11. 사용자(User) 백엔드 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-backend
+  template:
+    metadata:
+      labels:
+        app: user-backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: user-backend-container
+        image: kt16big.azurecr.io/user-backend:${IMAGE_TAG}
+        ports:
+        - containerPort: 8081
+        env:
+        - name: spring.datasource.url
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: DB_URL
+        - name: spring.datasource.username
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: DB_USER
+        - name: spring.datasource.password
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: DB_PASSWORD
+---
+# ===================================================
+# 12. 사용자(User) 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: user-backend
+  ports:
+  - protocol: TCP
+    port: 8081
+    targetPort: 8081
+---
+# ===================================================
+# 13. 로그인/회원가입 프론트엔드 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-frontend
+  template:
+    metadata:
+      labels:
+        app: auth-frontend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: auth-frontend-container
+        image: kt16big.azurecr.io/auth-frontend:${IMAGE_TAG}
+        ports:
+        - containerPort: 3000
+---
+# ===================================================
+# 14. 로그인/회원가입 프론트엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: auth-frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+---
+# ===================================================
+# 15. API 게이트웨이 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: gateway-container
+        image: kt16big.azurecr.io/gateway:${IMAGE_TAG}
+        ports:
+        - containerPort: 8000
+        env:
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: JWT_SECRET
+---
+# ===================================================
+# 16. API 게이트웨이 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-service
+spec:
+  type: ClusterIP
+  selector:
+    app: gateway
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+---
+# ===================================================
+# 17. NGINX 인그레스(Ingress) 규칙 (게이트웨이/루트)
+# ===================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: multi-app-gateway-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: gateway-service
+            port:
+              number: 8000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-frontend-service
+            port:
+              number: 80
+
+# ===================================================
+# 18. 웹툰 대시보드 - 백엔드(FastAPI) 배포 (Ingress 없음)
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoon-dashboard-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webtoon-dashboard-backend
+  template:
+    metadata:
+      labels:
+        app: webtoon-dashboard-backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: webtoon-dashboard-backend-container
+        image: kt16big.azurecr.io/webtoon-dashboard-backend:${IMAGE_TAG}
+        ports:
+        - containerPort: 8000
+        workingDir: /app
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+---
+# ===================================================
+# 19. 웹툰 대시보드 - 백엔드 서비스 (ClusterIP)
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoon-dashboard-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: webtoon-dashboard-backend
+  ports:
+  - protocol: TCP
+    port: 8002
+    targetPort: 8000
+---
+# ===================================================
+# 20. 웹툰 대시보드 - 프론트엔드(React) 배포 (Ingress 없음)
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoon-dashboard-frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webtoon-dashboard-frontend
+  template:
+    metadata:
+      labels:
+        app: webtoon-dashboard-frontend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: webtoon-dashboard-frontend-container
+        image: kt16big.azurecr.io/webtoon-dashboard-frontend:${IMAGE_TAG}
+        ports:
+        - containerPort: 80
+        workingDir: /usr/share/nginx/html
+---
+# ===================================================
+# 21. 웹툰 대시보드 - 프론트엔드 서비스 (ClusterIP)
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoon-dashboard-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: webtoon-dashboard-frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
