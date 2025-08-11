@@ -1,0 +1,281 @@
+/* register.css */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  background: linear-gradient(135deg, #4b3b65, #7d5a96);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.register-wrapper {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: #b8a5c5;
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 30px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  z-index: 10;
+  user-select: none;
+}
+
+.stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  background: radial-gradient(circle at center, white 60%, transparent 100%);
+  border-radius: 50%;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 3px rgba(255,255,255,0.8));
+  animation: twinkle 3s infinite ease-in-out;
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.9;
+    transform: scale(1);
+    filter: drop-shadow(0 0 3px rgba(255,255,255,0.8));
+  }
+  25% {
+    opacity: 0.6;
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 6px rgba(255,255,255,1));
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(0.9);
+    filter: drop-shadow(0 0 2px rgba(255,255,255,0.5));
+  }
+  75% {
+    opacity: 0.6;
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 5px rgba(255,255,255,0.7));
+  }
+}
+
+.register-container {
+  position: relative;
+  z-index: 1;
+  width: 420px;
+  padding: 40px 36px;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(100, 100, 150, 0.25);
+  background-color: #fef6f9;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.register-title {
+  margin-bottom: 30px;
+  color: #7d5a96;
+  text-align: center;
+  font-weight: 700;
+  font-size: 2.2rem;
+}
+
+.register-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 20px;
+  margin-bottom: 22px;
+  border-radius: 12px;
+  border: 1.8px solid #d8bfd8;
+  background-color: #f8f1fb;
+  font-size: 1rem;
+  transition: border-color 0.3s, background-color 0.3s;
+  color: #4b3b65;
+  box-sizing: border-box;
+}
+
+.register-input:focus {
+  border-color: #b794f4;
+  background-color: #fff;
+  outline: none;
+}
+
+.password-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-bottom: 22px;
+}
+
+.password-wrapper input.register-input {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.show-password-btn {
+  position: absolute;
+  right: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.8rem;
+  opacity: 0.3;
+  user-select: none;
+  outline: none;
+  color: #7d5a96;
+}
+
+.show-password-btn:hover {
+  color: rgba(125, 90, 150, 1);
+  cursor: default;
+}
+
+.show-password-btn:active {
+  filter: brightness(0.8);
+  cursor: default;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.register-button,
+.back-button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.register-button {
+  background-color: #b794f4;
+  color: white;
+}
+
+.back-button {
+  background-color: #d9c3ff;
+  color: rgb(114, 74, 160);
+}
+
+
+.register-button:hover:not(:disabled) {
+  background-color: #a078e0;
+}
+
+.register-button:active:not(:disabled) {
+  background-color: #7d5a96;
+}
+
+.register-button:disabled {
+  background-color: #d3b8f9;
+  cursor: not-allowed;
+}
+
+.back-button:hover:not(:disabled) {
+  background-color: #bba0e6;
+}
+
+.back-button:active:not(:disabled) {
+  background-color: #b089ce;
+}
+
+.back-button:disabled {
+  background-color: #d3b8f9;
+  cursor: not-allowed;
+}
+
+.register-footer {
+  margin-top: 24px;
+  text-align: center;
+  color: #7d5a96;
+  font-weight: 600;
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+.register-footer a {
+  color: #a078e0;
+  text-decoration: none;
+  margin-left: 10px;
+  transition: color 0.3s;
+  cursor: pointer;
+}
+
+.register-footer a:hover {
+  color: #7d5a96;
+  text-decoration: underline;
+}
+
+/* 모달 배경 */
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(75, 59, 101, 0.85); /* 기존 배경색 계열에 약간 투명도 추가 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* 모달 박스 */
+.modal-box {
+  background-color: #fef6f9; /* 기존 폼 배경색과 통일 */
+  padding: 30px 40px;
+  border-radius: 14px;
+  box-shadow: 0 12px 28px rgba(100, 100, 150, 0.25);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  color: #7d5a96; /* 기존 텍스트 톤과 맞춤 */
+  font-weight: 700;
+  font-size: 1.3rem;
+  user-select: none;
+}
+
+/* 확인 버튼 */
+.modal-confirm-btn {
+  margin-top: 20px;
+  padding: 12px 28px;
+  background-color: #b794f4;
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+
+.modal-confirm-btn:hover {
+  background-color: #a078e0;
+}
+
+.modal-confirm-btn:active {
+  background-color: #7d5a96;
+}
