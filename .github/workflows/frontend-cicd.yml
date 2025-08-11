@@ -22,9 +22,7 @@ env:
 
 jobs:
   build-and-push-to-acr:
-    # 소스코드나 Dockerfile이 변경되었을 때만 이미지 빌드 실행
-    if: |
-      contains(join(github.event.commits.*.modified, ' '), 'frontend/')
+    # ✅ [수정] if 조건문을 제거하여 워크플로우가 실행될 때마다 항상 빌드하도록 합니다.
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
