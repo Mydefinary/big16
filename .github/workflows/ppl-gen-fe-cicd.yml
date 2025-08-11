@@ -67,13 +67,16 @@ jobs:
     # build-and-push-to-acr 잡이 성공해야만 실행됨
     needs: build-and-push-to-acr
     steps:
-      # 1. Azure에 로그인
+      # 1. 리포지토리 코드 가져오기 (all-deployment.yaml 파일을 읽기 위해 필요)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      # 2. Azure에 로그인
       - name: Log in to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # 2. AKS 클러스터에 연결 설정
+      # 3. AKS 클러스터에 연결 설정
       - name: Set AKS context
         uses: azure/aks-set-context@v3
         with:
@@ -81,8 +84,17 @@ jobs:
           resource-group: ${{ env.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
 
-      # 3. kubectl을 사용하여 배포된 이미지 업데이트
-      - name: Deploy to AKS
-        run: |
-          kubectl set image deployment/goods-gen-frontend-deployment \
-            goods-gen-frontend-container=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      # 4. Manifest 파일을 사용하여 AKS에 배포 (⭐️ 핵심 변경 사항)
+      - name: Deploy to AKS using all-deployment.yaml
+        uses: azure/k8s-deploy@v4
+        with:
+          action: 'deploy'
+          # ✅ 배포 파일 경로를 all-deployment.yaml로 지정합니다.
+          #    (파일이 리포지토리 루트에 있다면 경로를 맞게 수정하세요)
+          manifests: |
+            ./all-deployment.yaml
+          # ✅ 교체할 이미지 정보를 명확히 전달합니다.
+          #    이 액션은 manifests 파일에서 'kt16big.azurecr.io/ppl-gen-backend' 이미지를 찾아
+          #    태그를 :${{ github.sha }} 로 교체하여 적용합니다.
+          images: |
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
