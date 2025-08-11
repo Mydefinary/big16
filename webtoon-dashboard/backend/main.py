@@ -26,7 +26,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "https://webtoon-analytics-dashboard.vercel.app",
-        "https://webtoon-analytics-dashboard-1flmwo7bk.vercel.app",
+        "https://localhost:8080"
+
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
