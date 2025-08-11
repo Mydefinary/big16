@@ -1,0 +1,72 @@
+# .github/workflows/webtoon-dashboard-be-cicd.yml
+# 워크플로우의 전체 이름을 정의합니다. GitHub Actions 탭에 이 이름이 표시됩니다.
+name: 'CI/CD for WEBTOON-DASHBOARD Backend'
+# 어떤 이벤트가 발생했을 때 이 워크플로우를 실행할지 정의합니다.
+on:
+  # 'webtoon-dashboard' 브랜치에 코드가 푸시될 때 실행됩니다.
+  push:
+    branches: [ "webtoon-dashboard" ]
+    # 'paths'에 지정된 파일 경로가 변경되었을 때만 워크플로우를 실행하여 효율성을 높입니다.
+    paths:
+      - 'webtoon-dashboard/backend/**'
+      - '.github/workflows/webtoon-dashboard-be-cicd.yml'
+  # 'webtoon-dashboard' 브랜치를 대상으로 하는 Pull Request가 생성/업데이트될 때 실행됩니다.
+  pull_request:
+    branches: [ "webtoon-dashboard" ]
+    paths:
+      - 'webtoon-dashboard/backend/**'
+# 이 워크플로우의 모든 잡(job)에서 공통적으로 사용할 환경 변수를 설정합니다.
+env:
+  ACR_NAME: "kt16big"
+  IMAGE_NAME: "webtoon-dashboard-backend" # ACR에 저장될 Docker 이미지의 이름
+  WORKING_DIR: "webtoon-dashboard/backend"
+  # 아래 두 값은 AKS 배포 시 필요합니다.
+  AKS_CLUSTER_NAME: "kt16big-aks" # <-- 실제 AKS 클러스터 이름으로 수정
+  AKS_RESOURCE_GROUP: "kt16big" # 리소스 그룹 이름
+  DEPLOYMENT_NAME: "webtoon-dashboard-backend-deployment"  # ✅ 배포할 리소스의 이름을 변수로 추가
+# 실제 작업(task)들의 묶음인 잡(job)을 정의합니다.
+jobs:
+  # 'ACR에 빌드하고 푸시한다'는 이름의 잡입니다.
+  build-and-push-to-acr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Log in to ACR
+        run: az acr login --name ${{ env.ACR_NAME }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ env.WORKING_DIR }}
+          file: ${{ env.WORKING_DIR }}/Dockerfile
+          push: true
+          tags: |
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+  # 'AKS에 배포한다'는 이름의 새 잡입니다.
+  deploy-to-aks:
+    runs-on: ubuntu-latest
+    # build-and-push-to-acr 잡이 성공해야만 이 잡이 실행됩니다.
+    needs: build-and-push-to-acr
+    steps:
+          # 1. 리포지토리 코드 가져오기 (all-deployment.yaml 파일을 읽기 위해 필요)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Set AKS context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ env.AKS_RESOURCE_GROUP }} # 위 env에 설정한 값으로 자동 삽입
+          cluster-name: ${{ env.AKS_CLUSTER_NAME }}     # 위 env에 설정한 값으로 자동 삽입
+      # ✅ [수정] kubectl을 사용하여 특정 Deployment의 이미지만 교체
+      - name: Deploy to AKS by setting image
+        run: |
+          kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \
+            webtoon-dashboard-backend-container=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
