@@ -6,18 +6,12 @@ server:
 spring:
   cloud:
     gateway:
-      # 전역 CORS(Cross-Origin Resource Sharing) 설정
+      # 전역 CORS 설정
       globalcors:
         cors-configurations:
           '[/**]':
             allowedOrigins: "http://20.249.154.2"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - PATCH
-              - DELETE
-              - OPTIONS
+            allowedMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
             allowedHeaders: "*"
             maxAge: 3600
 
@@ -35,36 +29,18 @@ spring:
           order: 0
 
         # ===================================================
-        # 2. ✅ [수정] 사용자 정보 (User) 서비스 라우팅 분리 및 개별 경로 지정
+        # 2. 사용자 정보 (User) 서비스 라우팅
         # ===================================================
-        # 2-1. 회원가입 경로 (인증 불필요)
-        - id: user-register-route
+        # 2-1. 회원가입 등 공개 경로 (인증 불필요)
+        - id: user-public-routes
           uri: lb://user-backend-service
           predicates:
-            - Path=/api/users/register
+            - Path=/api/users/register, /api/users/check-email, /api/users/find-id
           filters:
             - StripPrefix=1
           order: 1
 
-        # 2-2. 이메일 중복 확인 경로 (인증 불필요)
-        - id: user-check-email-route
-          uri: lb://user-backend-service
-          predicates:
-            - Path=/api/users/check-email
-          filters:
-            - StripPrefix=1
-          order: 1
-
-        # 2-3. 아이디 찾기 경로 (인증 불필요)
-        - id: user-find-id-route
-          uri: lb://user-backend-service
-          predicates:
-            - Path=/api/users/find-id
-          filters:
-            - StripPrefix=1
-          order: 1
-
-        # 2-4. 인증이 필요한 나머지 User API 경로
+        # 2-2. 인증이 필요한 나머지 경로
         - id: user-secure-routes
           uri: lb://user-backend-service
           predicates:
@@ -111,7 +87,7 @@ spring:
           order: 12
 
         # ===================================================
-        # 6. ✅ [신규 추가] 웹툰 하이라이트 서비스 라우팅
+        # 6. 웹툰 하이라이트 서비스 라우팅 (인증 필요)
         # ===================================================
         - id: webtoon-hl-service
           uri: lb://webtoon-hl-backend-service
@@ -123,7 +99,7 @@ spring:
           order: 13
 
         # ===================================================
-        # 7. ✅ [신규 추가] 게시판 서비스 라우팅
+        # 7. 게시판 서비스 라우팅 (인증 필요)
         # ===================================================
         - id: board-service
           uri: lb://board-backend-service
@@ -134,8 +110,4 @@ spring:
             - StripPrefix=2
           order: 14
 
-      # default-filters 설정 (기존과 동일)
-      default-filters:
-        - name: JwtAuthenticationFilter
-          args:
-            secretKey: ${JWT_SECRET}
+      # ✅ [수정] 모든 경로에 필터를 강제하던 default-filters 섹션을 완전히 삭제합니다.
