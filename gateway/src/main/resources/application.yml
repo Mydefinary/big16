@@ -6,6 +6,26 @@ server:
 spring:
   cloud:
     gateway:
+      # ✅ [신규 추가] 전역 CORS(Cross-Origin Resource Sharing) 설정
+      globalcors:
+        cors-configurations:
+          # '[/**]'는 모든 경로(/)에 이 규칙을 적용한다는 의미입니다.
+          '[/**]':
+            # ✅ [수정] 프론트엔드 서버의 주소를 허용 목록에 추가합니다.
+            allowedOrigins: "http://20.249.154.2"
+            # 허용할 HTTP 메소드 목록
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            # 허용할 HTTP 헤더 목록 ('*'는 모든 헤더를 허용)
+            allowedHeaders: "*"
+            # pre-flight 요청 결과를 캐시할 시간 (초 단위)
+            maxAge: 3600
+
       # 라우팅 규칙 정의
       routes:
         # ===================================================
