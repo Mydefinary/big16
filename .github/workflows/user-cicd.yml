@@ -1,41 +1,35 @@
-# 워크플로우 이름
+# .github/workflows/user-cicd.yml
+
 name: 'CI/CD for User Service'
 
 on:
   push:
-    branches: [ "login-cicd" ] # CI/CD를 적용할 브랜치
+    branches: [ "login-cicd" ]
     paths:
-      - 'user/**'                     # 1. 유저 서비스의 소스코드 경로
-      - '.github/workflows/user-cicd.yml' # 2. 워크플로우 파일 자신
-      - 'all-deployment.yaml'         # 3. 공용 배포 파일
+      - 'user/**'
+      - '.github/workflows/user-cicd.yml'
+      - 'all-deployment.yaml'
 
-# 워크플로우 전체에서 사용할 환경 변수
 env:
   ACR_NAME: "kt16big"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
-  # --- 서비스별로 이 부분만 수정 ---
   IMAGE_NAME: "user-backend"
   WORKING_DIR: "user"
   DEPLOYMENT_NAME: "user-backend-deployment"
-  MANIFEST_FILE: "all-deployment.yaml"
 
 jobs:
   build-and-push-to-acr:
-    # if 조건문을 제거하여 항상 빌드하도록 수정
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Log in to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: Log in to ACR
         run: az acr login --name ${{ env.ACR_NAME }}
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -51,23 +45,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Log in to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: Set AKS context
         uses: azure/aks-set-context@v3
         with:
           resource-group: ${{ env.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
-
-      - name: Deploy to AKS
+      # ✅ [수정] kubectl set image 명령어로 안정적인 배포 수행
+      - name: Deploy to AKS by setting image
         run: |
-          # if 조건 없이 항상 이미지 태그를 교체하고 배포하도록 단순화
-          echo "Updating image tag in manifest..."
-          sed -i "s|${{ env.IMAGE_NAME }}:\${IMAGE_TAG}|${{ env.IMAGE_NAME }}:${{ github.sha }}|g" ${{ env.MANIFEST_FILE }}
-          
-          echo "Applying updated manifest..."
-          kubectl apply -f ${{ env.MANIFEST_FILE }}
+          kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \
+            user-backend-container=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
