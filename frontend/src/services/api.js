@@ -77,6 +77,7 @@ export const authAPI = {
         },
       }
     ),
+  // ✅ [수정] 빠져있던 /api/ 경로 추가
   changePassword: (currentPassword, newPassword) =>
     api.patch('/api/auth/password-change', { currentPassword, newPassword }),
   resendCode: (email) => api.post('/api/auth/resend-code', { email }),
