@@ -110,6 +110,30 @@ spring:
             - StripPrefix=2
           order: 12
 
+        # ===================================================
+        # 6. ✅ [신규 추가] 웹툰 하이라이트 서비스 라우팅
+        # ===================================================
+        - id: webtoon-hl-service
+          uri: lb://webtoon-hl-backend-service
+          predicates:
+            - Path=/api/webtoon-hl/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 13
+
+        # ===================================================
+        # 7. ✅ [신규 추가] 게시판 서비스 라우팅
+        # ===================================================
+        - id: board-service
+          uri: lb://board-backend-service
+          predicates:
+            - Path=/api/board/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 14
+
       # default-filters 설정 (기존과 동일)
       default-filters:
         - name: JwtAuthenticationFilter
