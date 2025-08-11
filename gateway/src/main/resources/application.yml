@@ -31,21 +31,20 @@ spring:
           predicates:
             - Path=/api/auth/**
           filters:
-            - StripPrefix=2
-          # ✅ [추가] 우선순위 지정
+            - StripPrefix=1
           order: 0
 
         # ===================================================
-        # 2. ✅ [수정] 사용자 정보 (User) 서비스 라우팅 분리 및 우선순위 지정
+        # 2. 사용자 정보 (User) 서비스 라우팅 분리 및 우선순위 지정
         # ===================================================
         # 2-1. 회원가입 등 인증이 필요 없는 User API 경로
         - id: user-public-routes
           uri: lb://user-backend-service
           predicates:
-            - Path=/api/users/register, /api/users/check-email, /api/users/find-id
+            # ✅ [수정] 정규표현식을 사용하여 여러 공개 경로를 한 번에 지정합니다.
+            - Path=/api/users/{segment:(register|check-email|find-id)}
           filters:
-            - StripPrefix=2 # 인증 필터 없음
-          # ✅ [추가] 가장 높은 우선순위를 부여하여 먼저 확인하도록 함
+            - StripPrefix=1 # 인증 필터 없음
           order: 1
 
         # 2-2. 인증이 필요한 User API 경로 (예: 내 정보 조회, 탈퇴 등)
@@ -55,8 +54,7 @@ spring:
             - Path=/api/users/**
           filters:
             - name: JwtAuthenticationFilter
-            - StripPrefix=2
-          # ✅ [추가] 낮은 우선순위를 부여하여 나중에 확인하도록 함
+            - StripPrefix=1
           order: 2
 
         # ===================================================
@@ -69,7 +67,6 @@ spring:
           filters:
             - name: JwtAuthenticationFilter
             - StripPrefix=2
-          # ✅ [추가] 우선순위 지정
           order: 10
 
         # ===================================================
@@ -82,7 +79,6 @@ spring:
           filters:
             - name: JwtAuthenticationFilter
             - StripPrefix=2
-          # ✅ [추가] 우선순위 지정
           order: 11
 
         # ===================================================
@@ -95,7 +91,6 @@ spring:
           filters:
             - name: JwtAuthenticationFilter
             - StripPrefix=2
-          # ✅ [추가] 우선순위 지정
           order: 12
 
       # default-filters 설정 (기존과 동일)
