@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+# Spring Cloud Gateway 설정
+spring:
+  cloud:
+    gateway:
+      # 라우팅 규칙 정의
+      routes:
+        # 1. Auth 서비스 라우팅 (인증이 필요 없는 경로)
+        # 예: /api/auth/login, /api/auth/register
+        - id: auth-service
+          uri: lb://auth  # Kubernetes 서비스 이름 'auth'로 로드 밸런싱
+          predicates:
+            - Path=/api/auth/**
+
+        # 2. User 서비스 라우팅 (인증이 필요한 경로)
+        # 예: /api/users/me
+        - id: user-service
+          uri: lb://user  # Kubernetes 서비스 이름 'user'로 로드 밸런싱
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - JwtAuthenticationFilter # 아래에서 정의한 커스텀 JWT 인증 필터 적용
+
+        # 3. 이미지 생성 서비스 라우팅 (인증이 필요한 경로)
+        - id: ppl-gen-service
+          uri: lb://ppl-gen-backend # Kubernetes 서비스 이름 'ppl-gen-backend'로 로드 밸런싱
+          predicates:
+            - Path=/api/ppl/**
+          filters:
+            - JwtAuthenticationFilter # 커스텀 JWT 인증 필터 적용
+
+      # 커스텀 필터 정의
+      default-filters:
+        - name: JwtAuthenticationFilter
+          args:
+            secretKey: ${JWT_SECRET_KEY} # 환경변수에서 JWT 비밀 키를 가져옴

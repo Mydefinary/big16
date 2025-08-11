@@ -4,12 +4,12 @@ name: 'CI/CD for Frontend Service'
 
 on:
   push:
-    branches: [ "img-gen-cicd" ] # CI/CD를 적용할 브랜치 이름입니다. 필요시 'main' 등으로 변경하세요.
+    branches: [ "login-cicd" ] # CI/CD를 적용할 브랜치 이름입니다. 필요시 'main' 등으로 변경하세요.
     paths:
       - 'frontend/**' # 이 경로에 변경이 있을 때만 워크플로우가 실행됩니다.
       - '.github/workflows/frontend-cicd.yml'
   pull_request:
-    branches: [ "img-gen-cicd" ]
+    branches: [ "login-cicd" ]
     paths:
       - 'frontend/**'
 

@@ -15,7 +15,25 @@ spec:
         app: gateway
     spec:
       containers:
-        - name: gateway
-          image: username/gateway:latest
+        - name: gateway-container # ✅ 일관성을 위해 컨테이너 이름 명시 (예: gateway-container)
+          # ✅ 중요: 이미지를 CI/CD 파이프라인에서 빌드한 ACR 이미지로 변경해야 합니다.
+          # 예: kt16big.azurecr.io/gateway:${github.sha}
+          image: kt16big.azurecr.io/gateway:latest
           ports:
             - containerPort: 8080
+          # ✅ [수정] 환경 변수 설정
+          env:
+            - name: JWT_SECRET_KEY # application.yml에서 사용한 환경 변수 이름
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret    # ✅ 생성한 Secret의 이름
+                  key: JWT_SECRET          # ✅ Secret 내부의 키 이름
+          # ✅ [추가] 볼륨 마운트 설정
+          volumeMounts:
+            - name: config-volume
+              mountPath: /workspace/config # 컨테이너 내부의 마운트 경로
+      # ✅ [추가] 볼륨 정의
+      volumes:
+        - name: config-volume
+          configMap:
+            name: gateway-config # 2단계에서 생성한 ConfigMap 이름
