@@ -208,7 +208,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: api-keys-secret
-              key: JWT_SECRET
+              key: JWT_SECRET_KEY
         - name: spring.datasource.url
           valueFrom:
             secretKeyRef:
@@ -321,7 +321,7 @@ spec:
       - name: auth-frontend-container
         image: kt16big.azurecr.io/auth-frontend:${IMAGE_TAG}
         ports:
-        - containerPort: 3000
+        - containerPort: 8080
 ---
 # ===================================================
 # 14. 로그인/회원가입 프론트엔드 서비스
@@ -337,7 +337,7 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-    targetPort: 3000
+    targetPort: 8080
 ---
 # ===================================================
 # 15. API 게이트웨이 배포
@@ -368,7 +368,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: api-keys-secret
-              key: JWT_SECRET
+              key: JWT_SECRET_KEY
 ---
 # ===================================================
 # 16. API 게이트웨이 서비스
@@ -398,8 +398,9 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "200m"
 spec:
   rules:
-    - http:
+  - http:
       paths:
+        # 웹툰 하이라이트 백엔드
       - path: /api/webtoon-highlight
         pathType: Prefix
         backend:
@@ -407,6 +408,8 @@ spec:
             name: webtoon-hl-backend-service
             port:
               number: 8003
+
+        # 웹툰 하이라이트 프론트엔드
       - path: /webtoon-highlight
         pathType: Prefix
         backend:
@@ -414,6 +417,8 @@ spec:
             name: webtoon-hl-frontend-service
             port:
               number: 3003
+
+        # 기존 API 게이트웨이
       - path: /api
         pathType: Prefix
         backend:
@@ -421,11 +426,22 @@ spec:
             name: gateway-service
             port:
               number: 8000
+
+        # 기본 루트 (Auth 프론트엔드)
       - path: /
         pathType: Prefix
         backend:
           service:
             name: auth-frontend-service
+            port:
+              number: 80
+
+        # 웹툰 대시보드 프론트엔드
+      - path: /webtoon
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-dashboard-frontend-service
             port:
               number: 80
 
