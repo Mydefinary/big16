@@ -8,7 +8,6 @@ on:
     paths:
       - 'auth/**' # 이 경로에 변경이 있을 때만 워크플로우가 실행됩니다.
       - '.github/workflows/auth-cicd.yml'
-      - 'all-deployment.yaml'         # 3. 공용 배포 파일
   pull_request:
     branches: [ "login-cicd" ]
     paths:

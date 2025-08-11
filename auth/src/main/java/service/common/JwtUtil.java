@@ -44,7 +44,7 @@ public class JwtUtil {
                 .signWith(signingKey, SignatureAlgorithm.HS256)  // 🆕 SecretKey 사용
                 .compact();
     }
-
+    // 주석추가
     // 이메일 인증용 토큰 생성
     public static String generateEmailToken(String email) {
         checkSecret();

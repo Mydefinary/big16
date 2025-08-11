@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.ApplicationContext;
 import service.config.kafka.KafkaProcessor;
-
+// 주석추가
 @SpringBootApplication
 @EnableBinding(KafkaProcessor.class)
 @EnableFeignClients

@@ -42,7 +42,7 @@ public class JwtUtil {
             return true;
         }
     }
-
+    // 주석추가
     // 내부: 토큰 파싱
     private static Claims parseToken(String token) {
         checkSecret();
