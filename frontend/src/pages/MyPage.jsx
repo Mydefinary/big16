@@ -2,124 +2,175 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { authAPI, userAPI } from '../services/api';
 
 const MyPage = () => {
-  const { token, isAuthenticated } = useAuth();
+  const { token, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
-  const [userInfo, setUserInfo] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('profile');
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    bio: ''
+  const [loading, setLoading] = useState(false);
+  
+  // 비밀번호 변경 관련 상태
+  const [passwordChangeData, setPasswordChangeData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
 
   useEffect(() => {
+    // 인증 상태 디버깅
+    console.log('🔍 MyPage - Auth Status:', {
+      isAuthenticated: isAuthenticated(),
+      hasToken: !!token,
+      tokenInStorage: !!localStorage.getItem('accessToken')
+    });
+    
     if (!isAuthenticated()) {
+      console.log('❌ Not authenticated, redirecting to login');
       navigate('/login');
       return;
     }
+  }, [isAuthenticated, navigate, token]);
 
-    // JWT 토큰에서 사용자 정보 추출
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        // 실제 환경에서는 API로 사용자 정보를 가져와야 합니다
-        const mockUserInfo = {
-          userId: payload.sub,
-          name: 'John Doe',
-          email: 'john.doe@example.com',
-          phone: '010-1234-5678',
-          bio: '웹툰을 사랑하는 크리에이터입니다.',
-          joinDate: '2024-01-15',
-          profileImage: null,
-          stats: {
-            totalProjects: 12,
-            completedProjects: 8,
-            inProgressProjects: 4,
-            totalViews: 15420
-          }
-        };
-        
-        setUserInfo(mockUserInfo);
-        setFormData({
-          name: mockUserInfo.name,
-          email: mockUserInfo.email,
-          phone: mockUserInfo.phone,
-          bio: mockUserInfo.bio
-        });
-      } catch (error) {
-        console.error('Token parsing error:', error);
-        toast.error('사용자 정보를 불러오는 중 오류가 발생했습니다.');
-      }
-    }
-    setLoading(false);
-  }, [token, isAuthenticated, navigate]);
-
-  const handleInputChange = (e) => {
+  const handlePasswordInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setPasswordChangeData(prev => ({
       ...prev,
       [name]: value
     }));
   };
 
-  const handleSaveProfile = () => {
-    // 실제 환경에서는 API 호출로 프로필 업데이트
-    setUserInfo(prev => ({
-      ...prev,
-      ...formData
-    }));
-    setIsEditing(false);
-    toast.success('프로필이 성공적으로 업데이트되었습니다!', {
-      position: "top-right",
-      autoClose: 3000,
-    });
+  const handlePasswordChange = async () => {
+    if (!passwordChangeData.currentPassword || !passwordChangeData.newPassword) {
+      toast.error('현재 비밀번호와 새 비밀번호를 모두 입력해주세요.');
+      return;
+    }
+
+    if (passwordChangeData.newPassword !== passwordChangeData.confirmPassword) {
+      toast.error('새 비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+      return;
+    }
+
+    if (passwordChangeData.newPassword.length < 8) {
+      toast.error('새 비밀번호는 8자 이상이어야 합니다.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      console.log('🔄 Starting password change...');
+      
+      await authAPI.changePassword(
+        passwordChangeData.currentPassword,
+        passwordChangeData.newPassword
+      );
+      
+      console.log('✅ Password change successful');
+      toast.success('비밀번호가 성공적으로 변경되었습니다!', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      
+      // 폼 초기화 및 숨기기
+      setPasswordChangeData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      setShowPasswordForm(false);
+      
+    } catch (error) {
+      console.error('❌ Password change error:', error);
+      const errorMessage = error.response?.data || error.message || '비밀번호 변경 중 오류가 발생했습니다.';
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCancelEdit = () => {
-    setFormData({
-      name: userInfo.name,
-      email: userInfo.email,
-      phone: userInfo.phone,
-      bio: userInfo.bio
+  const handleCancelPasswordChange = () => {
+    setPasswordChangeData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
     });
-    setIsEditing(false);
+    setShowPasswordForm(false);
   };
 
-  const handlePasswordChange = () => {
-    toast.info('비밀번호 변경 페이지로 이동합니다.', {
-      position: "top-center",
-      autoClose: 3000,
+  const handleAccountDelete = async () => {
+    console.log('🗑️ Account deletion initiated');
+    console.log('🔍 Current auth state:', {
+      isAuthenticated: isAuthenticated(),
+      hasToken: !!localStorage.getItem('accessToken'),
+      tokenValid: !!localStorage.getItem('accessToken') // 간단한 체크
     });
-    // 실제 환경에서는 비밀번호 변경 페이지로 이동
-  };
 
-  const handleAccountDelete = () => {
-    const confirmed = window.confirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');
-    if (confirmed) {
-      toast.warn('회원 탈퇴 기능은 추후 구현 예정입니다.', {
+    const confirmed = window.confirm(
+      '정말로 계정을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.\n\n계속하려면 "확인"을 클릭하세요.'
+    );
+    
+    if (!confirmed) return;
+
+    const doubleConfirmed = window.confirm(
+      '마지막 확인입니다.\n계정을 삭제하면 모든 데이터가 영구적으로 삭제됩니다.\n정말 진행하시겠습니까?'
+    );
+    
+    if (!doubleConfirmed) return;
+
+    try {
+      setLoading(true);
+      console.log('🔄 Sending account deletion request...');
+      
+      const response = await userAPI.deactivate();
+      console.log('✅ Account deletion response:', response.data);
+      
+      toast.success('계정이 성공적으로 삭제되었습니다.', {
         position: "top-center",
         autoClose: 5000,
       });
+      
+      // 로그아웃 처리
+      console.log('🔄 Logging out after account deletion...');
+      await logout();
+      navigate('/');
+      
+    } catch (error) {
+      console.error('❌ Account deletion error:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        headers: error.response?.headers,
+        message: error.message
+      });
+      
+      let errorMessage = '계정 삭제 중 오류가 발생했습니다.';
+      
+      if (error.response?.status === 401) {
+        errorMessage = '인증이 만료되었습니다. 다시 로그인해 주세요.';
+        // 인증 오류 시 로그인 페이지로 이동
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      } else if (error.response?.data) {
+        errorMessage = error.response.data;
+      }
+      
+      toast.error(errorMessage, {
+        position: "top-center",
+        autoClose: 5000,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   if (loading) {
     return (
       <div className="loading">
-        <div className="loading-spinner">로딩 중...</div>
-      </div>
-    );
-  }
-
-  if (!userInfo) {
-    return (
-      <div className="error-container">
-        <div className="error-message">사용자 정보를 불러올 수 없습니다.</div>
+        <div className="loading-spinner">처리 중...</div>
       </div>
     );
   }
@@ -127,264 +178,107 @@ const MyPage = () => {
   return (
     <div className="mypage-container">
       <div className="mypage-header">
-        <h1>👤 마이페이지</h1>
-        <p>프로필 정보를 관리하고 활동 내역을 확인하세요.</p>
+        <h1>⚙️ 계정 설정</h1>
+        <p>계정 보안 설정을 관리하세요.</p>
+        {/* 디버깅용 정보 표시 */}
+        <div style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
+          인증상태: {isAuthenticated() ? '✅' : '❌'} | 
+          토큰: {localStorage.getItem('accessToken') ? '있음' : '없음'}
+        </div>
       </div>
 
       <div className="mypage-content">
-        <div className="mypage-tabs">
-          <button 
-            className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
-            onClick={() => setActiveTab('profile')}
-          >
-            📝 프로필
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'activity' ? 'active' : ''}`}
-            onClick={() => setActiveTab('activity')}
-          >
-            📊 활동 내역
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('settings')}
-          >
-            ⚙️ 설정
-          </button>
-        </div>
-
-        <div className="tab-content">
-          {activeTab === 'profile' && (
-            <div className="profile-section">
-              <div className="profile-card">
-                <div className="profile-header">
-                  <div className="profile-avatar">
-                    {userInfo.profileImage ? (
-                      <img src={userInfo.profileImage} alt="Profile" />
-                    ) : (
-                      <div className="avatar-placeholder">
-                        {userInfo.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                  <div className="profile-info">
-                    <h2>{userInfo.name}</h2>
-                    <p className="user-id">ID: {userInfo.userId}</p>
-                    <p className="join-date">가입일: {userInfo.joinDate}</p>
-                  </div>
-                  <div className="profile-actions">
-                    {!isEditing ? (
-                      <button 
-                        className="edit-btn"
-                        onClick={() => setIsEditing(true)}
-                      >
-                        ✏️ 편집
-                      </button>
-                    ) : (
-                      <div className="edit-actions">
-                        <button 
-                          className="save-btn"
-                          onClick={handleSaveProfile}
-                        >
-                          💾 저장
-                        </button>
-                        <button 
-                          className="cancel-btn"
-                          onClick={handleCancelEdit}
-                        >
-                          ❌ 취소
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="profile-form">
-                  <div className="form-group">
-                    <label>이름</label>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        placeholder="이름을 입력하세요"
-                      />
-                    ) : (
-                      <div className="form-display">{userInfo.name}</div>
-                    )}
-                  </div>
-
-                  <div className="form-group">
-                    <label>이메일</label>
-                    {isEditing ? (
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="이메일을 입력하세요"
-                      />
-                    ) : (
-                      <div className="form-display">{userInfo.email}</div>
-                    )}
-                  </div>
-
-                  <div className="form-group">
-                    <label>전화번호</label>
-                    {isEditing ? (
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        placeholder="전화번호를 입력하세요"
-                      />
-                    ) : (
-                      <div className="form-display">{userInfo.phone}</div>
-                    )}
-                  </div>
-
-                  <div className="form-group">
-                    <label>자기소개</label>
-                    {isEditing ? (
-                      <textarea
-                        name="bio"
-                        value={formData.bio}
-                        onChange={handleInputChange}
-                        placeholder="자기소개를 입력하세요"
-                        rows="4"
-                      />
-                    ) : (
-                      <div className="form-display bio">{userInfo.bio}</div>
-                    )}
-                  </div>
-                </div>
+        <div className="settings-section">
+          <div className="settings-group">
+            <h3>🔒 보안 설정</h3>
+            <div className="setting-item">
+              <div className="setting-info">
+                <div className="setting-title">비밀번호 변경</div>
+                <div className="setting-description">계정의 비밀번호를 변경합니다</div>
               </div>
+              <button 
+                className="setting-btn primary"
+                onClick={() => setShowPasswordForm(!showPasswordForm)}
+                disabled={loading}
+              >
+                {showPasswordForm ? '취소' : '변경하기'}
+              </button>
             </div>
-          )}
 
-          {activeTab === 'activity' && (
-            <div className="activity-section">
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <div className="stat-icon">📁</div>
-                  <div className="stat-info">
-                    <div className="stat-number">{userInfo.stats.totalProjects}</div>
-                    <div className="stat-label">총 프로젝트</div>
-                  </div>
+            {showPasswordForm && (
+              <div className="password-change-form">
+                <div className="form-group">
+                  <label>현재 비밀번호</label>
+                  <input
+                    type="password"
+                    name="currentPassword"
+                    value={passwordChangeData.currentPassword}
+                    onChange={handlePasswordInputChange}
+                    placeholder="현재 비밀번호를 입력하세요"
+                    disabled={loading}
+                  />
                 </div>
-                <div className="stat-card">
-                  <div className="stat-icon">✅</div>
-                  <div className="stat-info">
-                    <div className="stat-number">{userInfo.stats.completedProjects}</div>
-                    <div className="stat-label">완료된 프로젝트</div>
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-icon">🔄</div>
-                  <div className="stat-info">
-                    <div className="stat-number">{userInfo.stats.inProgressProjects}</div>
-                    <div className="stat-label">진행 중인 프로젝트</div>
-                  </div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-icon">👀</div>
-                  <div className="stat-info">
-                    <div className="stat-number">{userInfo.stats.totalViews.toLocaleString()}</div>
-                    <div className="stat-label">총 조회수</div>
-                  </div>
-                </div>
-              </div>
 
-              <div className="recent-activity">
-                <h3>최근 활동</h3>
-                <div className="activity-list">
-                  <div className="activity-item">
-                    <div className="activity-icon">📝</div>
-                    <div className="activity-content">
-                      <div className="activity-title">새로운 웹툰 프로젝트 생성</div>
-                      <div className="activity-time">2024-08-07 14:30</div>
-                    </div>
-                  </div>
-                  <div className="activity-item">
-                    <div className="activity-icon">🎨</div>
-                    <div className="activity-content">
-                      <div className="activity-title">캐릭터 디자인 업로드</div>
-                      <div className="activity-time">2024-08-06 16:45</div>
-                    </div>
-                  </div>
-                  <div className="activity-item">
-                    <div className="activity-icon">💬</div>
-                    <div className="activity-content">
-                      <div className="activity-title">작품 피드백 수신</div>
-                      <div className="activity-time">2024-08-05 11:20</div>
-                    </div>
-                  </div>
+                <div className="form-group">
+                  <label>새 비밀번호</label>
+                  <input
+                    type="password"
+                    name="newPassword"
+                    value={passwordChangeData.newPassword}
+                    onChange={handlePasswordInputChange}
+                    placeholder="새 비밀번호를 입력하세요 (8자 이상)"
+                    disabled={loading}
+                  />
                 </div>
-              </div>
-            </div>
-          )}
 
-          {activeTab === 'settings' && (
-            <div className="settings-section">
-              <div className="settings-group">
-                <h3>🔒 보안 설정</h3>
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <div className="setting-title">비밀번호 변경</div>
-                    <div className="setting-description">계정의 비밀번호를 변경합니다</div>
-                  </div>
+                <div className="form-group">
+                  <label>새 비밀번호 확인</label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={passwordChangeData.confirmPassword}
+                    onChange={handlePasswordInputChange}
+                    placeholder="새 비밀번호를 다시 입력하세요"
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="form-actions">
                   <button 
-                    className="setting-btn primary"
+                    className="save-btn"
                     onClick={handlePasswordChange}
+                    disabled={loading}
                   >
-                    변경하기
+                    💾 비밀번호 변경
                   </button>
-                </div>
-              </div>
-
-              <div className="settings-group">
-                <h3>🔔 알림 설정</h3>
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <div className="setting-title">이메일 알림</div>
-                    <div className="setting-description">새로운 메시지 및 업데이트 알림을 받습니다</div>
-                  </div>
-                  <label className="toggle-switch">
-                    <input type="checkbox" defaultChecked />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <div className="setting-title">프로젝트 알림</div>
-                    <div className="setting-description">프로젝트 상태 변경 시 알림을 받습니다</div>
-                  </div>
-                  <label className="toggle-switch">
-                    <input type="checkbox" defaultChecked />
-                    <span className="slider"></span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="settings-group danger">
-                <h3>⚠️ 위험 영역</h3>
-                <div className="setting-item">
-                  <div className="setting-info">
-                    <div className="setting-title">계정 삭제</div>
-                    <div className="setting-description">계정을 영구적으로 삭제합니다. 이 작업은 되돌릴 수 없습니다.</div>
-                  </div>
                   <button 
-                    className="setting-btn danger"
-                    onClick={handleAccountDelete}
+                    className="cancel-btn"
+                    onClick={handleCancelPasswordChange}
+                    disabled={loading}
                   >
-                    계정 삭제
+                    ❌ 취소
                   </button>
                 </div>
               </div>
+            )}
+          </div>
+
+          <div className="settings-group danger">
+            <h3>⚠️ 위험 영역</h3>
+            <div className="setting-item">
+              <div className="setting-info">
+                <div className="setting-title">계정 삭제</div>
+                <div className="setting-description">계정을 영구적으로 삭제합니다. 이 작업은 되돌릴 수 없습니다.</div>
+              </div>
+              <button 
+                className="setting-btn danger"
+                onClick={handleAccountDelete}
+                disabled={loading}
+              >
+                계정 삭제
+              </button>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

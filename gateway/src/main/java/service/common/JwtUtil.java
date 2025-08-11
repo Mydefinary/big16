@@ -23,12 +23,39 @@ public class JwtUtil {
         return Long.parseLong(claims.getSubject());
     }
 
-    // 토큰 유효성 검증
+    // 토큰 유효성 검증 (디버깅 로그 추가)
     public static boolean validateToken(String token) {
         try {
-            parseToken(token);
+            System.out.println("🔍 JWT Validation Debug:");
+            System.out.println("   Token: " + token.substring(0, Math.min(20, token.length())) + "...");
+            System.out.println("   SECRET_KEY exists: " + (SECRET_KEY != null && !SECRET_KEY.isEmpty()));
+            System.out.println("   SECRET_KEY length: " + (SECRET_KEY != null ? SECRET_KEY.length() : 0));
+            
+            Claims claims = parseToken(token);
+            
+            System.out.println("   Token subject: " + claims.getSubject());
+            System.out.println("   Token expiration: " + claims.getExpiration());
+            System.out.println("   Current time: " + new Date());
+            System.out.println("   Is expired: " + claims.getExpiration().before(new Date()));
+            
+            // 만료 시간 체크
+            if (claims.getExpiration().before(new Date())) {
+                System.out.println("❌ Token expired");
+                return false;
+            }
+            
+            System.out.println("✅ Token validation successful");
             return true;
-        } catch (JwtException | IllegalArgumentException e) {  // 🆕 구체적인 예외 처리
+            
+        } catch (JwtException e) {
+            debugSecretKey();
+            System.out.println("❌ JWT Exception: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            return false;
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Illegal Argument: " + e.getMessage());
+            return false;
+        } catch (Exception e) {
+            System.out.println("❌ Unexpected error: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             return false;
         }
     }
@@ -38,7 +65,7 @@ public class JwtUtil {
         try {
             Claims claims = parseToken(token);
             return claims.getExpiration().before(new Date());
-        } catch (JwtException | IllegalArgumentException e) {  // 🆕 구체적인 예외 처리
+        } catch (JwtException | IllegalArgumentException e) {
             return true;
         }
     }
@@ -46,7 +73,7 @@ public class JwtUtil {
     // 내부: 토큰 파싱
     private static Claims parseToken(String token) {
         checkSecret();
-        return Jwts.parserBuilder()  // 🆕 parserBuilder() 사용
+        return Jwts.parserBuilder()
                 .setSigningKey(signingKey)
                 .build()
                 .parseClaimsJws(token)
@@ -58,5 +85,16 @@ public class JwtUtil {
         if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
             throw new IllegalStateException("JWT_SECRET 환경변수가 설정되어 있지 않습니다.");
         }
+    }
+
+    public static void debugSecretKey() {
+        System.out.println("=== SECRET_KEY DEBUG ===");
+        System.out.println("SECRET_KEY: " + SECRET_KEY);
+        System.out.println("SECRET_KEY length: " + (SECRET_KEY != null ? SECRET_KEY.length() : 0));
+        System.out.println("SECRET_KEY first 20 chars: " + 
+            (SECRET_KEY != null && SECRET_KEY.length() > 20 ? 
+            SECRET_KEY.substring(0, 20) : SECRET_KEY));
+        System.out.println("SECRET_KEY hash: " + (SECRET_KEY != null ? SECRET_KEY.hashCode() : 0));
+        System.out.println("========================");
     }
 }

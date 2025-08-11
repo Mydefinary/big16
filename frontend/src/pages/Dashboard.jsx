@@ -6,7 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Dashboard = () => {
-  const { token, refreshToken, logout } = useAuth();
+  const { token, refreshToken, logout, updateTokens } = useAuth();
   const [tokenInfo, setTokenInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -15,7 +15,6 @@ const Dashboard = () => {
     // JWT 토큰 파싱하여 정보 추출
     if (token) {
       try {
-        // JWT 토큰의 payload 부분 디코딩
         const payload = JSON.parse(atob(token.split('.')[1]));
         setTokenInfo({
           userId: payload.sub,
@@ -33,11 +32,41 @@ const Dashboard = () => {
     }
   }, [token]);
 
+  // 토큰 리프레시 이벤트 리스너
+  useEffect(() => {
+    const handleTokenRefresh = (event) => {
+      const { accessToken, refreshToken: newRefreshToken } = event.detail;
+      updateTokens(accessToken, newRefreshToken);
+      toast.success('토큰이 자동으로 갱신되었습니다!', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    };
+
+    const handleAuthRequired = () => {
+      logout();
+      navigate('/login');
+      toast.error('세션이 만료되었습니다. 다시 로그인해주세요.', {
+        position: "top-right",
+        autoClose: 5000,
+      });
+    };
+
+    window.addEventListener('tokenRefreshed', handleTokenRefresh);
+    window.addEventListener('authRequired', handleAuthRequired);
+
+    return () => {
+      window.removeEventListener('tokenRefreshed', handleTokenRefresh);
+      window.removeEventListener('authRequired', handleAuthRequired);
+    };
+  }, [updateTokens, logout, navigate]);
+
   const handleLogout = async () => {
     setLoading(true);
     try {
-      // 서버에 로그아웃 요청
-      await authAPI.logout(refreshToken);
+      if (refreshToken) {
+        await authAPI.logout(refreshToken);
+      }
       toast.success('로그아웃이 완료되었습니다.', {
         position: "top-right",
         autoClose: 3000,
@@ -49,7 +78,6 @@ const Dashboard = () => {
         autoClose: 3000,
       });
     } finally {
-      // 로컬 스토리지 정리 및 로그인 페이지로 이동
       logout();
       navigate('/login');
       setLoading(false);
@@ -57,19 +85,30 @@ const Dashboard = () => {
   };
 
   const handleRefreshToken = async () => {
+    if (!refreshToken) {
+      toast.error('리프레시 토큰이 없습니다.', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await authAPI.refreshToken(refreshToken);
       const { accessToken, refreshToken: newRefreshToken } = response.data;
       
-      // AuthContext의 login 함수로 새 토큰 저장
-      const { login } = useAuth();
-      login(accessToken, newRefreshToken);
+      // updateTokens 함수로 새 토큰 저장
+      const success = updateTokens(accessToken, newRefreshToken);
       
-      toast.success('토큰이 성공적으로 갱신되었습니다!', {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      if (success) {
+        toast.success('토큰이 성공적으로 갱신되었습니다!', {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      } else {
+        throw new Error('Invalid token received');
+      }
     } catch (error) {
       console.error('Token refresh error:', error);
       const message = typeof error.response?.data === 'string' 
@@ -101,6 +140,12 @@ const Dashboard = () => {
       autoClose: 3000,
     });
   };
+
+  // 토큰이 없는 경우 로그인으로 리다이렉트
+  if (!token) {
+    navigate('/login');
+    return null;
+  }
 
   return (
     <div className="dashboard-container">
@@ -184,6 +229,7 @@ const Dashboard = () => {
               <li><strong>토큰 갱신:</strong> Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.</li>
               <li><strong>로그아웃:</strong> 서버에서 토큰을 무효화하고 로컬 스토리지를 정리합니다.</li>
               <li><strong>자동 갱신:</strong> API 요청 시 토큰이 만료되면 자동으로 갱신됩니다.</li>
+              <li><strong>새로고침 안전:</strong> 페이지 새로고침 시에도 유효한 토큰을 자동으로 확인합니다.</li>
             </ul>
           </div>
         </div>
