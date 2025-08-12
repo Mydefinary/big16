@@ -1,15 +1,19 @@
-name: 'CI/CD for Webtoon Highlight Frontend'
+name: "CI/CD for Webtoon Highlight Frontend"
 
 on:
   push:
-    branches: [ "**" ]
+    branches: ["**"]
     paths:
-      - 'frontend/**'
-      - '.github/workflows/webtoon-hl-fe-cicd.yml'
+      - "frontend/**"
+      - ".github/workflows/webtoon-hl-fe-cicd.yml"
   pull_request:
-    branches: [ "**" ]
+    branches: ["**"]
     paths:
-      - 'frontend/**'
+      - "frontend/**"
+
+concurrency:
+  group: webtoon-hl-fe-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
   ACR_NAME: "kt16big"
@@ -17,8 +21,8 @@ env:
   WORKING_DIR: "frontend"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
-  DEPLOYMENT_NAME: "webtoon-hl-frontend-deployment"    # all-deployment.yaml 이름과 일치
-  CONTAINER_NAME: "webtoon-hl-frontend-container"      # all-deployment.yaml 이름과 일치
+  DEPLOYMENT_NAME: "webtoon-hl-frontend-deployment"
+  CONTAINER_NAME: "webtoon-hl-frontend-container"
 
 jobs:
   build-and-push-to-acr:
@@ -27,7 +31,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Log in to Azure
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
@@ -51,18 +55,26 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Log in to Azure
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Set AKS context
-        uses: azure/aks-set-context@v3
+        uses: azure/aks-set-context@v4
         with:
           resource-group: ${{ env.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
 
+      - name: Select namespace by branch
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            echo "K8S_NAMESPACE=prod" >> $GITHUB_ENV
+          else
+            echo "K8S_NAMESPACE=dev" >> $GITHUB_ENV
+          fi
+
       - name: Rollout by updating image
         run: |
-          kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \
-            ${{ env.CONTAINER_NAME }}=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
-          kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }}
+          kubectl -n $K8S_NAMESPACE set image deployment/${{ env.DEPLOYMENT_NAME }} \
+            ${{ env.CONTAINER_NAME }}=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }} --record
+          kubectl -n $K8S_NAMESPACE rollout status deployment/${{ env.DEPLOYMENT_NAME }} --timeout=180s

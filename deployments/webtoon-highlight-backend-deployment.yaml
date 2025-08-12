@@ -1,0 +1,47 @@
+# ===================================================
+# 22. 웹툰 하이라이트 - 백엔드(FastAPI) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoon-hl-backend-deployment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: webtoon-hl-backend
+  template:
+    metadata:
+      labels:
+        app: webtoon-hl-backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: webtoon-hl-backend-container
+          image: kt16big.azurecr.io/webtoon-hl-backend:${IMAGE_TAG}
+          ports:
+            - containerPort: 8000
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: OPENAI_API_KEY
+---
+# ===================================================
+# 23. 웹툰 하이라이트 - 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoon-hl-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: webtoon-hl-backend
+  ports:
+    - protocol: TCP
+      port: 8003
+      targetPort: 8000
