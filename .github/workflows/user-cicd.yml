@@ -20,7 +20,7 @@ env:
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
   # ✅ [추가]
-  DEPLOYMENT_FILE: "deployments/user-backend.yaml"
+  DEPLOYMENT_FILE: "deployments/user-backend-deployment.yaml"
 
 jobs:
   build-and-push-to-acr:

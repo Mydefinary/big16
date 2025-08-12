@@ -20,7 +20,7 @@ env:
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
   # ✅ [추가]
-  DEPLOYMENT_FILE: "deployments/gateway.yaml"
+  DEPLOYMENT_FILE: "deployments/gateway-deployment.yaml"
 
 jobs:
   build-and-push-to-acr:
