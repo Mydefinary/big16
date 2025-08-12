@@ -7,7 +7,7 @@ on:
     paths:
       - 'webtoon-dashboard/frontend/**'
       - '.github/workflows/webtoon-dashboard-fe-cicd.yml'
-      - 'all-deployment.yaml'        # ← 초배포 시 apply 위해 추가 권장
+      - 'webtoon-dashboard-frontend-deployment.yaml'
   pull_request:
     branches: [ "webtoon-dashboard" ]
     paths:
@@ -70,7 +70,7 @@ jobs:
           set -e
           if ! kubectl get deploy/${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} >/dev/null 2>&1; then
             echo "Deployment not found. Applying manifests for the first time..."
-            sed "s/\${IMAGE_TAG}/${{ env.IMAGE_TAG }}/g" all-deployment.yaml | kubectl apply -n ${{ env.NAMESPACE }} -f -
+            sed "s/\${IMAGE_TAG}/${{ env.IMAGE_TAG }}/g" webtoon-dashboard-frontend-deployment.yaml | kubectl apply -n ${{ env.NAMESPACE }} -f -
           else
             echo "Deployment exists. Skipping apply."
           fi
