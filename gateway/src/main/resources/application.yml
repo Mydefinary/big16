@@ -1,0 +1,113 @@
+# 서버 포트 설정
+server:
+  port: 8000
+
+# Spring Cloud Gateway 설정
+spring:
+  cloud:
+    gateway:
+      # 전역 CORS 설정
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://20.249.154.2"
+            allowedMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+            allowedHeaders: "*"
+            maxAge: 3600
+
+      # 라우팅 규칙 정의
+      routes:
+        # ===================================================
+        # 1. 인증/인가 (Auth) 서비스 라우팅 (인증 불필요)
+        # ===================================================
+        - id: auth-service
+          uri: lb://auth-backend-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
+          order: 0
+
+        # ===================================================
+        # 2. 사용자 정보 (User) 서비스 라우팅
+        # ===================================================
+        # 2-1. 회원가입 등 공개 경로 (인증 불필요)
+        - id: user-public-routes
+          uri: lb://user-backend-service
+          predicates:
+            - Path=/api/users/register, /api/users/check-email, /api/users/find-id
+          filters:
+            - StripPrefix=1
+          order: 1
+
+        # 2-2. 인증이 필요한 나머지 경로
+        - id: user-secure-routes
+          uri: lb://user-backend-service
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=1
+          order: 2
+
+        # ===================================================
+        # 3. PPL 생성기 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: ppl-gen-service
+          uri: lb://ppl-gen-backend-service
+          predicates:
+            - Path=/api/ppl-gen/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 10
+
+        # ===================================================
+        # 4. 굿즈 생성기 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: goods-gen-service
+          uri: lb://goods-gen-backend-service
+          predicates:
+            - Path=/api/goods-gen/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 11
+
+        # ===================================================
+        # 5. 웹툰 대시보드 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: webtoon-dashboard-service
+          uri: lb://webtoon-dashboard-backend-service
+          predicates:
+            - Path=/api/webtoon/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 12
+
+        # ===================================================
+        # 6. 웹툰 하이라이트 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: webtoon-hl-service
+          uri: lb://webtoon-hl-backend-service
+          predicates:
+            - Path=/api/webtoon-hl/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 13
+
+        # ===================================================
+        # 7. 게시판 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: board-service
+          uri: lb://board-backend-service
+          predicates:
+            - Path=/api/board/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 14
+
+      # ✅ [수정] 모든 경로에 필터를 강제하던 default-filters 섹션을 완전히 삭제합니다.

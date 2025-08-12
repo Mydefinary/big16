@@ -1,0 +1,41 @@
+# ===================================================
+# 1. 빌드 스테이지 (Build Stage)
+# ===================================================
+# Maven과 JDK 8이 포함된 이미지를 빌드 환경으로 사용
+FROM maven:3.6.3-jdk-8-slim AS build
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# 먼저 pom.xml을 복사하여 의존성을 다운로드합니다.
+# 소스 코드가 변경되지 않으면 이 레이어는 캐시되어 빌드 속도가 향상됩니다.
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+# 전체 소스 코드를 복사합니다.
+COPY src ./src
+
+# Maven을 사용하여 애플리케이션을 빌드합니다. (테스트는 생략하여 빌드 시간 단축)
+RUN mvn package -DskipTests
+
+
+# ===================================================
+# 2. 실행 스테이지 (Run Stage)
+# ===================================================
+# 더 가벼운 OpenJDK JRE 이미지를 최종 실행 환경으로 사용
+FROM openjdk:8u212-jre-alpine
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# -- 빌드 스테이지(build)에서 생성된 JAR 파일만 복사 --
+COPY --from=build /app/target/*-SNAPSHOT.jar app.jar
+
+# 타임존 설정
+ENV TZ=Asia/Seoul
+
+# 애플리케이션 실행 포트 노출
+EXPOSE 8000
+
+# 컨테이너 시작 시 JAR 파일 실행
+ENTRYPOINT ["java", "-jar", "app.jar"]
