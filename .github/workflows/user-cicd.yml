@@ -1,3 +1,5 @@
+# .github/workflows/user-cicd.yml
+
 name: CI/CD for User Backend
 
 on:
@@ -6,21 +8,15 @@ on:
     paths:
       - 'user/**'
       - '.github/workflows/user-cicd.yml'
-      # ✅ [수정]
-      - '.github/workflows/user-backend-deployment.yaml'
-  pull_request:
-    branches: [ "login-cicd" ]
-    paths:
-      - 'user/**'
+      - 'k8s/user-backend-deployment.yaml' # ✅ 경로 수정
 
 env:
   ACR_NAME: "kt16big"
-  IMAGE_NAME: "user"
+  IMAGE_NAME: "user-backend" # user -> user-backend로 수정 권장
   WORKING_DIR: "user"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
-  # ✅ [추가]
-  DEPLOYMENT_FILE: ".github/workflows/user-backend-deployment.yaml"
+  DEPLOYMENT_FILE: "k8s/user-backend-deployment.yaml" # ✅ 경로 수정
 
 jobs:
   build-and-push-to-acr:
@@ -44,10 +40,15 @@ jobs:
         run: az acr login --name ${{ env.ACR_NAME }}
 
       - name: Set up Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      # ✅ [추가] gradlew 스크립트에 실행 권한 부여
+      - name: Grant execute permission for gradlew
+        working-directory: ${{ env.WORKING_DIR }}
+        run: chmod +x ./gradlew
 
       - name: Build with Gradle
         working-directory: ${{ env.WORKING_DIR }}
@@ -61,7 +62,6 @@ jobs:
           push: true
           tags: |
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ steps.get_sha.outputs.sha }}
-            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
 
   deploy-to-aks:
     runs-on: ubuntu-latest
@@ -80,8 +80,7 @@ jobs:
         with:
           resource-group: ${{ env.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
-      
-      # ✅ [변경]
+
       - name: Substitute IMAGE_TAG and Deploy to AKS
         env:
           IMAGE_TAG: ${{ needs.build-and-push-to-acr.outputs.image_tag }}
