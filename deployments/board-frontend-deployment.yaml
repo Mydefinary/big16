@@ -1,0 +1,41 @@
+# ===================================================
+# 28. 게시판(Board) - 프론트엔드(React) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: board-frontend-deployment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: board-frontend
+  template:
+    metadata:
+      labels:
+        app: board-frontend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: board-frontend-container
+          image: kt16big.azurecr.io/board-frontend:${IMAGE_TAG}
+          ports:
+            - containerPort: 3000
+---
+# ===================================================
+# 29. 게시판(Board) - 프론트엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: board-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: board-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000

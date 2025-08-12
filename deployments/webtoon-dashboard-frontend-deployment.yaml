@@ -1,0 +1,42 @@
+# ===================================================
+# 20. 웹툰 대시보드 - 프론트엔드(React) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoon-dashboard-frontend-deployment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: webtoon-dashboard-frontend
+  template:
+    metadata:
+      labels:
+        app: webtoon-dashboard-frontend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: webtoon-dashboard-frontend-container
+          image: kt16big.azurecr.io/webtoon-dashboard-frontend:${IMAGE_TAG}
+          ports:
+            - containerPort: 80
+          workingDir: /usr/share/nginx/html
+---
+# ===================================================
+# 21. 웹툰 대시보드 - 프론트엔드 서비스 (ClusterIP)
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoon-dashboard-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: webtoon-dashboard-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

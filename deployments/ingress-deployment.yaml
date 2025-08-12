@@ -1,0 +1,49 @@
+# ===================================================
+# 17. NGINX 인그레스(Ingress) 규칙 (게이트웨이/루트)
+# ===================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: multi-app-gateway-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 8000
+          - path: /webtoon
+            pathType: Prefix
+            backend:
+              service:
+                name: webtoon-dashboard-frontend-service
+                port:
+                  number: 80
+          - path: /highlight
+            pathType: Prefix
+            backend:
+              service:
+                name: webtoon-hl-frontend-service
+                port:
+                  number: 3003
+          - path: /board
+            pathType: Prefix
+            backend:
+              service:
+                name: board-frontend-service
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: auth-frontend-service
+                port:
+                  number: 80

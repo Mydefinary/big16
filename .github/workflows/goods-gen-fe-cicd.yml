@@ -1,5 +1,3 @@
-# .github/workflows/goods-gen-fe-cicd.yml
-
 name: 'CI/CD for GOODS-GEN Frontend'
 
 on:
@@ -8,13 +6,12 @@ on:
     paths:
       - 'goods-gen-react/frontend/**'
       - '.github/workflows/goods-gen-fe-cicd.yml'
-      - 'all-deployment.yaml'         # 3. 공용 배포 파일
+      # ✅ [수정]
+      - 'deployments/goods-gen-frontend.yaml'
   pull_request:
     branches: [ "img-gen-cicd" ]
     paths:
       - 'goods-gen-react/frontend/**'
-      - '.github/workflows/goods-gen-fe-cicd.yml'
-
 
 env:
   ACR_NAME: "kt16big"
@@ -22,20 +19,30 @@ env:
   WORKING_DIR: "goods-gen-react/frontend"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
-  DEPLOYMENT_NAME: "goods-gen-frontend-deployment"  # ✅ 배포할 리소스의 이름을 변수로 추가
+  # ✅ [추가]
+  DEPLOYMENT_FILE: "deployments/goods-gen-frontend.yaml"
 
 jobs:
   build-and-push-to-acr:
     runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.get_sha.outputs.sha }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Get short SHA
+        id: get_sha
+        run: echo "sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
       - name: Log in to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Log in to ACR
         run: az acr login --name ${{ env.ACR_NAME }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -43,27 +50,30 @@ jobs:
           file: ${{ env.WORKING_DIR }}/Dockerfile
           push: true
           tags: |
-            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ steps.get_sha.outputs.sha }}
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
 
   deploy-to-aks:
     runs-on: ubuntu-latest
     needs: build-and-push-to-acr
     steps:
-      # 1. 리포지토리 코드 가져오기 (all-deployment.yaml 파일을 읽기 위해 필요)
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Log in to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Set AKS context
         uses: azure/aks-set-context@v3
         with:
           resource-group: ${{ env.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
-      # ✅ [수정] kubectl을 사용하여 특정 Deployment의 이미지만 교체
-      - name: Deploy to AKS by setting image
+
+      # ✅ [변경]
+      - name: Substitute IMAGE_TAG and Deploy to AKS
+        env:
+          IMAGE_TAG: ${{ needs.build-and-push-to-acr.outputs.image_tag }}
         run: |
-          kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \
-            goods-gen-frontend-container=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          envsubst < ${{ env.DEPLOYMENT_FILE }} | kubectl apply -f -
