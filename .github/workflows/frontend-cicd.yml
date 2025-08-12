@@ -1,0 +1,79 @@
+name: CI/CD for Auth Frontend
+
+on:
+  push:
+    branches: [ "login-fb" ]
+    paths:
+      - 'frontend/**'  # ✅ 소스코드 경로를 확인하고 필요시 수정하세요.
+      - '.github/workflows/auth-frontend-cicd.yml'
+      - 'deployments/auth-frontend-deployment.yaml'
+  pull_request:
+    branches: [ "login-fb" ]
+    paths:
+      - 'frontend/**'
+
+env:
+  ACR_NAME: "kt16big"
+  IMAGE_NAME: "auth-frontend"
+  WORKING_DIR: "frontend" # ✅ 소스코드 경로를 확인하고 필요시 수정하세요.
+  AKS_CLUSTER_NAME: "kt16big-aks"
+  AKS_RESOURCE_GROUP: "kt16big"
+  DEPLOYMENT_FILE: "deployments/auth-frontend-deployment.yaml"
+
+jobs:
+  build-and-push-to-acr:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.get_sha.outputs.sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get short SHA
+        id: get_sha
+        run: echo "sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Log in to ACR
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ env.WORKING_DIR }}
+          file: ${{ env.WORKING_DIR }}/Dockerfile
+          push: true
+          tags: |
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ steps.get_sha.outputs.sha }}
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+
+  deploy-to-aks:
+    runs-on: ubuntu-latest
+    needs: build-and-push-to-acr
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set AKS context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ env.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ env.AKS_CLUSTER_NAME }}
+
+      - name: List files for debugging
+        run: ls -R
+
+      - name: Substitute IMAGE_TAG and Deploy to AKS
+        env:
+          IMAGE_TAG: ${{ needs.build-and-push-to-acr.outputs.image_tag }}
+        run: |
+          envsubst < ${{ env.DEPLOYMENT_FILE }} | kubectl apply -f -
