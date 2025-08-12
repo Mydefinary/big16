@@ -4,11 +4,12 @@ name: 'CI/CD for Gateway Service'
 
 on:
   push:
-    branches: [ "login-cicd" ]
+    branches: [ "login-ok" ]
     paths:
       - 'gateway/**'
       - '.github/workflows/gateway-cicd.yml'
-      - 'all-deployment.yaml'
+      # ✅ 경로 수정
+      - 'deployment/gateway-deployment.yaml'
 
 env:
   ACR_NAME: "kt16big"
@@ -54,7 +55,6 @@ jobs:
         with:
           resource-group: ${{ env.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
-      # ✅ [수정] kubectl set image 명령어로 안정적인 배포 수행
       - name: Deploy to AKS by setting image
         run: |
           kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \

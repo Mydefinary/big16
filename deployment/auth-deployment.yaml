@@ -1,0 +1,61 @@
+# ===================================================
+# 9. 통합 인증(Auth) 백엔드 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-backend
+  template:
+    metadata:
+      labels:
+        app: auth-backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: auth-backend-container
+          image: kt16big.azurecr.io/auth-backend:${IMAGE_TAG}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: jwt.secret
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: JWT_SECRET_KEY
+            - name: spring.datasource.url
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: DB_URL
+            - name: spring.datasource.username
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: DB_USER
+            - name: spring.datasource.password
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: DB_PASSWORD
+---
+# ===================================================
+# 10. 통합 인증(Auth) 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: auth-backend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
