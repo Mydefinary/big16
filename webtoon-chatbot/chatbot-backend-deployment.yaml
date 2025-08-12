@@ -1,0 +1,47 @@
+# ===================================================
+# 웹툰 챗봇 - 백엔드(FastAPI) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoon-chatbot-backend-deployment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: webtoon-chatbot-backend
+  template:
+    metadata:
+      labels:
+        app: webtoon-chatbot-backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: webtoon-chatbot-backend-container
+          image: kt16big.azurecr.io/webtoon-chatbot-backend:${IMAGE_TAG}
+          ports:
+            - containerPort: 8083
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: OPENAI_API_KEY
+---
+# ===================================================
+# 웹툰 챗봇 - 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoon-chatbot-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: webtoon-chatbot-backend
+  ports:
+    - protocol: TCP
+      port: 8083
+      targetPort: 8083
