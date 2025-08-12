@@ -1,84 +1,24 @@
-server:
-  port: 8080
+# ✅ [수정] user/src/main/resources/application.yml
+
+# 서버 포트는 deployment.yaml에서 지정하므로 여기서 삭제하거나 주석 처리합니다.
+# server:
+#   port: 8081
 
 spring:
-  application:
-    name: user
----
+  # 데이터베이스 설정을 최상위로 이동하여 항상 적용되도록 합니다.
+  datasource:
+    # 쿠버네티스 Secret의 환경변수 이름을 직접 참조합니다.
+    url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
-spring:
-  profiles: default
   jpa:
+    hibernate:
+      ddl-auto: update
     properties:
       hibernate:
-        show_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
-        implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
-  cloud:
-    stream:
-      kafka:
-        binder:
-          brokers: localhost:9092
-        streams:
-          binder:
-            configuration:
-              default:
-                key:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-                value:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-      bindings:
-        event-in:
-          group: user
-#<<< EDA / Topic Name
-          destination: service
-#>>> EDA / Topic Name
-          contentType: application/json
-        event-out:
-#<<< EDA / Topic Name
-          destination: service
-#>>> EDA / Topic Name
-          contentType: application/json
 
-logging:
-  level:
-    org.hibernate.type: trace
-    org.springframework.cloud: debug
-
-
-server:
-  port: 8083
-
----
-
-spring:
-  profiles: docker
-  jpa:
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
-        implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
-  cloud:
-    stream:
-      kafka:
-        binder:
-          brokers: my-kafka:9092
-        streams:
-          binder:
-            configuration:
-              default:
-                key:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-                value:
-                  serde: org.apache.kafka.common.serialization.Serdes$StringSerde
-      bindings:
-        event-in:
-          group: user
-          destination: service
-          contentType: application/json
-        event-out:
-          destination: service
-          contentType: application/json
-
-
+# --- 프로필 구분선을 모두 제거 ---
