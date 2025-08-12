@@ -4,11 +4,11 @@ name: CI/CD for Auth Backend
 
 on:
   push:
-    branches: [ "login-fb", "login-cicd" ] # 두 브랜치 모두에 적용
+    branches: [ "login-fb", "login-cicd" ]
     paths:
       - 'auth/**'
       - '.github/workflows/auth-cicd.yml'
-      - 'k8s/auth-backend-deployment.yaml' # ✅ 경로 수정
+      - 'k8s/auth-backend-deployment.yaml'
 
 env:
   ACR_NAME: "kt16big"
@@ -16,7 +16,7 @@ env:
   WORKING_DIR: "auth"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
-  DEPLOYMENT_FILE: "k8s/auth-backend-deployment.yaml" # ✅ 경로 수정
+  DEPLOYMENT_FILE: "k8s/auth-backend-deployment.yaml"
 
 jobs:
   build-and-push-to-acr:
@@ -45,14 +45,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # ✅ [추가] gradlew 스크립트에 실행 권한 부여
-      - name: Grant execute permission for gradlew
+      # ✅ [변경] mvnw 스크립트에 실행 권한 부여
+      - name: Grant execute permission for mvnw
         working-directory: ${{ env.WORKING_DIR }}
-        run: chmod +x ./gradlew
+        run: chmod +x ./mvnw
 
-      - name: Build with Gradle
+      # ✅ [변경] Maven으로 빌드 실행
+      - name: Build with Maven
         working-directory: ${{ env.WORKING_DIR }}
-        run: ./gradlew build
+        run: ./mvnw clean package
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5

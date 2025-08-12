@@ -1,22 +1,22 @@
-# .github/workflows/frontend-cicd.yml
+# .github/workflows/gateway-cicd.yml
 
-name: CI/CD for Auth Frontend
+name: CI/CD for Gateway
 
 on:
   push:
-    branches: [ "login-cicd" ]
+    branches: [ "login-fb", "login-cicd" ]
     paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-cicd.yml'
-      - 'k8s/user-frontend-deployment.yaml' # ✅ 경로 수정
+      - 'gateway/**'
+      - '.github/workflows/gateway-cicd.yml'
+      - 'k8s/gateway-deployment.yaml'
 
 env:
   ACR_NAME: "kt16big"
-  IMAGE_NAME: "auth-frontend"
-  WORKING_DIR: "frontend"
+  IMAGE_NAME: "gateway"
+  WORKING_DIR: "gateway"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
-  DEPLOYMENT_FILE: "k8s/user-frontend-deployment.yaml" # ✅ 경로 수정
+  DEPLOYMENT_FILE: "k8s/gateway-deployment.yaml"
 
 jobs:
   build-and-push-to-acr:
@@ -39,6 +39,22 @@ jobs:
       - name: Log in to ACR
         run: az acr login --name ${{ env.ACR_NAME }}
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # ✅ [변경] mvnw 스크립트에 실행 권한 부여
+      - name: Grant execute permission for mvnw
+        working-directory: ${{ env.WORKING_DIR }}
+        run: chmod +x ./mvnw
+
+      # ✅ [변경] Maven으로 빌드 실행
+      - name: Build with Maven
+        working-directory: ${{ env.WORKING_DIR }}
+        run: ./mvnw clean package
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -47,7 +63,6 @@ jobs:
           push: true
           tags: |
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ steps.get_sha.outputs.sha }}
-            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
 
   deploy-to-aks:
     runs-on: ubuntu-latest
