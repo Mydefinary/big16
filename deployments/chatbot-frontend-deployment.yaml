@@ -4,23 +4,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webtoon-chatbot-frontend-deployment
+  name: chatbot-frontend-deployment
 spec:
   replicas: 1
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: webtoon-chatbot-frontend
+      app: chatbot-frontend
   template:
     metadata:
       labels:
-        app: webtoon-chatbot-frontend
+        app: chatbot-frontend
     spec:
       nodeSelector:
         agentpool: userpool
       containers:
-        - name: webtoon-chatbot-frontend-container
-          image: kt16big.azurecr.io/webtoon-chatbot-frontend:${IMAGE_TAG}
+        - name: chatbot-frontend-container
+          image: kt16big.azurecr.io/chatbot-frontend:${IMAGE_TAG}
           ports:
             - containerPort: 3000
 ---
@@ -30,11 +30,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: webtoon-chatbot-frontend-service
+  name: chatbot-frontend-service
 spec:
   type: ClusterIP
   selector:
-    app: webtoon-chatbot-frontend
+    app: chatbot-frontend
   ports:
     - protocol: TCP
       port: 80
