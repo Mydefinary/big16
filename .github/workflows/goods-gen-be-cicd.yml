@@ -26,7 +26,7 @@ env:
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
   # ✅ [추가] 배포할 YAML 파일의 경로를 변수로 지정하여 관리 용이성을 높입니다.
-  DEPLOYMENT_FILE: "deployments/goods-gen-backend.yaml"
+  DEPLOYMENT_FILE: "deployments/goods-gen-backend-deployment.yaml"
 
 # 실제 작업(task)들의 묶음인 잡(job)을 정의합니다.
 jobs:

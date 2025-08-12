@@ -16,11 +16,11 @@ on:
 env:
   ACR_NAME: "kt16big"
   IMAGE_NAME: "ppl-gen-backend"
-  WORKING_DIR: "ppl-gen-fastapi/backend"
+  WORKING_DIR: "ppl-gen-react/backend"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
   # ✅ [추가]
-  DEPLOYMENT_FILE: "deployments/ppl-gen-backend.yaml"
+  DEPLOYMENT_FILE: "deployments/ppl-gen-backend-deployment.yaml"
 
 jobs:
   build-and-push-to-acr:
