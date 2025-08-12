@@ -7,8 +7,7 @@ import javax.servlet.http.Cookie;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
 import service.domain.*;
 import service.dto.*;
 import java.util.Map;
@@ -36,7 +35,7 @@ public class AuthController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!BCrypt.checkpw(request.getCurrentPassword(), auth.getPasswordHash())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Current password incorrect");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("현재 비밀번호가 일치하지 않습니다");
         }
 
         auth.setPasswordHash(BCrypt.hashpw(request.getNewPassword(), BCrypt.gensalt()));
@@ -362,11 +361,20 @@ public class AuthController {
         String token = getTokenFromCookie(request, "accessToken");
         if (token != null && JwtUtil.validateToken(token)) {
             Long userId = JwtUtil.getUserIdFromToken(token);
-            
-            Map<String, Object> userInfo = new HashMap<>();
-            userInfo.put("userId", userId);
-            
-            return ResponseEntity.ok(userInfo);
+            try{
+                Auth auth = authRepository.findByUserId(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
+                
+                Map<String, Object> userInfo = new HashMap<>();
+                userInfo.put("userId", userId);
+                userInfo.put("email", auth.getEmail());
+                userInfo.put("createdAt", auth.getCreatedAt());
+                
+                return ResponseEntity.ok(userInfo);
+            }catch (IllegalArgumentException e){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("인증 실패: " + e.getMessage());
+            }
         }
         return ResponseEntity.status(401).body("Unauthorized");
     }

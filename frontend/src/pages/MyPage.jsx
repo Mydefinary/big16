@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { authAPI, userAPI } from '../services/api';
 
 const MyPage = () => {
@@ -339,8 +340,7 @@ const MyPage = () => {
         <p>계정 보안 설정을 관리하세요.</p>
         {/* 디버깅용 정보 표시 */}
         <div style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
-          인증상태: {isAuthenticated() ? '✅' : '❌'} | 
-          토큰: {localStorage.getItem('accessToken') ? '있음' : '없음'}
+          인증상태: {isAuthenticated() ? '✅' : '❌'}
         </div>
       </div>
 
@@ -483,6 +483,9 @@ const MyPage = () => {
 
       {/* 커스텀 삭제 확인 모달 */}
       <DeleteConfirmModal />
+      
+      {/* ToastContainer 추가 */}
+      <ToastContainer />
     </div>
   );
 };

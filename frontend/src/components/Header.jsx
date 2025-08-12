@@ -130,12 +130,12 @@ const Header = () => {
               </Link>
               <Link to="/mypage" className="header-btn mypage-btn">
                 MyPage
-                {/* 사용자 정보가 있으면 표시 */}
+                {/* 사용자 정보가 있으면 표시
                 {userInfo?.userId && (
                   <span className="user-indicator">
                     ({userInfo.userId})
                   </span>
-                )}
+                )} */}
               </Link>
               <button
                 onClick={handleLogout}
