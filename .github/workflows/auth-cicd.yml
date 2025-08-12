@@ -8,17 +8,14 @@ on:
     paths:
       - 'auth/**'
       - '.github/workflows/auth-cicd.yml'
-      # ✅ 경로 수정
       - 'deployment/auth-deployment.yaml'
 
 env:
   ACR_NAME: "kt16big"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
-  # ✅ 이름 수정
   IMAGE_NAME: "auth-backend-hoa"
   WORKING_DIR: "auth"
-  # ✅ 이름 수정 및 경로 제거
   DEPLOYMENT_NAME: "auth-backend-deployment-hoa"
 
 jobs:
@@ -57,14 +54,10 @@ jobs:
         with:
           resource-group: ${{ env.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
-
-      # ✅ [추가] Deployment, Service 리소스 생성/업데이트 단계
       - name: Apply Kubernetes manifest
         run: |
           kubectl apply -f deployment/auth-deployment.yaml
-
       - name: Deploy to AKS by setting image
         run: |
           kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \
-            # ✅ 컨테이너 이름 수정
             auth-backend-container-hoa=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
