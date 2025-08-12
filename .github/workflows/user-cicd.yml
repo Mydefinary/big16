@@ -4,19 +4,19 @@ on:
   push:
     branches: [ "login-cicd" ]
     paths:
-      - 'user-backend/**'
+      - 'user/**'
       - '.github/workflows/user-cicd.yml'
       # ✅ [수정]
       - '.github/workflows/user-backend-deployment.yaml'
   pull_request:
     branches: [ "login-cicd" ]
     paths:
-      - 'user-backend/**'
+      - 'user/**'
 
 env:
   ACR_NAME: "kt16big"
-  IMAGE_NAME: "user-backend"
-  WORKING_DIR: "user-backend"
+  IMAGE_NAME: "user"
+  WORKING_DIR: "user"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
   # ✅ [추가]

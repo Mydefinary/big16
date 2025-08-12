@@ -2,21 +2,21 @@ name: CI/CD for Auth Backend
 
 on:
   push:
-    branches: [ "login-cicd" ]
+    branches: [ "login-fb" ]
     paths:
-      - 'auth-backend/**'
+      - 'auth/**'
       - '.github/workflows/auth-cicd.yml'
       # ✅ [수정]
       - '.github/workflows/auth-backend-deployment.yaml'
   pull_request:
-    branches: [ "login-cicd" ]
+    branches: [ "login-fb" ]
     paths:
-      - 'auth-backend/**'
+      - 'auth/**'
 
 env:
   ACR_NAME: "kt16big"
   IMAGE_NAME: "auth-backend"
-  WORKING_DIR: "auth-backend"
+  WORKING_DIR: "auth"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
   # ✅ [추가]
