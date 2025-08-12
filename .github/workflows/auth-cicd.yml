@@ -7,7 +7,7 @@ on:
       - 'auth-backend/**'
       - '.github/workflows/auth-cicd.yml'
       # ✅ [수정]
-      - 'deployments/auth-backend.yaml'
+      - '.github/workflows/auth-backend-deployment.yaml'
   pull_request:
     branches: [ "login-cicd" ]
     paths:
@@ -20,7 +20,7 @@ env:
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
   # ✅ [추가]
-  DEPLOYMENT_FILE: "deployments/auth-backend-deployment.yaml"
+  DEPLOYMENT_FILE: ".github/workflows/auth-backend-deployment.yaml"
 
 jobs:
   build-and-push-to-acr:
