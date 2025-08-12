@@ -57,6 +57,12 @@ jobs:
         with:
           resource-group: ${{ env.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
+
+      # ✅ [추가] Deployment, Service 리소스 생성/업데이트 단계
+      - name: Apply Kubernetes manifest
+        run: |
+          kubectl apply -f deployment/user-deployment.yaml
+
       - name: Deploy to AKS by setting image
         run: |
           kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \
