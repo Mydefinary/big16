@@ -26,14 +26,49 @@ const Register = () => {
       [name]: value
     }));
 
-    // 입력 수정 시 해당 필드 에러 삭제
-    setErrors(prev => {
-      const copy = { ...prev };
-      if (copy[name]) {
-        delete copy[name];
-      }
-      return copy;
-    });
+    // 아이디 유효성 검사 (실시간)
+    if (name === 'loginId') {
+      setErrors(prev => {
+        const copy = { ...prev };
+        
+        // 빈 값이면 에러 제거
+        if (!value) {
+          delete copy.loginId;
+        }
+        // 값이 있으면 검사 진행
+        else {
+          // 아이디 길이 검사 (4-20자)
+          if (value.length < 4) {
+            copy.loginId = '아이디는 4자리 이상이어야 합니다.';
+          } else if (value.length > 20) {
+            copy.loginId = '아이디는 20자리 이하여야 합니다.';
+          }
+          // 아이디 형식 검사 (영문, 숫자만 허용)
+          else if (!/^[a-zA-Z0-9]+$/.test(value)) {
+            copy.loginId = '아이디는 영문과 숫자만 사용할 수 있습니다.';
+          }
+          // 첫 글자는 영문으로 시작해야 함
+          else if (!/^[a-zA-Z]/.test(value)) {
+            copy.loginId = '아이디는 영문으로 시작해야 합니다.';
+          }
+          else {
+            delete copy.loginId;
+          }
+        }
+        
+        return copy;
+      });
+    }
+    // 다른 필드들의 에러 제거
+    else {
+      setErrors(prev => {
+        const copy = { ...prev };
+        if (copy[name]) {
+          delete copy[name];
+        }
+        return copy;
+      });
+    }
 
     // 비밀번호 / 비밀번호 확인 일치 검증
     if (name === 'password' || name === 'confirmPassword') {
@@ -69,7 +104,22 @@ const Register = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.loginId) newErrors.loginId = '아이디를 입력하세요.';
+    // 필수 필드 검사
+    if (!formData.loginId) {
+      newErrors.loginId = '아이디를 입력하세요.';
+    } else {
+      // 아이디 유효성 검사
+      if (formData.loginId.length < 4) {
+        newErrors.loginId = '아이디는 4자리 이상이어야 합니다.';
+      } else if (formData.loginId.length > 20) {
+        newErrors.loginId = '아이디는 20자리 이하여야 합니다.';
+      } else if (!/^[a-zA-Z0-9]+$/.test(formData.loginId)) {
+        newErrors.loginId = '아이디는 영문과 숫자만 사용할 수 있습니다.';
+      } else if (!/^[a-zA-Z]/.test(formData.loginId)) {
+        newErrors.loginId = '아이디는 영문으로 시작해야 합니다.';
+      }
+    }
+
     if (!formData.email) newErrors.email = '이메일을 입력하세요.';
     if (!formData.nickname) newErrors.nickname = '이름을 입력하세요.';
     if (!formData.password) newErrors.password = '비밀번호를 입력하세요.';
@@ -137,7 +187,7 @@ const Register = () => {
         }
       });
     } catch (err) {
-      console.error('Registration error:', err);
+      // console.error('Registration error:', err); // 콘솔 로그 제거
       const errorMessage = typeof err.response?.data === 'string' 
         ? err.response.data 
         : err.response?.data?.message || '회원가입에 실패했습니다.';
@@ -167,7 +217,23 @@ const Register = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="loginId">로그인 아이디</label>
+            <label htmlFor="loginId">
+              로그인 아이디
+              <div className="help-icon-container">
+                <span className="help-icon">?</span>
+                <div className="tooltip tooltip-right">
+                  <div className="tooltip-content">
+                    <strong>아이디 요구사항:</strong>
+                    <ul>
+                      <li>4-20자리</li>
+                      <li>영문으로 시작</li>
+                      <li>영문, 숫자만 사용</li>
+                      <li>특수문자 사용 불가</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </label>
             <input
               type="text"
               id="loginId"
@@ -175,7 +241,9 @@ const Register = () => {
               value={formData.loginId}
               onChange={handleChange}
               required
-              placeholder="로그인 아이디를 입력하세요"
+              placeholder="영문으로 시작하는 4-20자리 아이디"
+              minLength="4"
+              maxLength="20"
             />
             {errors.loginId && <div className="field-error">{errors.loginId}</div>}
           </div>

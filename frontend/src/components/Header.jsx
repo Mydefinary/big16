@@ -126,7 +126,7 @@ const Header = () => {
           ) : (
             <>
               <Link to="/dashboard" className="header-btn dashboard-btn">
-                Dashboard
+                메인화면
               </Link>
               <Link to="/mypage" className="header-btn mypage-btn">
                 MyPage

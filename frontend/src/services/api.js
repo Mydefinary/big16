@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 // API 기본 설정
-const API_BASE_URL = 'https://improved-space-computing-machine-9gx9qqww4qv3p7rr-8088.app.github.dev';
+const API_BASE_URL = 'https://8088-mlee9999-kt16bp-75np1ya1uyo.ws-us121.gitpod.io';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
