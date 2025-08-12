@@ -41,6 +41,14 @@ jobs:
       - name: Log in to ACR
         run: az acr login --name ${{ env.ACR_NAME }}
 
+      # (필수) Buildx를 docker-container 드라이버로 생성
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+          buildkitd-flags: --debug
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -52,6 +60,7 @@ jobs:
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          builder: ${{ steps.buildx.outputs.name }}  # <-- 중요
 
   deploy-to-aks:
     runs-on: ubuntu-latest
