@@ -5,11 +5,13 @@ on:
     branches: ["**"]
     paths:
       - "frontend/**"
+      - "deployments/webtoon-highlight-frontend-deployment.yaml"
       - ".github/workflows/webtoon-hl-fe-cicd.yml"
   pull_request:
     branches: ["**"]
     paths:
       - "frontend/**"
+      - "deployments/webtoon-highlight-frontend-deployment.yaml"
 
 concurrency:
   group: webtoon-hl-fe-${{ github.ref }}
@@ -23,6 +25,7 @@ env:
   AKS_RESOURCE_GROUP: "kt16big"
   DEPLOYMENT_NAME: "webtoon-hl-frontend-deployment"
   CONTAINER_NAME: "webtoon-hl-frontend-container"
+  K8S_NAMESPACE: "default"
 
 jobs:
   build-and-push-to-acr:
@@ -47,6 +50,8 @@ jobs:
           tags: |
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy-to-aks:
     runs-on: ubuntu-latest
@@ -65,16 +70,15 @@ jobs:
           resource-group: ${{ env.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
 
-      - name: Select namespace by branch
+      # 처음 배포면 매니페스트 1회 적용
+      - name: Apply manifest if deployment not found
         run: |
-          if [ "${GITHUB_REF_NAME}" = "main" ]; then
-            echo "K8S_NAMESPACE=prod" >> $GITHUB_ENV
-          else
-            echo "K8S_NAMESPACE=dev" >> $GITHUB_ENV
+          if ! kubectl -n $K8S_NAMESPACE get deploy ${{ env.DEPLOYMENT_NAME }} >/dev/null 2>&1; then
+            kubectl -n $K8S_NAMESPACE apply -f deployments/webtoon-highlight-frontend-deployment.yaml
           fi
 
       - name: Rollout by updating image
         run: |
           kubectl -n $K8S_NAMESPACE set image deployment/${{ env.DEPLOYMENT_NAME }} \
-            ${{ env.CONTAINER_NAME }}=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }} --record
+            ${{ env.CONTAINER_NAME }}=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
           kubectl -n $K8S_NAMESPACE rollout status deployment/${{ env.DEPLOYMENT_NAME }} --timeout=180s
