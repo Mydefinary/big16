@@ -15,9 +15,11 @@ env:
   ACR_NAME: "kt16big"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
-  IMAGE_NAME: "auth-backend"
+  # ✅ 이름 수정
+  IMAGE_NAME: "auth-backend-hoa"
   WORKING_DIR: "auth"
-  DEPLOYMENT_NAME: "auth-backend-deployment"
+  # ✅ 이름 수정 및 경로 제거
+  DEPLOYMENT_NAME: "auth-backend-deployment-hoa"
 
 jobs:
   build-and-push-to-acr:
@@ -58,4 +60,5 @@ jobs:
       - name: Deploy to AKS by setting image
         run: |
           kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \
-            auth-backend-container=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            # ✅ 컨테이너 이름 수정
+            auth-backend-container-hoa=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}

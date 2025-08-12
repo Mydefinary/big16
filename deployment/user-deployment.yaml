@@ -1,25 +1,27 @@
-# ===================================================
-# 11. 사용자(User) 백엔드 배포
-# ===================================================
+# deployment/user-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user-backend-deployment
+  # ✅ 이름 수정
+  name: user-backend-deployment-hoa
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: user-backend
+      # ✅ 이름 수정
+      app: user-backend-hoa
   template:
     metadata:
       labels:
-        app: user-backend
+        # ✅ 이름 수정
+        app: user-backend-hoa
     spec:
       nodeSelector:
         agentpool: userpool
       containers:
-        - name: user-backend-container
-          image: kt16big.azurecr.io/user-backend:${IMAGE_TAG}
+        # ✅ 이름 수정
+        - name: user-backend-container-hoa
+          image: kt16big.azurecr.io/user-backend-hoa:${IMAGE_TAG}
           ports:
             - containerPort: 8081
           env:
@@ -39,17 +41,16 @@ spec:
                   name: api-keys-secret
                   key: DB_PASSWORD
 ---
-# ===================================================
-# 12. 사용자(User) 백엔드 서비스
-# ===================================================
 apiVersion: v1
 kind: Service
 metadata:
-  name: user-backend-service
+  # ✅ 이름 수정
+  name: user-backend-service-hoa
 spec:
   type: ClusterIP
   selector:
-    app: user-backend
+    # ✅ 이름 수정
+    app: user-backend-hoa
   ports:
     - protocol: TCP
       port: 8081

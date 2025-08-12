@@ -15,9 +15,12 @@ env:
   ACR_NAME: "kt16big"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
-  IMAGE_NAME: "gateway"
+  # ✅ 이름 수정
+  IMAGE_NAME: "gateway-hoa"
   WORKING_DIR: "gateway"
-  DEPLOYMENT_NAME: "gateway-deployment"
+  # ✅ 이름 수정
+  DEPLOYMENT_NAME: "gateway-deployment-hoa"
+
 
 jobs:
   build-and-push-to-acr:
@@ -58,4 +61,4 @@ jobs:
       - name: Deploy to AKS by setting image
         run: |
           kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \
-            gateway-container=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            gateway-container-hoa=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}

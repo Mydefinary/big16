@@ -1,25 +1,27 @@
-# ===================================================
-# 9. 통합 인증(Auth) 백엔드 배포
-# ===================================================
+# deployment/auth-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-backend-deployment
+  # ✅ 이름 수정
+  name: auth-backend-deployment-hoa
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auth-backend
+      # ✅ 이름 수정
+      app: auth-backend-hoa
   template:
     metadata:
       labels:
-        app: auth-backend
+        # ✅ 이름 수정
+        app: auth-backend-hoa
     spec:
       nodeSelector:
         agentpool: userpool
       containers:
-        - name: auth-backend-container
-          image: kt16big.azurecr.io/auth-backend:${IMAGE_TAG}
+        # ✅ 이름 수정
+        - name: auth-backend-container-hoa
+          image: kt16big.azurecr.io/auth-backend-hoa:${IMAGE_TAG}
           ports:
             - containerPort: 8080
           env:
@@ -44,17 +46,16 @@ spec:
                   name: api-keys-secret
                   key: DB_PASSWORD
 ---
-# ===================================================
-# 10. 통합 인증(Auth) 백엔드 서비스
-# ===================================================
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-backend-service
+  # ✅ 이름 수정
+  name: auth-backend-service-hoa
 spec:
   type: ClusterIP
   selector:
-    app: auth-backend
+    # ✅ 이름 수정 (위의 Deployment app 레이블과 일치해야 함)
+    app: auth-backend-hoa
   ports:
     - protocol: TCP
       port: 8080

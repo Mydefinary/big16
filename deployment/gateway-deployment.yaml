@@ -1,25 +1,27 @@
-# ===================================================
-# 15. API 게이트웨이 배포
-# ===================================================
+# deployment/gateway-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gateway-deployment
+  # ✅ 이름 수정
+  name: gateway-deployment-hoa
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gateway
+      # ✅ 이름 수정
+      app: gateway-hoa
   template:
     metadata:
       labels:
-        app: gateway
+        # ✅ 이름 수정
+        app: gateway-hoa
     spec:
       nodeSelector:
         agentpool: userpool
       containers:
-        - name: gateway-container
-          image: kt16big.azurecr.io/gateway:${IMAGE_TAG}
+        # ✅ 이름 수정
+        - name: gateway-container-hoa
+          image: kt16big.azurecr.io/gateway-hoa:${IMAGE_TAG}
           ports:
             - containerPort: 8000
           env:
@@ -28,29 +30,24 @@ spec:
                 secretKeyRef:
                   name: api-keys-secret
                   key: JWT_SECRET_KEY
-          # ✅ [추가] ConfigMap을 컨테이너 내부의 경로에 마운트합니다.
           volumeMounts:
             - name: gateway-config-volume
-              # Spring Boot가 외부 설정을 읽는 기본 경로 중 하나
               mountPath: /config
-      # ✅ [추가] Pod에서 사용할 볼륨을 정의하고 ConfigMap과 연결합니다.
       volumes:
         - name: gateway-config-volume
           configMap:
-            # 이 ConfigMap의 데이터를 사용합니다.
             name: gateway-config
 ---
-# ===================================================
-# 16. API 게이트웨이 서비스
-# ===================================================
 apiVersion: v1
 kind: Service
 metadata:
-  name: gateway-service
+  # ✅ 이름 수정
+  name: gateway-service-hoa
 spec:
   type: ClusterIP
   selector:
-    app: gateway
+    # ✅ 이름 수정
+    app: gateway-hoa
   ports:
     - protocol: TCP
       port: 8000
