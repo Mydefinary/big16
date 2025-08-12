@@ -1,6 +1,4 @@
-# .github/workflows/frontend-cicd.yml
-
-name: 'CI/CD for Frontend Service'
+name: CI/CD for Auth Frontend
 
 on:
   push:
@@ -8,28 +6,43 @@ on:
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend-cicd.yml'
-      - 'all-deployment.yaml'
+      # ✅ [수정]
+      - 'deployments/auth-frontend.yaml'
+  pull_request:
+    branches: [ "login-cicd" ]
+    paths:
+      - 'frontend/**'
 
 env:
   ACR_NAME: "kt16big"
-  AKS_CLUSTER_NAME: "kt16big-aks"
-  AKS_RESOURCE_GROUP: "kt16big"
   IMAGE_NAME: "auth-frontend"
   WORKING_DIR: "frontend"
-  DEPLOYMENT_NAME: "auth-frontend-deployment"
+  AKS_CLUSTER_NAME: "kt16big-aks"
+  AKS_RESOURCE_GROUP: "kt16big"
+  # ✅ [추가]
+  DEPLOYMENT_FILE: "deployments/auth-frontend.yaml"
 
 jobs:
   build-and-push-to-acr:
     runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.get_sha.outputs.sha }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Get short SHA
+        id: get_sha
+        run: echo "sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
       - name: Log in to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Log in to ACR
         run: az acr login --name ${{ env.ACR_NAME }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -37,25 +50,30 @@ jobs:
           file: ${{ env.WORKING_DIR }}/Dockerfile
           push: true
           tags: |
-            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ steps.get_sha.outputs.sha }}
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
 
   deploy-to-aks:
-    needs: build-and-push-to-acr
     runs-on: ubuntu-latest
+    needs: build-and-push-to-acr
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Log in to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Set AKS context
         uses: azure/aks-set-context@v3
         with:
           resource-group: ${{ env.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
-      # ✅ [수정] kubectl set image 명령어로 안정적인 배포 수행
-      - name: Deploy to AKS by setting image
+
+      # ✅ [변경]
+      - name: Substitute IMAGE_TAG and Deploy to AKS
+        env:
+          IMAGE_TAG: ${{ needs.build-and-push-to-acr.outputs.image_tag }}
         run: |
-          kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \
-            auth-frontend-container=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          envsubst < ${{ env.DEPLOYMENT_FILE }} | kubectl apply -f -
