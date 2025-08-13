@@ -21,6 +21,19 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect # MySQL 8 버전용 Dialect
         format_sql: true
 
+  # ✅ [추가] Spring Mail 설정
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: mydefinary@gmail.com   # ⬅️ 실제 사용하는 Gmail 주소로 변경
+    password: !Q2w3e4r     # ⬅️ Gmail 앱 비밀번호로 변경
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 jwt:
   # 쿠버네티스 Secret의 환경변수 이름을 직접 참조합니다.
   secret: ${jwt.secret}
