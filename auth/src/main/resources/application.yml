@@ -8,15 +8,6 @@ spring:
     password: ${spring.datasource.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        format_sql: true
-
-
 jwt:
   # 쿠버네티스 Secret의 환경변수 이름을 직접 참조합니다.
   secret: ${jwt.secret}
