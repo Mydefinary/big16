@@ -1,4 +1,4 @@
-name: CI/CD for Auth Backend
+name: CI/CD for Auth Backend Lee
 
 on:
   push:
@@ -8,18 +8,18 @@ on:
       - '.github/workflows/auth-cicd.yml'
       - 'deployments/auth-backend-deployment.yaml'
   pull_request:
-    branches: [ "lofin-fb" ]
+    branches: [ "login-fb" ]
     paths:
       - 'auth-backend/**'
 
 env:
   ACR_NAME: "kt16big"
-  IMAGE_NAME: "auth-backend"
+  IMAGE_NAME: "auth-backend-lee"
   WORKING_DIR: "auth-backend"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
   # ✅ 배포할 YAML 파일 경로를 명확하게 지정합니다.
-  DEPLOYMENT_FILE: "deployments/auth-backend-deployment.yaml"
+  DEPLOYMENT_FILE: "auth-backend-lee-deployment.yaml"
 
 jobs:
   build-and-push-to-acr:
@@ -84,7 +84,6 @@ jobs:
       - name: List files for debugging
         run: ls -R
 
-      # ✅ [변경] envsubst를 이용한 파일 기반 배포
       - name: Substitute IMAGE_TAG and Deploy to AKS
         env:
           IMAGE_TAG: ${{ needs.build-and-push-to-acr.outputs.image_tag }}

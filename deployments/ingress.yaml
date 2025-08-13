@@ -1,0 +1,88 @@
+# ===================================================
+# Ingress 설정 - Lee 프로젝트
+# ===================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: microservices-lee-ingress
+  annotations:
+    # NGINX Ingress Controller 사용
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # CORS 설정
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Authorization, X-Requested-With"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    # 타임아웃 설정
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+spec:
+  rules:
+  - host: microservices-lee.example.com  # ✅ 실제 도메인으로 변경하세요
+    http:
+      paths:
+      # API Gateway를 통한 모든 API 요청
+      - path: /api/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: gateway-lee-service
+            port:
+              number: 9000
+      
+      # 프론트엔드 정적 파일 서빙 (기본 경로)
+      - path: /(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-lee-service
+            port:
+              number: 9003
+  
+  # ✅ TLS 인증서 설정 (선택사항)
+  # tls:
+  # - hosts:
+  #   - microservices-lee.example.com
+  #   secretName: microservices-lee-tls
+
+---
+# ===================================================
+# 개발환경용 Ingress (localhost 접근)
+# ===================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: microservices-lee-dev-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Authorization, X-Requested-With"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+spec:
+  rules:
+  # 로컬 개발환경용 (IP 직접 접근)
+  - http:
+      paths:
+      # API Gateway 경로
+      - path: /api/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: gateway-lee-service
+            port:
+              number: 9000
+      
+      # 프론트엔드 기본 경로
+      - path: /(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-lee-service
+            port:
+              number: 9003

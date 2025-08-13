@@ -4,26 +4,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-backend-deployment
+  name: auth-backend-lee-deployment
 spec:
   replicas: 1
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: auth-backend
+      app: auth-backend-lee
   template:
     metadata:
       labels:
-        app: auth-backend
+        app: auth-backend-lee
     spec:
       nodeSelector:
         agentpool: userpool
       containers:
-        - name: auth-backend-container
+        - name: auth-backend-lee-container
           # ✅ CI/CD 파이프라인에 의해 이 변수가 실제 이미지 태그로 치환됩니다.
-          image: kt16big.azurecr.io/auth-backend:${IMAGE_TAG}
+          image: kt16big.azurecr.io/auth-backend-lee:${IMAGE_TAG}
           ports:
-            - containerPort: 8080
+            - containerPort: 9001
           env:
             - name: jwt.secret
               valueFrom:
@@ -52,12 +52,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-backend-service
+  name: auth-backend-lee-service
 spec:
   type: ClusterIP
   selector:
-    app: auth-backend
+    app: auth-backend-lee
   ports:
     - protocol: TCP
-      port: 8080
-      targetPort: 8080
+      port: 9001
+      targetPort: 9001

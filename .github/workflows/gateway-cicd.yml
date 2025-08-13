@@ -1,4 +1,4 @@
-name: CI/CD for Gateway
+name: CI/CD for Gateway Lee
 
 on:
   push:
@@ -14,11 +14,11 @@ on:
 
 env:
   ACR_NAME: "kt16big"
-  IMAGE_NAME: "gateway"
+  IMAGE_NAME: "gateway-lee"
   WORKING_DIR: "gateway"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
-  DEPLOYMENT_FILE: "deployments/gateway-deployment.yaml"
+  DEPLOYMENT_FILE: "gateway-lee-deployment.yaml"
 
 jobs:
   build-and-push-to-acr:

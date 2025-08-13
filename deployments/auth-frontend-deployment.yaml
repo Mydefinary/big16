@@ -4,25 +4,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend-deployment
+  name: frontend-lee-deployment
 spec:
   replicas: 1
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: frontend
+      app: frontend-lee
   template:
     metadata:
       labels:
-        app: frontend
+        app: frontend-lee
     spec:
       nodeSelector:
         agentpool: userpool
       containers:
-        - name: frontend-container
-          image: kt16big.azurecr.io/frontend:${IMAGE_TAG}
+        - name: frontend-lee-container
+          image: kt16big.azurecr.io/frontend-lee:${IMAGE_TAG}
           ports:
-            - containerPort: 8080
+            - containerPort: 9003
 ---
 # ===================================================
 # 14. 로그인/회원가입 프론트엔드 서비스
@@ -30,12 +30,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend-service
+  name: frontend-lee-service
 spec:
   type: ClusterIP
   selector:
-    app: frontend
+    app: frontend-lee
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 8080
+      port: 9003
+      targetPort: 9003

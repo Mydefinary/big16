@@ -4,25 +4,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user-backend-deployment
+  name: user-backend-lee-deployment
 spec:
   replicas: 1
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: user-backend
+      app: user-backend-lee
   template:
     metadata:
       labels:
-        app: user-backend
+        app: user-backend-lee
     spec:
       nodeSelector:
         agentpool: userpool
       containers:
-        - name: user-backend-container
-          image: kt16big.azurecr.io/user-backend:${IMAGE_TAG}
+        - name: user-backend-lee-container
+          image: kt16big.azurecr.io/user-backend-lee:${IMAGE_TAG}
           ports:
-            - containerPort: 8081
+            - containerPort: 9002
           env:
             - name: spring.datasource.url
               valueFrom:
@@ -46,12 +46,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: user-backend-service
+  name: user-backend-lee-service
 spec:
   type: ClusterIP
   selector:
-    app: user-backend
+    app: user-backend-lee
   ports:
     - protocol: TCP
-      port: 8081
-      targetPort: 8081
+      port: 9002
+      targetPort: 9002

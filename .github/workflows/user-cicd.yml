@@ -1,4 +1,4 @@
-name: CI/CD for User Backend
+name: CI/CD for User Backend Lee
 
 on:
   push:
@@ -14,11 +14,11 @@ on:
 
 env:
   ACR_NAME: "kt16big"
-  IMAGE_NAME: "user-backend"
+  IMAGE_NAME: "user-backend-lee"
   WORKING_DIR: "user-backend"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
-  DEPLOYMENT_FILE: "deployments/user-backend-deployment.yaml"
+  DEPLOYMENT_FILE: "user-backend-lee-deployment.yaml"
 
 jobs:
   build-and-push-to-acr:

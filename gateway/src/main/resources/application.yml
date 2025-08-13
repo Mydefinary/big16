@@ -1,5 +1,5 @@
 server:
-  port: 8088
+  port: 9000
 
 ---
 spring:
@@ -8,26 +8,26 @@ spring:
     gateway: #<<< API Gateway / Routes
       routes:
         - id: auth-public
-          uri: http://localhost:8082
+          uri: http://localhost:9001
           predicates:
             - Path=/auths/login,/auths/refresh,/auths/verify-code,/auths/reset-password,/auths/resend-code
           # 필터 없음 (인증 불필요)
           
         - id: auth-private
-          uri: http://localhost:8082
+          uri: http://localhost:9001
           predicates:
             - Path=/auths/**
           filters:
             - name: JwtAuthenticationFilter
             
         - id: user-public
-          uri: http://localhost:8083
+          uri: http://localhost:9002
           predicates:
             - Path=/users/register,/users/check-email,/users/find-id
           # 필터 없음
           
         - id: user-private
-          uri: http://localhost:8083
+          uri: http://localhost:9002
           predicates:
             - Path=/users/**
           filters:
@@ -35,7 +35,7 @@ spring:
             
         # 🎯 프론트엔드 라우트는 JWT 필터 제거 (정적 파일이므로)
         - id: frontend
-          uri: http://localhost:8080
+          uri: http://localhost:9003
           predicates:
             - Path=/**
           # 필터 제거! 정적 파일에는 JWT 검증이 불필요
@@ -66,31 +66,31 @@ spring:
       routes:
         # 🎯 Docker 환경에서도 public/private 경로 분리
         - id: auth-public
-          uri: http://auth:8080
+          uri: http://auth-backend-lee-service:9001
           predicates:
             - Path=/auths/login,/auths/refresh,/auths/verify-code,/auths/reset-password,/auths/resend-code
             
         - id: auth-private
-          uri: http://auth:8080
+          uri: http://auth-backend-lee-service:9001
           predicates:
             - Path=/auths/**
           filters:
             - name: JwtAuthenticationFilter
             
         - id: user-public
-          uri: http://user:8080
+          uri: http://user-backend-lee-service:9002
           predicates:
             - Path=/users/register,/users/check-email,/users/find-id
             
         - id: user-private
-          uri: http://user:8080
+          uri: http://user-backend-lee-service:9002
           predicates:
             - Path=/users/**
           filters:
             - name: JwtAuthenticationFilter
             
         - id: frontend
-          uri: http://frontend:8080
+          uri: http://frontend-lee-service:9003
           predicates:
             - Path=/**
           # Docker 환경에서도 정적 파일에는 JWT 필터 없음
@@ -99,8 +99,8 @@ spring:
         cors-configurations:
           '[/**]':
             allowed-origins:
-              - "http://localhost:8088"  # Gateway 포트
-              - "http://frontend:8080"   # Docker 내부 통신
+              - "http://localhost:9000"  # Gateway 포트
+              - "http://frontend-lee-service:9003"   # Docker 내부 통신
             allowed-methods:
               - "GET"
               - "POST"
@@ -112,6 +112,3 @@ spring:
               - "*"
             allow-credentials: true
             max-age: 3600
-
-server:
-  port: 8080
