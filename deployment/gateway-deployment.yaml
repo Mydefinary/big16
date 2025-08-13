@@ -37,7 +37,6 @@ spec:
         - name: gateway-config-volume
           configMap:
             name: gateway-config
-      env:
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:
