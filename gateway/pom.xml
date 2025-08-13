@@ -59,6 +59,11 @@
 			<artifactId>spring-cloud-starter-kubernetes-client-discovery</artifactId>
 			<version>1.18.12</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-kubernetes-client-config</artifactId>
+		</dependency>
+		
 
 	</dependencies>
 
