@@ -45,7 +45,7 @@ spring:
         cors-configurations:  # 🔧 오타 수정: corsConfigurations -> cors-configurations
           '[/**]':
             allowed-origins:  # 🔧 camelCase -> kebab-case
-              - "https://8088-mlee9999-kt16bp-75np1ya1uyo.ws-us121.gitpod.io"    # Vite 개발서버 (커스텀 포트)
+              - "*"    # Vite 개발서버 (커스텀 포트)
             allowed-methods:
               - "GET"
               - "POST" 
