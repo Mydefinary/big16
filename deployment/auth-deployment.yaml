@@ -25,12 +25,12 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            - name: jwt.secret
+            - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: api-keys-secret
                   key: JWT_SECRET_KEY
-            - name: spring.datasource.url
+            - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:
                   name: api-keys-secret
