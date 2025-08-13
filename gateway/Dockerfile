@@ -1,41 +1,66 @@
-# ===================================================
-# 1. 빌드 스테이지 (Build Stage)
-# ===================================================
-# Maven과 JDK 8이 포함된 이미지를 빌드 환경으로 사용
-FROM maven:3.6.3-jdk-8-slim AS build
+# ✅ Java 11과 Maven이 포함된 공식 이미지 사용
+FROM maven:3.9.4-eclipse-temurin-11-alpine AS builder
 
 # 작업 디렉토리 설정
 WORKDIR /app
 
-# 먼저 pom.xml을 복사하여 의존성을 다운로드합니다.
-# 소스 코드가 변경되지 않으면 이 레이어는 캐시되어 빌드 속도가 향상됩니다.
-COPY pom.xml .
-RUN mvn dependency:go-offline
+# ✅ 환경 확인
+RUN echo "=== Build Environment ===" && \
+    java -version && \
+    mvn -version
 
-# 전체 소스 코드를 복사합니다.
+# 의존성 캐싱을 위해 pom.xml 먼저 복사
+COPY pom.xml .
+
+# ✅ 의존성 미리 다운로드 (캐싱 최적화)
+RUN mvn dependency:go-offline -B
+
+# 소스 코드 복사
 COPY src ./src
 
-# Maven을 사용하여 애플리케이션을 빌드합니다. (테스트는 생략하여 빌드 시간 단축)
-RUN mvn package -DskipTests
+# ✅ 애플리케이션 빌드
+RUN echo "=== Building Application ===" && \
+    mvn clean package -DskipTests -B && \
+    echo "=== Build Complete ==="
 
+# ✅ 런타임 이미지 (경량화)
+FROM eclipse-temurin:11-jre-alpine
 
-# ===================================================
-# 2. 실행 스테이지 (Run Stage)
-# ===================================================
-# 더 가벼운 OpenJDK JRE 이미지를 최종 실행 환경으로 사용
-FROM openjdk:8u212-jre-alpine
+# 필수 패키지 설치
+RUN apk add --no-cache curl tzdata
+
+# 시간대 설정 (한국)
+ENV TZ=Asia/Seoul
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# 애플리케이션 사용자 생성 (보안)
+RUN addgroup -g 1001 appuser && \
+    adduser -u 1001 -G appuser -s /bin/sh -D appuser
 
 # 작업 디렉토리 설정
 WORKDIR /app
 
-# -- 빌드 스테이지(build)에서 생성된 JAR 파일만 복사 --
-COPY --from=build /app/target/*-SNAPSHOT.jar app.jar
+# 빌드된 JAR 파일 복사
+COPY --from=builder /app/target/*.jar app.jar
 
-# 타임존 설정
-ENV TZ=Asia/Seoul
+# 소유권 변경
+RUN chown -R appuser:appuser /app
 
-# 애플리케이션 실행 포트 노출
-EXPOSE 8000
+# 애플리케이션 사용자로 전환
+USER appuser
 
-# 컨테이너 시작 시 JAR 파일 실행
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# 포트 노출
+EXPOSE 8080
+
+# ✅ 헬스체크 추가
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# ✅ JVM 최적화 옵션 추가
+ENTRYPOINT ["java", \
+    "-Djava.security.egd=file:/dev/./urandom", \
+    "-Xms256m", \
+    "-Xmx1024m", \
+    "-XX:+UseContainerSupport", \
+    "-XX:MaxRAMPercentage=75.0", \
+    "-jar", "app.jar"]
