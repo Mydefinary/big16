@@ -35,11 +35,11 @@
 			<artifactId>spring-boot-starter-hateoas</artifactId>
 		</dependency>
 		
-		<!-- 메일 발송을 위한 의존성 -->
+		<!-- 메일 발송을 위한 의존성. 오류 지속 발생으로 주석처리
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
-		</dependency>
+		</dependency>  -->
 		
 		<!-- 비밀번호 암호화를 위한 BCrypt -->
 		<dependency>

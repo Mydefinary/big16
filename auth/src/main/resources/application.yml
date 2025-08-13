@@ -16,17 +16,6 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: 'mydefinary@gmail.com'
-    password: '!Q2w3e4r'
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
 
 jwt:
   # 쿠버네티스 Secret의 환경변수 이름을 직접 참조합니다.

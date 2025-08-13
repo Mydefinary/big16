@@ -12,7 +12,7 @@ import service.config.kafka.KafkaProcessor;
 import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration; // ✅ [추가] import
 
 @SpringBootApplication(
-    // ✅ [수정] MailSenderAutoConfiguration.class 를 자동 설정에서 제외
+    // ✅ [수정] 문제가 되는 MailSender 자동 설정을 제외합니다.
     exclude = MailSenderAutoConfiguration.class
 )
 @EnableBinding(KafkaProcessor.class)
