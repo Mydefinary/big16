@@ -6,11 +6,19 @@ spring:
     import: optional:file:.env[.properties]
   application:
     name: auth
----
 
+---
 spring:
   profiles: default
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${db_url}
+    username: ${db_username}
+    password: ${db_password}
   jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: true
@@ -32,20 +40,16 @@ spring:
       bindings:
         event-in:
           group: auth
-#<<< EDA / Topic Name
           destination: service
-#>>> EDA / Topic Name
           contentType: application/json
         event-out:
-#<<< EDA / Topic Name
           destination: service
-#>>> EDA / Topic Name
           contentType: application/json
   mail:
-    host: sandbox.smtp.mailtrap.io
-    port: 2525
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    host: smtp.gmail.com
+    port: 465
+    username: ${GMAIL_USERNAME}
+    password: ${GMAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -58,20 +62,37 @@ logging:
     org.hibernate.type: trace
     org.springframework.cloud: debug
 
-
 server:
   port: 8082
 
 ---
-
 spring:
   profiles: docker
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
   jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: true
         format_sql: true
         implicit_naming_strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USERNAME}
+    password: ${GMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   cloud:
     stream:
       kafka:
