@@ -1,3 +1,4 @@
+# auth application.yml
 spring:
   datasource:
     # deployment.yaml의 환경변수명과 매칭

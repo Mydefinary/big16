@@ -1,3 +1,5 @@
+// user.java
+
 package service.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

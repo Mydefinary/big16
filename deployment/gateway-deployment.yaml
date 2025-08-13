@@ -1,67 +1,53 @@
-# deployment/gateway-deployment.yaml
+# gateway-deployment.yaml
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  # ✅ 이름 수정
   name: gateway-deployment-hoa
 spec:
   replicas: 1
   selector:
     matchLabels:
-      # ✅ 이름 수정
       app: gateway-hoa
   template:
     metadata:
       labels:
-        # ✅ 이름 수정
         app: gateway-hoa
     spec:
       nodeSelector:
         agentpool: userpool
       containers:
-        # ✅ 이름 수정
-        - name: gateway-container-hoa
-          image: kt16big.azurecr.io/gateway-hoa:$latest
-          ports:
-            - containerPort: 8000
-          env:
-            - name: JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: api-keys-secret
-                  key: JWT_SECRET_KEY
-          volumeMounts:
-            - name: gateway-config-volume
-              mountPath: /config
-      volumes:
-        - name: gateway-config-volume
-          configMap:
-            name: gateway-config
+      - name: gateway-container-hoa
+        image: kt16big.azurecr.io/gateway-hoa:latest
+        ports:
+        - containerPort: 8000
+        env:
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:
               name: api-keys-secret
               key: JWT_SECRET_KEY
-        
-        # ✅ Kafka 설정 추가
         - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
           value: "kafka-service:9092"
         - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
           value: "kafka-service:9092"
-
-
+        volumeMounts:
+        - name: gateway-config-volume
+          mountPath: /config
+      volumes:
+      - name: gateway-config-volume
+        configMap:
+          name: gateway-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  # ✅ 이름 수정
   name: gateway-service-hoa
 spec:
   type: ClusterIP
   selector:
-    # ✅ 이름 수정
     app: gateway-hoa
   ports:
-    - protocol: TCP
-      port: 8000
-      targetPort: 8000
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000

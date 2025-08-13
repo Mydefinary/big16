@@ -1,3 +1,4 @@
+// AuthRepository.java
 package service.domain;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
