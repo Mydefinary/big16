@@ -1,0 +1,32 @@
+# deployment/rbac.yaml
+
+# --- 1. 서비스가 사용할 역할(Role) 정의 ---
+# 'secret-reader'라는 이름의 역할을 만들고,
+# 'secrets' 리소스에 대해 'get', 'list' 권한을 부여합니다.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: secret-reader
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["secrets", "configmaps"]
+  verbs: ["get", "list"]
+
+---
+# --- 2. 역할과 서비스 계정(Service Account) 연결 ---
+# 'default' 네임스페이스의 기본 서비스 계정(default)에
+# 위에서 만든 'secret-reader' 역할을 부여합니다.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-secrets-binding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: default # 대부분의 경우 기본 서비스 계정 이름은 'default' 입니다.
+  namespace: default
+roleRef:
+  kind: Role
+  name: secret-reader
+  apiGroup: rbac.authorization.k8s.io

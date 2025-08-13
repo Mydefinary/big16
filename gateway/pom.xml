@@ -53,6 +53,13 @@
 			<artifactId>dotenv-java</artifactId>
 			<version>2.2.0</version>
 		</dependency>
+		<!-- spring cloud kubernetes discovery client 의존성 추가 -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-kubernetes-client-discovery</artifactId>
+			<version>1.18.12</version>
+		</dependency>
+
 	</dependencies>
 
 	<dependencyManagement>
