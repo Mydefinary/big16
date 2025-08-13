@@ -12,6 +12,24 @@ spring:
     username: ${spring.datasource.username}
     password: ${spring.datasource.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
+# Kafka 설정
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: ${SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS:kafka-service:9092}
+          auto-create-topics: true
+  
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka-service:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:auth-service}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
 
   jpa:
     hibernate:

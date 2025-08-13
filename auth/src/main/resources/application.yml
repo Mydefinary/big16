@@ -1,17 +1,43 @@
-# ✅ [수정] auth/src/main/resources/application.yml
-
 spring:
   datasource:
-    # 쿠버네티스 Secret의 환경변수 이름을 직접 참조합니다.
-    url: ${spring.datasource.url}
-    username: ${spring.datasource.username}
-    password: ${spring.datasource.password}
+    # deployment.yaml의 환경변수명과 매칭
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/auth}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  # Kafka 설정
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: ${SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS:kafka-service:9092}
+          auto-create-topics: true
+  
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka-service:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:auth-service}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
 jwt:
-  # 쿠버네티스 Secret의 환경변수 이름을 직접 참조합니다.
-  secret: ${jwt.secret}
+  secret: ${JWT_SECRET:your-default-jwt-secret}
 
 logging:
   level:
     org.hibernate.SQL: debug
+    org.springframework.cloud.stream: debug
+    org.apache.kafka: info
+
+# JPA 설정
+jpa:
+  hibernate:
+    ddl-auto: update
+  show-sql: true
+  properties:
+    hibernate:
+      format_sql: true
