@@ -1,48 +1,51 @@
+// frontend/src/pages/Login.jsx
+
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { authAPI } from '../services/api';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    loginId: '',
-    password: ''
-  });
+  const [loginId, setLoginId] = useState(''); // email 대신 loginId 사용
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!loginId.trim() || !password.trim()) {
+      toast.error('아이디와 비밀번호를 입력해주세요.', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const response = await authAPI.login(formData);
-      const { accessToken, refreshToken } = response.data;
+      const result = await login(loginId, password);
       
-      login(accessToken, refreshToken);
-      navigate('/dashboard');
-    } catch (err) {
-      console.error('Login error:', err);
-      // const message = err.response?.data?.message || '로그인에 실패했습니다.';
-      const message =typeof err.response?.data === 'string' 
-      ? err.response.data 
-      : err.response?.data?.message || '로그인에 실패했습니다.'
-      toast.error(message, {
+      if (result.success) {
+        toast.success('로그인 성공!', {
+          position: "top-center",
+          autoClose: 2000,
+        });
+        navigate('/dashboard');
+      } else {
+        toast.error(result.error, {
+          position: "top-right",
+          autoClose: 5000,
+        });
+      }
+    } catch (error) {
+      toast.error('로그인 중 오류가 발생했습니다.', {
         position: "top-right",
         autoClose: 5000,
-        pauseOnHover: true,
-        draggable: true,
       });
     } finally {
       setLoading(false);
@@ -60,27 +63,25 @@ const Login = () => {
             <input
               type="text"
               id="loginId"
-              name="loginId"
-              value={formData.loginId}
-              onChange={handleChange}
-              required
+              value={loginId}
+              onChange={(e) => setLoginId(e.target.value)}
               placeholder="아이디를 입력하세요"
+              required
             />
           </div>
-
+          
           <div className="form-group">
             <label htmlFor="password">비밀번호</label>
             <input
               type="password"
               id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="비밀번호를 입력하세요"
+              required
             />
           </div>
-
+          
           <button 
             type="submit" 
             className="auth-button primary"
@@ -91,13 +92,18 @@ const Login = () => {
         </form>
 
         <div className="auth-links">
-          <Link to="/find-id" className="link">아이디 찾기</Link>
-          <Link to="/find-password" className="link">비밀번호 찾기</Link>
-          <Link to="/register" className="link">회원가입</Link>
+          <Link to="/register" className="link-button">
+            회원가입
+          </Link>
+          <Link to="/find-id" className="link-button">
+            아이디 찾기
+          </Link>
+          <Link to="/find-password" className="link-button">
+            비밀번호 찾기
+          </Link>
         </div>
       </div>
 
-      {/* ToastContainer는 최상단에 한 번만 넣으면 됩니다 */}
       <ToastContainer />
     </div>
   );

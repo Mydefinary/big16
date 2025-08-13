@@ -110,6 +110,14 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Register.jsx에서
+  const result = await userAPI.register({
+    loginId: formData.loginId,
+    email: formData.email,
+    nickname: formData.nickname,
+    password: formData.password
+  });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 

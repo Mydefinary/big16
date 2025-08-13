@@ -7,32 +7,36 @@ import '@style/Login.css';
 import { Link } from "react-router-dom";
 import Stars from "@components/Stars";
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+// Register.jsx의 handleSubmit 함수에서
+try {
+  const response = await userAPI.register({
+    loginId: formData.loginId,
+    email: formData.email,
+    nickname: formData.nickname,
+    password: formData.password
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const res = await api.post("/auth/login", { email, password });
-      localStorage.setItem("accessToken", res.data.token);
-      localStorage.setItem("refreshToken", res.data.refreshToken);
-      toast.success("로그인 성공!");
-      // TODO: 로그인 후 페이지 이동 등
-    } catch (err) {
-      // 서버에서 내려준 메시지 보여주기
-      const msg =
-        err.response?.data ||
-        err.message ||
-        "로그인 중 오류가 발생했습니다.";
-      toast.error(msg);
-    } finally {
-      setLoading(false);
+  // response.data가 문자열인 경우 처리
+  const message = typeof response.data === 'string' 
+    ? response.data 
+    : response.data.message || '회원가입이 완료되었습니다!';
+
+  toast.success(message, {
+    position: "top-center",
+    autoClose: 3000,
+  });
+
+  // 회원가입 성공 후 이메일 인증 페이지로 이동
+  navigate('/email-verification', {
+    state: {
+      email: formData.email,
+      purpose: 'SIGN_UP_VERIFICATION',
+      message: '회원가입이 완료되었습니다. 이메일로 발송된 인증코드를 입력해주세요.'
     }
-  };
+  });
+} catch (err) {
+  // 에러 처리는 기존과 동일
+}
 
   return (
     <div className="login-wrapper">
