@@ -1,7 +1,7 @@
 # 서버 포트 설정
 server:
   port: 8000
-
+# cicd 작동
 # Spring Cloud Gateway 설정
 spring:
   cloud:
