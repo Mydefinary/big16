@@ -1,0 +1,12 @@
+# ✅ [생성] auth/src/main/resources/bootstrap.yml
+spring:
+  application:
+    name: auth-backend-hoa
+  cloud:
+    kubernetes:
+      config:
+        sources:
+          # 'api-keys-secret'이라는 이름의 Secret에서 모든 데이터를 가져와 Spring 환경변수로 등록합니다.
+          - name: api-keys-secret
+      reload:
+        enabled: true
