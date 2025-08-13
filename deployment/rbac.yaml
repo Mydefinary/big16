@@ -1,32 +1,63 @@
 # deployment/rbac.yaml
 
-# --- 1. 서비스가 사용할 역할(Role) 정의 ---
-# 'secret-reader'라는 이름의 역할을 만들고,
-# 'secrets' 리소스에 대해 'get', 'list' 권한을 부여합니다.
+# --- 1. 네임스페이스 레벨 Role (기존 + 추가 권한) ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: secret-reader
+  name: microservice-role
   namespace: default
 rules:
+# Secret과 ConfigMap 읽기 권한 (기존)
 - apiGroups: [""]
   resources: ["secrets", "configmaps"]
-  verbs: ["get", "list"]
+  verbs: ["get", "list", "watch"]
+# 서비스 디스커버리를 위한 권한 (추가)
+- apiGroups: [""]
+  resources: ["services", "endpoints", "pods"]
+  verbs: ["get", "list", "watch"]
 
 ---
-# --- 2. 역할과 서비스 계정(Service Account) 연결 ---
-# 'default' 네임스페이스의 기본 서비스 계정(default)에
-# 위에서 만든 'secret-reader' 역할을 부여합니다.
+# --- 2. 클러스터 레벨 권한 (서비스 디스커버리용) ---
+# 일부 Kubernetes 버전에서는 클러스터 레벨 권한이 필요할 수 있습니다
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: service-discovery-role
+rules:
+- apiGroups: [""]
+  resources: ["services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list", "watch"]
+
+---
+# --- 3. Role과 ServiceAccount 연결 (기존 수정) ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: read-secrets-binding
+  name: microservice-binding
   namespace: default
 subjects:
 - kind: ServiceAccount
-  name: default # 대부분의 경우 기본 서비스 계정 이름은 'default' 입니다.
+  name: default
   namespace: default
 roleRef:
   kind: Role
-  name: secret-reader
+  name: microservice-role
   apiGroup: rbac.authorization.k8s.io
+
+---
+# --- 4. ClusterRole과 ServiceAccount 연결 (추가) ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: service-discovery-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: service-discovery-role
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default

@@ -70,6 +70,28 @@ spec:
               value: "true"
             - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE
               value: "true"
+            - name: spring.datasource.url
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: DB_URL
+            - name: spring.datasource.username
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: DB_USER
+            - name: spring.datasource.password
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: DB_PASSWORD
+            
+            # ✅ Kafka 설정 추가
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka-service:9092"
+            - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+              value: "kafka-service:9092"
+
 ---
 apiVersion: v1
 kind: Service
