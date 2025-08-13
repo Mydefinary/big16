@@ -1,11 +1,6 @@
 # ✅ [수정] auth/src/main/resources/application.yml
 
-# 서버 포트는 deployment.yaml에서 지정하므로 여기서 삭제하거나 주석 처리합니다.
-# server:
-#  port: 8080
-
 spring:
-  # 데이터베이스 설정을 최상위로 이동하여 항상 적용되도록 합니다.
   datasource:
     # 쿠버네티스 Secret의 환경변수 이름을 직접 참조합니다.
     url: ${spring.datasource.url}
@@ -15,18 +10,17 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update # update 또는 validate 권장
+      ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect # MySQL 8 버전용 Dialect
+        dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
 
-  # ✅ [추가] Spring Mail 설정
   mail:
     host: smtp.gmail.com
     port: 587
-    username: 'mydefinary@gmail.com'   # ⬅️ 실제 사용하는 Gmail 주소로 변경
-    password: '!Q2w3e4r'     # ⬅️ Gmail 앱 비밀번호로 변경
+    username: 'mydefinary@gmail.com'
+    password: '!Q2w3e4r'
     properties:
       mail:
         smtp:
@@ -41,5 +35,3 @@ jwt:
 logging:
   level:
     org.hibernate.SQL: debug
-
-# --- 프로필 구분선을 모두 제거 ---

@@ -21,7 +21,7 @@ spring:
         # 1. 인증/인가 (Auth) 서비스 라우팅 (인증 불필요)
         # ===================================================
         - id: auth-service
-          uri: lb://auth-backend-service
+          uri: lb://auth-backend-service-hoa
           predicates:
             - Path=/api/auth/**
           filters:
@@ -33,7 +33,7 @@ spring:
         # ===================================================
         # 2-1. 회원가입 등 공개 경로 (인증 불필요)
         - id: user-public-routes
-          uri: lb://user-backend-service
+          uri: lb://user-backend-service-hoa
           predicates:
             - Path=/api/users/register, /api/users/check-email, /api/users/find-id
           filters:
@@ -42,7 +42,7 @@ spring:
 
         # 2-2. 인증이 필요한 나머지 경로
         - id: user-secure-routes
-          uri: lb://user-backend-service
+          uri: lb://user-backend-service-hoa
           predicates:
             - Path=/api/users/**
           filters:
