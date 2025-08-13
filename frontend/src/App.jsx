@@ -16,7 +16,7 @@ import Dashboard from './pages/Dashboard';
 import MyPage from './pages/MyPage'; // MyPage 추가
 import FAQ from './pages/FAQ';
 import './App.css';
-
+// redeploy trigger
 function App() {
   return (
     <AuthProvider>
