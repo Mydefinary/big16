@@ -21,7 +21,7 @@ spec:
       containers:
         # ✅ 이름 수정
         - name: gateway-container-hoa
-          image: kt16big.azurecr.io/gateway-hoa:${IMAGE_TAG}
+          image: kt16big.azurecr.io/gateway-hoa:$latest
           ports:
             - containerPort: 8000
           env:

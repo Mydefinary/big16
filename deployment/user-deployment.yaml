@@ -21,7 +21,7 @@ spec:
       containers:
         # ✅ 이름 수정
         - name: user-backend-container-hoa
-          image: kt16big.azurecr.io/user-backend-hoa:${IMAGE_TAG}
+          image: kt16big.azurecr.io/user-backend-hoa:$latest
           ports:
             - containerPort: 8081
           env:

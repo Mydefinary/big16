@@ -18,7 +18,7 @@ spec:
         agentpool: userpool
       containers:
         - name: auth-frontend-container-hoa
-          image: kt16big.azurecr.io/auth-frontend-hoa:${IMAGE_TAG}
+          image: kt16big.azurecr.io/auth-frontend-hoa:$latest
           ports:
             # ✅ 컨테이너가 실제로 노출하는 포트를 80으로 수정
             - containerPort: 80
