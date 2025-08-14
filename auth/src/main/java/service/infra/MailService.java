@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.SimpleMailMessage;
-import io.github.cdimascio.dotenv.Dotenv;
 
 import javax.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -26,26 +25,32 @@ public class MailService {
     private final String fromName;
     
     public MailService() {
-        // dotenv에서 값 읽기
-        String tempFromEmail;
-        String tempFromName;
+        // 환경변수에서 직접 읽기 (Azure 환경 호환)
+        String tempFromEmail = System.getenv("MAIL_FROM_ADDRESS");
+        String tempFromName = System.getenv("MAIL_FROM_NAME");
         
-        try {
-            Dotenv dotenv = Dotenv.load();
-            tempFromEmail = dotenv.get("MAIL_FROM_ADDRESS", "noreply@yourapp.com");
-            tempFromName = dotenv.get("MAIL_FROM_NAME", "인증서비스");
-            System.out.println("MailService 초기화 완료 - FROM: " + tempFromEmail);
-        } catch (Exception e) {
-            System.err.println("dotenv 로딩 실패, 기본값 사용: " + e.getMessage());
-            tempFromEmail = "noreply@yourapp.com";
-            tempFromName = "인증서비스";
+        // 기본값 설정
+        if (tempFromEmail == null || tempFromEmail.isEmpty()) {
+            tempFromEmail = "noreply@toonconnect.com";
+        }
+        if (tempFromName == null || tempFromName.isEmpty()) {
+            tempFromName = "ToonConnect 인증서비스";
         }
         
         this.fromEmail = tempFromEmail;
         this.fromName = tempFromName;
+        
+        System.out.println("MailService 초기화 완료 - FROM: " + tempFromEmail);
     }
 
     public void sendVerificationEmail(String toEmail, String code) {
+        // 현재 메일 설정이 불완전하므로 항상 Mock으로 처리
+        System.out.println("🔧 이메일 발송 요청 수신 - Mock 모드로 처리");
+        sendMockEmail(toEmail, code, "HTML-Mock");
+        return;
+        
+        // 실제 메일 발송은 나중에 활성화 예정
+        /*
         // 메일 설정 확인
         if (!isMailConfigured()) {
             sendMockEmail(toEmail, code, "HTML");
@@ -85,10 +90,17 @@ public class MailService {
             // 실패 시 Mock으로 대체
             sendMockEmail(toEmail, code, "HTML (발송실패)");
         }
+        */
     }
     
     // 간단한 버전
     public void sendVerificationEmailSimple(String toEmail, String code) {
+        System.out.println("🔧 Simple 이메일 발송 요청 - Mock 모드로 처리");
+        sendMockEmail(toEmail, code, "Simple-Mock");
+        return;
+        
+        // 실제 메일 발송은 나중에 활성화 예정
+        /*
         if (!isMailConfigured()) {
             sendMockEmail(toEmail, code, "Simple");
             return;
@@ -108,6 +120,7 @@ public class MailService {
             e.printStackTrace();
             sendMockEmail(toEmail, code, "Simple (발송실패)");
         }
+        */
     }
     
     // Mock 이메일 (실제 발송 안함)
