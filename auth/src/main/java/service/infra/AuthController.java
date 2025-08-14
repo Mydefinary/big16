@@ -133,7 +133,7 @@ public class AuthController {
             auth.setLoginId((String) userData.get("loginId"));
             auth.setEmail((String) userData.get("email"));
             auth.setPasswordHash((String) userData.get("passwordHash"));
-            auth.setStatus("EMAIL_VERIFIED"); // 이메일 인증 생략
+            auth.setVerified(true); // 이메일 인증 생략
             auth.setCreatedAt(new Date());
             
             authRepository.save(auth);
