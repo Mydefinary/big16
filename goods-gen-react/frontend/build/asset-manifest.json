@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/goods-gen/static/css/main.c6b8d3b6.css",
+    "main.js": "/goods-gen/static/js/main.a41489dd.js",
+    "static/js/453.4501120e.chunk.js": "/goods-gen/static/js/453.4501120e.chunk.js",
+    "index.html": "/goods-gen/index.html",
+    "main.c6b8d3b6.css.map": "/goods-gen/static/css/main.c6b8d3b6.css.map",
+    "main.a41489dd.js.map": "/goods-gen/static/js/main.a41489dd.js.map",
+    "453.4501120e.chunk.js.map": "/goods-gen/static/js/453.4501120e.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c6b8d3b6.css",
+    "static/js/main.a41489dd.js"
+  ]
+}

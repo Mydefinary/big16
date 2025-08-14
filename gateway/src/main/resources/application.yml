@@ -66,7 +66,50 @@ spring:
           order: 3
 
         # ===================================================
-        # 기타 서비스들...
+        # 프론트엔드 서비스 라우팅 (실제 서비스 페이지)
+        # ===================================================
+        - id: question-to-ppl-gen
+          uri: http://ppl-gen-frontend-service:80
+          predicates:
+            - Path=/question, /question/**
+          filters:
+            - name: JwtAuthenticationFilter
+          order: 5
+
+        - id: characters-to-webtoon-hl
+          uri: http://webtoon-hl-frontend-service:3003
+          predicates:
+            - Path=/characters, /characters/**
+          filters:
+            - name: JwtAuthenticationFilter
+          order: 6
+
+        - id: gallery-to-webtoon-dashboard
+          uri: http://webtoon-dashboard-frontend-service:80
+          predicates:
+            - Path=/gallery, /gallery/**
+          filters:
+            - name: JwtAuthenticationFilter
+          order: 7
+
+        - id: community-to-goods-gen
+          uri: http://goods-gen-frontend-service:80
+          predicates:
+            - Path=/community, /community/**
+          filters:
+            - name: JwtAuthenticationFilter
+          order: 8
+
+        - id: board-to-board-service
+          uri: http://board-frontend-service:80
+          predicates:
+            - Path=/board, /board/**
+          filters:
+            - name: JwtAuthenticationFilter
+          order: 9
+
+        # ===================================================
+        # 기타 서비스들 (API)...
         # ===================================================
         - id: ppl-gen-service
           uri: http://ppl-gen-backend-service:8080
