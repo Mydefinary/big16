@@ -11,7 +11,10 @@
       "Bash(kubectl patch:*)",
       "Bash(kubectl rollout restart:*)",
       "Bash(npm run build:*)",
-      "Bash(npx vite:*)"
+      "Bash(npx vite:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(sed:*)"
     ],
     "defaultMode": "acceptEdits"
   }

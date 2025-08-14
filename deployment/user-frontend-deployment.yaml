@@ -20,9 +20,9 @@ spec:
         agentpool: userpool
       containers:
         - name: auth-frontend-container
-          image: kt16big.azurecr.io/auth-frontend:${IMAGE_TAG}
+          image: kt16big.azurecr.io/auth-frontend:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 80
 ---
 # ===================================================
 # 14. 로그인/회원가입/인증 프론트엔드 서비스
@@ -38,4 +38,4 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080
+      targetPort: 80

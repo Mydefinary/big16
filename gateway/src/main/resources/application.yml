@@ -122,7 +122,7 @@ spring:
         # 메인 프론트엔드 (기본 경로들만) - 가장 낮은 우선순위
         # ===================================================
         - id: main-frontend
-          uri: http://auth-frontend-service-hoa:80
+          uri: http://auth-frontend-service:80
           predicates:
             - Path=/, /login, /register, /email-verification, /find-id, /find-password, /dashboard, /mypage, /faq, /static/**, /src/**, /node_modules/**, /@**
           order: 100

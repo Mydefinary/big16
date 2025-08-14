@@ -20,7 +20,7 @@ spec:
         agentpool: userpool
       containers:
         - name: webtoon-hl-frontend-container
-          image: kt16big.azurecr.io/webtoon-hl-frontend:${IMAGE_TAG}
+          image: kt16big.azurecr.io/webtoon-hl-frontend:latest
           ports:
             - containerPort: 80
 ---

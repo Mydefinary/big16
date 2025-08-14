@@ -20,7 +20,7 @@ spec:
         agentpool: userpool
       containers:
         - name: board-frontend-container
-          image: kt16big.azurecr.io/board-frontend:${IMAGE_TAG}
+          image: kt16big.azurecr.io/board-frontend:latest
           ports:
             - containerPort: 3000
 ---

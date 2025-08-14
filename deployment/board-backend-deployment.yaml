@@ -20,7 +20,7 @@ spec:
         agentpool: userpool
       containers:
         - name: board-backend-container
-          image: kt16big.azurecr.io/board-backend:${IMAGE_TAG}
+          image: kt16big.azurecr.io/board-backend:latest
           ports:
             - containerPort: 8082
 ---

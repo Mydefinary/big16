@@ -20,7 +20,7 @@ spec:
         agentpool: userpool
       containers:
         - name: user-backend-container
-          image: kt16big.azurecr.io/user-backend:${IMAGE_TAG}
+          image: kt16big.azurecr.io/user-backend:latest
           ports:
             - containerPort: 8081
           env:

@@ -20,7 +20,7 @@ spec:
         agentpool: userpool
       containers:
         - name: webtoon-dashboard-backend-container
-          image: kt16big.azurecr.io/webtoon-dashboard-backend:${IMAGE_TAG}
+          image: kt16big.azurecr.io/webtoon-dashboard-backend:latest
           ports:
             - containerPort: 8000
           workingDir: /app

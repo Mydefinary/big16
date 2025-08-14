@@ -7,7 +7,7 @@ on:
       - 'goods-gen-react/frontend/**'
       - '.github/workflows/goods-gen-fe-cicd.yml'
       # ✅ [수정]
-      - 'deployment/goods-gen-frontend.yaml'
+      - 'deployment/goods-gen-frontend-deployment.yaml'
   pull_request:
     branches: [ "img-gen-cicd" ]
     paths:
