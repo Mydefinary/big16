@@ -3,6 +3,7 @@
 package service.infra;
 
 import service.dto.UserRegisterRequest;
+import service.dto.SimpleTestRequest;
 
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
@@ -52,8 +53,23 @@ public class UserController {
     }
 
     @PostMapping("/test-json")
-    public ResponseEntity<?> testJson(@RequestBody(required = false) UserRegisterRequest request) {
-        System.out.println("=== JSON 테스트 ===");
+    public ResponseEntity<?> testJson(@RequestBody(required = false) SimpleTestRequest request) {
+        System.out.println("=== 간단한 JSON 테스트 ===");
+        System.out.println("Request Object: " + request);
+        if (request != null) {
+            System.out.println("Name: " + request.getName());
+            System.out.println("Email: " + request.getEmail());
+        }
+        return ResponseEntity.ok(Map.of(
+            "status", "success",
+            "message", "JSON parsing test completed",
+            "received", request != null ? request.toString() : "null"
+        ));
+    }
+    
+    @PostMapping("/test-complex")
+    public ResponseEntity<?> testComplexJson(@RequestBody(required = false) UserRegisterRequest request) {
+        System.out.println("=== 복잡한 JSON 테스트 ===");
         System.out.println("Request Object: " + request);
         if (request != null) {
             System.out.println("LoginId: " + request.getLoginId());
@@ -61,7 +77,11 @@ public class UserController {
             System.out.println("Nickname: " + request.getNickname());
             System.out.println("Password: " + (request.getPassword() != null ? "[SET]" : "[NULL]"));
         }
-        return ResponseEntity.ok("JSON parsing test completed. Check logs.");
+        return ResponseEntity.ok(Map.of(
+            "status", "success", 
+            "message", "Complex JSON parsing test completed",
+            "received", request != null ? request.toString() : "null"
+        ));
     }
 
     @PostMapping("/register")
