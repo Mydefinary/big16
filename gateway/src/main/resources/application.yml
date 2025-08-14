@@ -36,7 +36,7 @@ spring:
         - id: user-public-routes
           uri: http://user-backend-service-hoa:8081
           predicates:
-            - Path=/api/users/register, /api/users/check-email, /api/users/find-id, /api/users/health
+            - Path=/api/users/register, /api/users/check-email, /api/users/find-id, /api/users/health, /api/users/test-json
           filters:
             - StripPrefix=1
           order: 1

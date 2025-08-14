@@ -51,6 +51,19 @@ public class UserController {
         return ResponseEntity.ok(status);
     }
 
+    @PostMapping("/test-json")
+    public ResponseEntity<?> testJson(@RequestBody(required = false) UserRegisterRequest request) {
+        System.out.println("=== JSON 테스트 ===");
+        System.out.println("Request Object: " + request);
+        if (request != null) {
+            System.out.println("LoginId: " + request.getLoginId());
+            System.out.println("Email: " + request.getEmail());
+            System.out.println("Nickname: " + request.getNickname());
+            System.out.println("Password: " + (request.getPassword() != null ? "[SET]" : "[NULL]"));
+        }
+        return ResponseEntity.ok("JSON parsing test completed. Check logs.");
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody(required = false) UserRegisterRequest request, 
                                          HttpServletRequest httpRequest) {
@@ -58,7 +71,15 @@ public class UserController {
         System.out.println("Request Method: " + httpRequest.getMethod());
         System.out.println("Request URL: " + httpRequest.getRequestURL());
         System.out.println("Content Type: " + httpRequest.getContentType());
+        System.out.println("Content Length: " + httpRequest.getContentLength());
+        
+        // 헤더 정보 상세 확인
+        System.out.println("Accept Header: " + httpRequest.getHeader("Accept"));
+        System.out.println("User-Agent: " + httpRequest.getHeader("User-Agent"));
+        System.out.println("Origin: " + httpRequest.getHeader("Origin"));
+        
         System.out.println("Request Body Object: " + request);
+        System.out.println("Request Object Class: " + (request != null ? request.getClass().getName() : "null"));
         
         try {
             // 1) 입력 값 검증

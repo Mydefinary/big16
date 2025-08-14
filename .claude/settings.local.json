@@ -6,7 +6,8 @@
       "Bash(kubectl exec:*)",
       "Bash(kubectl logs:*)",
       "Bash(kubectl get pods:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(kubectl get:*)"
     ],
     "defaultMode": "acceptEdits"
   }
