@@ -184,7 +184,7 @@ public class UserController {
             System.out.println("Auth 서비스 HTTP 호출 시작");
             
             // Auth 서비스 URL (내부 서비스 호출)
-            String authServiceUrl = "http://auth-backend-service-hoa:8080/auth/save-password";
+            String authServiceUrl = "http://auth-backend-service-hoa:8080/auths/save-password";
             
             // 요청 데이터 준비
             Map<String, Object> authData = new HashMap<>();

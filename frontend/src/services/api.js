@@ -63,8 +63,8 @@ api.interceptors.response.use(
 
 // Auth API
 export const authAPI = {
-  // AuthController의 실제 경로에 맞게 수정 (/auths)
-  login: (credentials) => api.post('/api/auths/login', credentials),
+  // AuthController의 실제 경로에 맞게 수정 (/auths) - safe-login 사용
+  login: (credentials) => api.post('/api/auths/safe-login', credentials),
   logout: (refreshToken) => api.post('/api/auths/logout', { refreshToken }),
   refreshToken: (refreshToken) => api.post('/api/auths/refresh', { refreshToken }),
   verifyCode: (email, code) => api.post('/api/auths/verify-code', { email, code }),

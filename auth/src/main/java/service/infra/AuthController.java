@@ -121,28 +121,90 @@ public class AuthController {
         */
     }
 
-    // 로그인 테스트용 간단한 엔드포인트 - Map으로 받기
-    @PostMapping("/test-login")
-    public ResponseEntity<?> testLogin(@RequestBody(required = false) Map<String, Object> rawData) {
-        System.out.println("=== 로그인 테스트 (Map 방식) ===");
+    // 사용자 조회 테스트 엔드포인트
+    @GetMapping("/check-user/{loginId}")
+    public ResponseEntity<?> checkUser(@PathVariable String loginId) {
+        try {
+            Optional<Auth> authOpt = authRepository.findByLoginId(loginId);
+            if (authOpt.isPresent()) {
+                Auth auth = authOpt.get();
+                return ResponseEntity.ok(Map.of(
+                    "exists", true,
+                    "loginId", auth.getLoginId(),
+                    "email", auth.getEmail(),
+                    "userId", auth.getUserId(),
+                    "isVerified", auth.isVerified()
+                ));
+            } else {
+                return ResponseEntity.ok(Map.of("exists", false));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error checking user: " + e.getMessage());
+        }
+    }
+
+    // 안전한 로그인 엔드포인트 - String/Object 모두 처리
+    @PostMapping("/safe-login")
+    public ResponseEntity<?> safeLogin(@RequestBody(required = false) Object rawData, 
+                                      HttpServletRequest httpRequest) {
+        System.out.println("=== 안전한 로그인 요청 ===");
+        System.out.println("Raw Data Type: " + (rawData != null ? rawData.getClass().getName() : "null"));
         System.out.println("Raw Data: " + rawData);
         
         String loginId = null;
         String password = null;
         
-        if (rawData != null) {
-            loginId = (String) rawData.get("loginId");
-            password = (String) rawData.get("password");
+        try {
+            if (rawData instanceof Map) {
+                Map<String, Object> mapData = (Map<String, Object>) rawData;
+                loginId = (String) mapData.get("loginId");
+                password = (String) mapData.get("password");
+            } else if (rawData instanceof String) {
+                System.out.println("문자열 데이터 수신, JSON 파싱 시도");
+                // JSON 문자열인 경우 파싱
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                Map<String, Object> parsedData = mapper.readValue((String) rawData, Map.class);
+                loginId = (String) parsedData.get("loginId");
+                password = (String) parsedData.get("password");
+            }
+            
             System.out.println("Extracted LoginId: " + loginId);
             System.out.println("Extracted Password: " + (password != null ? "[PROVIDED]" : "[NULL]"));
+            
+            if (loginId == null || password == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 아이디와 비밀번호를 입력해주세요.");
+            }
+            
+            // 실제 로그인 로직 수행
+            Auth auth = authRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
+            
+            if (!auth.isVerified()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("이메일 미인증 상태입니다.");
+            }
+            
+            auth.verifyPassword(password);
+            
+            // 토큰 생성
+            String accessToken = JwtUtil.generateToken(auth.getUserId());
+            String refreshToken = JwtUtil.generateRefreshToken(auth.getUserId());
+            
+            auth.updateTokens(accessToken, refreshToken);
+            authRepository.save(auth);
+            
+            return ResponseEntity.ok(Map.of(
+                "accessToken", accessToken,
+                "refreshToken", refreshToken,
+                "userId", auth.getUserId(),
+                "loginId", auth.getLoginId()
+            ));
+            
+        } catch (Exception e) {
+            System.err.println("로그인 오류: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 실패: " + e.getMessage());
         }
-        
-        return ResponseEntity.ok(Map.of(
-            "status", "success",
-            "message", "로그인 테스트 완료 (Map)", 
-            "receivedLoginId", loginId != null ? loginId : "null",
-            "receivedPassword", password != null ? "[PROVIDED]" : "null"
-        ));
     }
 
     // User 서비스에서 직접 호출하는 비밀번호 저장 API
@@ -174,45 +236,39 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody(required = false) LoginCommand command, 
+    public ResponseEntity<?> login(@RequestBody(required = false) Map<String, Object> loginData, 
                                   HttpServletRequest httpRequest) {
-        System.out.println("=== 로그인 요청 시작 ===");
+        System.out.println("=== 로그인 요청 시작 (Map 방식) ===");
         System.out.println("Request URL: " + httpRequest.getRequestURL());
         System.out.println("Content Type: " + httpRequest.getContentType());
-        System.out.println("Content Length: " + httpRequest.getContentLength());
-        
-        // 헤더 정보 출력
-        java.util.Enumeration<String> headerNames = httpRequest.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String headerName = headerNames.nextElement();
-            System.out.println("Header " + headerName + ": " + httpRequest.getHeader(headerName));
-        }
-        
-        System.out.println("Command Object: " + command);
+        System.out.println("Raw Login Data: " + loginData);
         
         // 입력값 검증
-        if (command == null) {
-            System.out.println("ERROR: LoginCommand is null - JSON parsing failed");
+        if (loginData == null) {
+            System.out.println("ERROR: loginData is null");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 데이터가 없습니다.");
         }
         
-        System.out.println("LoginId: " + command.getLoginId());
-        System.out.println("Password: " + (command.getPassword() != null ? "[PROVIDED]" : "[NULL]"));
+        String loginId = (String) loginData.get("loginId");
+        String password = (String) loginData.get("password");
         
-        if (command.getLoginId() == null || command.getLoginId().trim().isEmpty()) {
+        System.out.println("Extracted LoginId: " + loginId);
+        System.out.println("Extracted Password: " + (password != null ? "[PROVIDED]" : "[NULL]"));
+        
+        if (loginId == null || loginId.trim().isEmpty()) {
             System.out.println("ERROR: LoginId is empty");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 아이디를 입력해주세요.");
         }
         
-        if (command.getPassword() == null || command.getPassword().trim().isEmpty()) {
+        if (password == null || password.trim().isEmpty()) {
             System.out.println("ERROR: Password is empty");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호를 입력해주세요.");
         }
         
         try {
             // 1. 사용자 조회
-            System.out.println("사용자 조회 시작: " + command.getLoginId());
-            Auth auth = authRepository.findByLoginId(command.getLoginId())
+            System.out.println("사용자 조회 시작: " + loginId);
+            Auth auth = authRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
             
             System.out.println("사용자 찾음. UserId: " + auth.getUserId() + ", Verified: " + auth.isVerified());
@@ -226,7 +282,7 @@ public class AuthController {
             
             // 3. 비밀번호 검증
             System.out.println("비밀번호 검증 시작");
-            auth.verifyPassword(command.getPassword());
+            auth.verifyPassword(password);
             System.out.println("비밀번호 검증 성공");
             
             // Access Token과 Refresh Token 생성
