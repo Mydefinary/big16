@@ -68,11 +68,25 @@ spring:
         # ===================================================
         # 프론트엔드 서비스 라우팅 (실제 서비스 페이지)
         # ===================================================
+        # ppl-gen 정적 자산 먼저 처리
+        - id: ppl-gen-assets
+          uri: http://ppl-gen-frontend-service:80
+          predicates:
+            - Path=/ppl-gen/assets/**, /ppl-gen/static/**, /ppl-gen/*.js, /ppl-gen/*.css, /ppl-gen/*.png, /ppl-gen/*.jpg, /ppl-gen/*.svg
+          order: 4
+
         - id: ppl-gen-frontend
           uri: http://ppl-gen-frontend-service:80
           predicates:
             - Path=/ppl-gen, /ppl-gen/**
           order: 5
+
+        # goods-gen 정적 자산 먼저 처리
+        - id: goods-gen-assets
+          uri: http://goods-gen-frontend-service:80
+          predicates:
+            - Path=/goods-gen/assets/**, /goods-gen/static/**, /goods-gen/*.js, /goods-gen/*.css, /goods-gen/*.png, /goods-gen/*.jpg, /goods-gen/*.svg
+          order: 5.5
 
         - id: goods-gen-frontend  
           uri: http://goods-gen-frontend-service:80
