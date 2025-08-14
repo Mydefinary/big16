@@ -2,10 +2,10 @@
 spring:
   application:
     name: gateway
-  cloud:
-    kubernetes:
-      secrets:
-        sources:
-          - name: api-keys-secret
-      reload:
-        enabled: true
+  # cloud:
+  #   kubernetes:
+  #     secrets:
+  #       sources:
+  #         - name: api-keys-secret
+  #     reload:
+  #       enabled: true
