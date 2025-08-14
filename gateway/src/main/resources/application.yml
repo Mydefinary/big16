@@ -68,39 +68,39 @@ spring:
         # ===================================================
         # 프론트엔드 서비스 라우팅 (실제 서비스 페이지)
         # ===================================================
-        - id: question-to-ppl-gen
+        - id: ppl-gen-frontend
           uri: http://ppl-gen-frontend-service:80
           predicates:
-            - Path=/question, /question/**
+            - Path=/ppl-gen, /ppl-gen/**
           filters:
             - name: JwtAuthenticationFilter
           order: 5
 
-        - id: characters-to-webtoon-hl
-          uri: http://webtoon-hl-frontend-service:3003
+        - id: goods-gen-frontend  
+          uri: http://goods-gen-frontend-service:80
           predicates:
-            - Path=/characters, /characters/**
+            - Path=/goods-gen, /goods-gen/**
           filters:
             - name: JwtAuthenticationFilter
           order: 6
 
-        - id: gallery-to-webtoon-dashboard
-          uri: http://webtoon-dashboard-frontend-service:80
+        - id: webtoon-hl-frontend
+          uri: http://webtoon-hl-frontend-service:3003
           predicates:
-            - Path=/gallery, /gallery/**
+            - Path=/webtoon-hl, /webtoon-hl/**
           filters:
             - name: JwtAuthenticationFilter
           order: 7
 
-        - id: community-to-goods-gen
-          uri: http://goods-gen-frontend-service:80
+        - id: webtoon-dashboard-frontend
+          uri: http://webtoon-dashboard-frontend-service:80
           predicates:
-            - Path=/community, /community/**
+            - Path=/webtoon-dashboard, /webtoon-dashboard/**
           filters:
             - name: JwtAuthenticationFilter
           order: 8
 
-        - id: board-to-board-service
+        - id: board-frontend
           uri: http://board-frontend-service:80
           predicates:
             - Path=/board, /board/**
@@ -109,10 +109,19 @@ spring:
           order: 9
 
         # ===================================================
+        # 메인 프론트엔드 (기본 경로들만) - 가장 낮은 우선순위
+        # ===================================================
+        - id: main-frontend
+          uri: http://auth-frontend-service-hoa:80
+          predicates:
+            - Path=/, /login, /register, /email-verification, /find-id, /find-password, /dashboard, /mypage, /faq, /static/**, /src/**, /node_modules/**, /@**
+          order: 100
+
+        # ===================================================
         # 기타 서비스들 (API)...
         # ===================================================
         - id: ppl-gen-service
-          uri: http://ppl-gen-backend-service:8080
+          uri: http://ppl-gen-backend-service:8000
           predicates:
             - Path=/api/ppl-gen/**
           filters:
@@ -121,7 +130,7 @@ spring:
           order: 10
 
         - id: goods-gen-service
-          uri: http://goods-gen-backend-service:8080
+          uri: http://goods-gen-backend-service:8001
           predicates:
             - Path=/api/goods-gen/**
           filters:
@@ -130,7 +139,7 @@ spring:
           order: 11
 
         - id: webtoon-dashboard-service
-          uri: http://webtoon-dashboard-backend-service:8080
+          uri: http://webtoon-dashboard-backend-service:8002
           predicates:
             - Path=/api/webtoon/**
           filters:
@@ -139,7 +148,7 @@ spring:
           order: 12
 
         - id: webtoon-hl-service
-          uri: http://webtoon-hl-backend-service:8080
+          uri: http://webtoon-hl-backend-service:8003
           predicates:
             - Path=/api/webtoon-hl/**
           filters:
@@ -148,7 +157,7 @@ spring:
           order: 13
 
         - id: board-service
-          uri: http://board-backend-service:8080
+          uri: http://board-backend-service:8082
           predicates:
             - Path=/api/board/**
           filters:

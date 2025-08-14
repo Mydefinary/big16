@@ -783,6 +783,16 @@ body {
   border-radius: 1px;
 }
 
+/* 네비게이션 버튼 스타일 (링크와 동일하게) */
+.nav-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 0;
+  font-size: 14px;
+  font-family: inherit;
+}
+
 /* 우측 액션 버튼들 */
 .header-actions {
   display: flex;

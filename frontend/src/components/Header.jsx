@@ -33,6 +33,21 @@ const Header = () => {
     }
   };
 
+  // JWT 토큰과 함께 외부 서비스로 이동하는 함수
+  const handleServiceNavigation = (servicePath) => {
+    if (!isAuthenticated()) {
+      toast.error('로그인이 필요합니다.', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      navigate('/login');
+      return;
+    }
+    
+    // 현재 도메인으로 서비스 경로로 이동 (Gateway에서 라우팅)
+    window.location.href = `${window.location.origin}${servicePath}`;
+  };
+
   // 현재 경로가 활성 상태인지 확인하는 함수
   const isActive = (path) => {
     if (path === '/') {
@@ -55,44 +70,44 @@ const Header = () => {
         <nav className="header-nav">
           <ul className="nav-list">
             <li className="nav-item">
-              <Link
-                to="/question"
-                className={`nav-link ${isActive('/question') ? 'active' : ''}`}
+              <button
+                onClick={() => handleServiceNavigation('/ppl-gen')}
+                className="nav-link nav-button"
               >
                 작품 질의하기
-              </Link>
+              </button>
             </li>
             <li className="nav-item">
-              <Link
-                to="/characters"
-                className={`nav-link ${isActive('/characters') ? 'active' : ''}`}
+              <button
+                onClick={() => handleServiceNavigation('/webtoon-hl')}
+                className="nav-link nav-button"
               >
                 하이라이트 제작
-              </Link>
+              </button>
             </li>
             <li className="nav-item">
-              <Link
-                to="/gallery"
-                className={`nav-link ${isActive('/gallery') ? 'active' : ''}`}
+              <button
+                onClick={() => handleServiceNavigation('/webtoon-dashboard')}
+                className="nav-link nav-button"
               >
                 웹툰 상세 분석
-              </Link>
+              </button>
             </li>
             <li className="nav-item">
-              <Link
-                to="/community"
-                className={`nav-link ${isActive('/community') ? 'active' : ''}`}
+              <button
+                onClick={() => handleServiceNavigation('/goods-gen')}
+                className="nav-link nav-button"
               >
                 광고 초안 생성
-              </Link>
+              </button>
             </li>
             <li className="nav-item">
-              <Link
-                to="/board"
-                className={`nav-link ${isActive('/board') ? 'active' : ''}`}
+              <button
+                onClick={() => handleServiceNavigation('/board')}
+                className="nav-link nav-button"
               >
                 광고 파트너십 문의
-              </Link>
+              </button>
             </li>
           </ul>
         </nav>

@@ -9,7 +9,9 @@
       "Bash(git add:*)",
       "Bash(kubectl get:*)",
       "Bash(kubectl patch:*)",
-      "Bash(kubectl rollout restart:*)"
+      "Bash(kubectl rollout restart:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx vite:*)"
     ],
     "defaultMode": "acceptEdits"
   }
