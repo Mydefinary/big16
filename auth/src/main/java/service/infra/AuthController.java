@@ -316,9 +316,9 @@ public class AuthController {
             auth.updateTokens(accessToken, refreshToken);
             authRepository.save(auth);
 
-            // 로그인 성공 이벤트 발행
-            LoginSuccessed event = new LoginSuccessed(auth, accessToken);
-            event.publish();
+            // 로그인 성공 이벤트 발행 (Kafka 직렬화 오류로 임시 비활성화)
+            // LoginSuccessed event = new LoginSuccessed(auth, accessToken);
+            // event.publish();
 
             Map<String, String> tokens = new HashMap<>();
             tokens.put("accessToken", accessToken);

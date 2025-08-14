@@ -124,4 +124,4 @@ spring:
 
 
 jwt:
-  secret: ${JWT_SECRET:your-super-secret-jwt-key-here-make-it-long-and-secure}
+  secret: ${JWT_SECRET:your-super-secret-jwt-key-here-make-it-long-and-secure-at-least-32-characters}

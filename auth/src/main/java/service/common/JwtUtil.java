@@ -14,51 +14,96 @@ import java.nio.charset.StandardCharsets;
 
 public class JwtUtil {
     
-    // ✅ 환경변수 접근 방식 수정 (dotenv 대신 System.getenv 사용)
-    private static final String SECRET_KEY = System.getenv("JWT_SECRET") != null 
-        ? System.getenv("JWT_SECRET") 
-        : "your-super-secret-jwt-key-here-make-it-long-and-secure-at-least-32-characters";
-    
-    // 🔑 JJWT 0.11+에서는 SecretKey 객체 사용
-    private static final SecretKey signingKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
-
     private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60; // 1시간
     private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 7; // 7일
     private static final long EMAIL_TOKEN_EXPIRATION = 1000 * 60 * 10; // 10분
+    
+    // 🔑 Lazy initialization으로 안전한 키 관리
+    private static volatile SecretKey signingKey;
+    private static volatile String secretKey;
+    
+    // 🔑 안전한 시크릿 키 가져오기
+    private static String getSecretKey() {
+        if (secretKey == null) {
+            synchronized (JwtUtil.class) {
+                if (secretKey == null) {
+                    String envSecret = System.getenv("JWT_SECRET");
+                    if (envSecret != null && envSecret.length() >= 32) {
+                        secretKey = envSecret;
+                    } else {
+                        secretKey = "your-super-secret-jwt-key-here-make-it-long-and-secure-at-least-32-characters-for-hmac-sha256";
+                    }
+                }
+            }
+        }
+        return secretKey;
+    }
+    
+    // 🔑 안전한 SigningKey 가져오기
+    private static SecretKey getSigningKey() {
+        if (signingKey == null) {
+            synchronized (JwtUtil.class) {
+                if (signingKey == null) {
+                    try {
+                        String key = getSecretKey();
+                        signingKey = Keys.hmacShaKeyFor(key.getBytes(StandardCharsets.UTF_8));
+                        System.out.println("JWT SigningKey 초기화 성공");
+                    } catch (Exception e) {
+                        System.err.println("JWT 키 생성 실패: " + e.getMessage());
+                        e.printStackTrace();
+                        throw new IllegalStateException("JWT 키 초기화 실패", e);
+                    }
+                }
+            }
+        }
+        return signingKey;
+    }
 
     // Access Token 생성
     public static String generateToken(Long userId) {
-        checkSecret();
-        return Jwts.builder()
-                .setSubject(userId.toString())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                .signWith(signingKey, SignatureAlgorithm.HS256)
-                .compact();
+        try {
+            return Jwts.builder()
+                    .setSubject(userId.toString())
+                    .setIssuedAt(new Date())
+                    .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
+                    .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                    .compact();
+        } catch (Exception e) {
+            System.err.println("Access Token 생성 실패: " + e.getMessage());
+            throw new RuntimeException("Access Token 생성 실패", e);
+        }
     }
 
     // Refresh Token 생성
     public static String generateRefreshToken(Long userId) {
-        checkSecret();
-        return Jwts.builder()
-                .setSubject(userId.toString())
-                .claim("type", "refresh") // ✅ 타입 명시 추가
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
-                .signWith(signingKey, SignatureAlgorithm.HS256)
-                .compact();
+        try {
+            return Jwts.builder()
+                    .setSubject(userId.toString())
+                    .claim("type", "refresh") // ✅ 타입 명시 추가
+                    .setIssuedAt(new Date())
+                    .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
+                    .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                    .compact();
+        } catch (Exception e) {
+            System.err.println("Refresh Token 생성 실패: " + e.getMessage());
+            throw new RuntimeException("Refresh Token 생성 실패", e);
+        }
     }
 
     // 이메일 인증용 토큰 생성
     public static String generateEmailToken(String email) {
-        checkSecret();
-        return Jwts.builder()
-                .setSubject(email)
-                .claim("type", "email-verification")
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EMAIL_TOKEN_EXPIRATION))
-                .signWith(signingKey, SignatureAlgorithm.HS256)
-                .compact();
+        try {
+            return Jwts.builder()
+                    .setSubject(email)
+                    .claim("type", "email-verification")
+                    .setIssuedAt(new Date())
+                    .setExpiration(new Date(System.currentTimeMillis() + EMAIL_TOKEN_EXPIRATION))
+                    .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                    .compact();
+        } catch (Exception e) {
+            System.err.println("Email Token 생성 실패: " + e.getMessage());
+            throw new RuntimeException("Email Token 생성 실패", e);
+        }
     }
 
     // 이메일 토큰에서 이메일 추출
@@ -98,18 +143,15 @@ public class JwtUtil {
 
     // 내부: 토큰 파싱
     private static Claims parseToken(String token) {
-        checkSecret();
-        return Jwts.parserBuilder()
-                .setSigningKey(signingKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    // 내부: 시크릿 체크
-    private static void checkSecret() {
-        if (SECRET_KEY == null || SECRET_KEY.isEmpty()) {
-            throw new IllegalStateException("JWT_SECRET 환경변수가 설정되어 있지 않습니다.");
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            System.err.println("토큰 파싱 실패: " + e.getMessage());
+            throw new IllegalArgumentException("유효하지 않은 토큰입니다.", e);
         }
     }
 }

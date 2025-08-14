@@ -100,9 +100,9 @@ public class Auth {
 
         repository().save(auth);
 
-        // 저장 후 이벤트 발행 (필요하다면)
-        PasswordSaved passwordSavedEvent = new PasswordSaved(auth);
-        passwordSavedEvent.publishAfterCommit();
+        // 저장 후 이벤트 발행 (Kafka 직렬화 오류로 임시 비활성화)
+        // PasswordSaved passwordSavedEvent = new PasswordSaved(auth);
+        // passwordSavedEvent.publishAfterCommit();
     }
 
     //>>> Clean Arch / Port Method
@@ -133,8 +133,8 @@ public class Auth {
 
             repository().save(auth);
 
-            EmailVerificationRequested event = new EmailVerificationRequested(auth);
-            event.publishAfterCommit();
+            // EmailVerificationRequested event = new EmailVerificationRequested(auth);
+            // event.publishAfterCommit();
         } else {
             // 어차피 UserBC에서 처리하기떄문에 복잡한 예외처리 없이 로그정도만
             System.out.println("이메일 없음");
@@ -153,8 +153,8 @@ public class Auth {
         isVerified = this.emailVerificationCode.equals(inputCode);
 
         if(isVerified){
-            EmailVerified event = new EmailVerified(this);
-            event.publish();
+            // EmailVerified event = new EmailVerified(this);
+            // event.publish();
         }
         // 이메일 인증 실패 이벤트는 이후 실행하는거 없어서 주석 처리
         // EmailVerificationFailed event = new EmailVerificationFailed(this);
@@ -177,8 +177,8 @@ public class Auth {
 
             repository().save(auth);
 
-            EmailVerificationRequested event = new EmailVerificationRequested(auth);
-            event.publishAfterCommit();
+            // EmailVerificationRequested event = new EmailVerificationRequested(auth);
+            // event.publishAfterCommit();
         } else {
             // 어차피 UserBC에서 처리하기떄문에 복잡한 예외처리 없이 로그정도만
             System.out.println("이메일 없음");
@@ -210,9 +210,9 @@ public class Auth {
         // 새로운 인증코드 생성
         String newCode = this.generateNewVerificationCode();
         
-        // 이벤트 발행 (기존 EmailVerificationRequested 재사용)
-        EmailVerificationRequested event = new EmailVerificationRequested(this);
-        event.publishAfterCommit();
+        // 이벤트 발행 (Kafka 직렬화 오류로 임시 비활성화)
+        // EmailVerificationRequested event = new EmailVerificationRequested(this);
+        // event.publishAfterCommit();
     }
 
     public String generateNewVerificationCode() {
