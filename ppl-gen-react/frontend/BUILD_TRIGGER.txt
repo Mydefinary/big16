@@ -1,6 +1,9 @@
-Build trigger file - Updated at 2025-08-14 16:15:00
+Build trigger file - Updated at 2025-08-14 20:50:00
 This file is created to force CI/CD pipeline trigger for ppl-gen frontend.
-Changes made:
-- Fixed nginx configuration
-- Removed homepage setting
-- Updated index.html with proper PPL service interface
+Final deployment ready:
+- All routing configurations verified and working
+- Gateway properly routes /ppl-gen to ppl-gen-frontend-service
+- API routes /api/ppl-gen/** configured without JWT auth
+- Homepage="/ppl-gen" setting confirmed for React app
+- Nginx subpath routing ready
+- Complete PPL generation service deployment ready

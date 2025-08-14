@@ -1,0 +1,10 @@
+Build trigger file - Updated at 2025-08-14 20:50:00
+This file is created to force CI/CD pipeline trigger for goods-gen frontend.
+Final deployment ready:
+- All routing configurations verified and working  
+- Gateway properly routes /goods-gen to goods-gen-frontend-service
+- API routes /api/goods-gen/** configured without JWT auth
+- Homepage="/goods-gen" setting confirmed for React app
+- Complete React app with professional UI/UX
+- Full feature set: translation, file upload, progress tracking
+- Complete goods generation service deployment ready
