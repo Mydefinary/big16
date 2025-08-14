@@ -5,7 +5,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <span className="logo">Service Name</span>
+        <span className="logo">ToonConnect</span>
         <ul>
           <li>작품 질의하기</li>
           <li className="active">하이라이트 제작</li>
