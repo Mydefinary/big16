@@ -122,20 +122,19 @@ spring:
         # 메인 프론트엔드 (기본 경로들만) - 가장 낮은 우선순위
         # ===================================================
         - id: main-frontend
-          uri: http://auth-frontend-service:80
+          uri: http://auth-frontend-service-hoa:80
           predicates:
             - Path=/, /login, /register, /email-verification, /find-id, /find-password, /dashboard, /mypage, /faq, /static/**, /src/**, /node_modules/**, /@**
           order: 100
 
         # ===================================================
-        # 기타 서비스들 (API)...
+        # PPL & Goods Generation APIs - 공개 경로 (인증 불필요)
         # ===================================================
         - id: ppl-gen-service
           uri: http://ppl-gen-backend-service:8000
           predicates:
             - Path=/api/ppl-gen/**
           filters:
-            - name: JwtAuthenticationFilter
             - StripPrefix=2
           order: 10
 
@@ -144,7 +143,6 @@ spring:
           predicates:
             - Path=/api/goods-gen/**
           filters:
-            - name: JwtAuthenticationFilter
             - StripPrefix=2
           order: 11
 
