@@ -25,7 +25,7 @@ spring:
         - id: auth-public-routes
           uri: http://auth-backend-service-hoa:8080
           predicates:
-            - Path=/api/auths/login, /api/auths/register, /api/auths/verify-code, /api/auths/resend-code, /api/auths/check-email, /api/auths/check-login-id, /api/auths/refresh, /api/auths/reset-password
+            - Path=/api/auths/login, /api/auths/register, /api/auths/verify-code, /api/auths/resend-code, /api/auths/check-email, /api/auths/check-login-id, /api/auths/refresh, /api/auths/reset-password, /api/auths/health
           filters:
             - StripPrefix=1
           order: 0
@@ -36,7 +36,7 @@ spring:
         - id: user-public-routes
           uri: http://user-backend-service-hoa:8081
           predicates:
-            - Path=/api/users/register, /api/users/check-email, /api/users/find-id
+            - Path=/api/users/register, /api/users/check-email, /api/users/find-id, /api/users/health
           filters:
             - StripPrefix=1
           order: 1
