@@ -31,33 +31,54 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRegisterRequest request) {
-        // 1) 중복 아이디/이메일 체크 (필요 시)
-        if(userRepository.findByLoginId(request.getLoginId()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 로그인 아이디입니다.");
+        try {
+            // 1) 입력 값 검증
+            if (request.getLoginId() == null || request.getLoginId().trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 아이디를 입력해주세요.");
+            }
+            if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이메일을 입력해주세요.");
+            }
+            if (request.getNickname() == null || request.getNickname().trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("닉네임을 입력해주세요.");
+            }
+            if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호를 입력해주세요.");
+            }
+
+            // 2) 중복 아이디/이메일 체크 (필요 시)
+            if(userRepository.findByLoginId(request.getLoginId()).isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 로그인 아이디입니다.");
+            }
+            if(userRepository.findByEmail(request.getEmail()).isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일입니다.");
+            }
+
+            // 3) User 엔티티 생성 및 저장
+            User user = new User();
+            user.setLoginId(request.getLoginId().trim());
+            user.setEmail(request.getEmail().trim());
+            user.setNickname(request.getNickname().trim());
+            user.setStatus("TRY_TO_REGISTERED"); // 가입 후 이메일 인증 대기 상태
+            user.setCreatedAt(new Date());
+            userRepository.save(user);
+
+            // 4) 비밀번호 저장 등 Auth BC와 연동 (이벤트 발행 또는 직접 호출)
+            // User 저장이 완료된 후에 이벤트를 발행하여 Auth BC로 비밀번호 정보 전달
+            UserSaved userSavedEvent = new UserSaved(user);
+            // 비밀번호는 반드시 암호화된 상태로 포함시켜야 함
+            userSavedEvent.setPassword(encryptPassword(request.getPassword())); 
+            // 트랜잭션 커밋 후 이벤트 발행
+            userSavedEvent.publishAfterCommit();
+
+            // 5) 응답 반환
+            return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 완료되었습니다. 이메일 인증을 진행해 주세요");
+        } catch (Exception e) {
+            // 로그 출력
+            System.err.println("회원가입 처리 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원가입 처리 중 오류가 발생했습니다.");
         }
-        if(userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일입니다.");
-        }
-
-        // 2) User 엔티티 생성 및 저장
-        User user = new User();
-        user.setLoginId(request.getLoginId());
-        user.setEmail(request.getEmail());
-        user.setNickname(request.getNickname());
-        user.setStatus("TRY_TO_REGISTERED"); // 가입 후 이메일 인증 대기 상태
-        user.setCreatedAt(new Date());
-        userRepository.save(user);
-
-        // 3) 비밀번호 저장 등 Auth BC와 연동 (이벤트 발행 또는 직접 호출)
-        // User 저장이 완료된 후에 이벤트를 발행하여 Auth BC로 비밀번호 정보 전달
-        UserSaved userSavedEvent = new UserSaved(user);
-        // 비밀번호는 반드시 암호화된 상태로 포함시켜야 함
-        userSavedEvent.setPassword(encryptPassword(request.getPassword())); 
-        // 트랜잭션 커밋 후 이벤트 발행
-        userSavedEvent.publishAfterCommit();
-
-        // 4) 응답 반환
-        return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 완료되었습니다. 이메일 인증을 진행해 주세요");
     }
 
     // 비밀번호 암호화 예시 메서드 (구현 필요)

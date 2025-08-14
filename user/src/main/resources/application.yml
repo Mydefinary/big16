@@ -33,11 +33,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
+        show_sql: true
+    show-sql: true
 
   # ✅ [추가] Spring Mail 설정
   mail:

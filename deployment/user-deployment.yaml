@@ -40,21 +40,6 @@ spec:
                 secretKeyRef:
                   name: api-keys-secret
                   key: DB_PASSWORD
-            - name: spring.datasource.url
-              valueFrom:
-                secretKeyRef:
-                  name: api-keys-secret
-                  key: DB_URL
-            - name: spring.datasource.username
-              valueFrom:
-                secretKeyRef:
-                  name: api-keys-secret
-                  key: DB_USER
-            - name: spring.datasource.password
-              valueFrom:
-                secretKeyRef:
-                  name: api-keys-secret
-                  key: DB_PASSWORD
             
             # ✅ Kafka 설정 추가
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS

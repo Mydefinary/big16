@@ -2,8 +2,8 @@
 
 import axios from 'axios';
 
-// API 기본 설정
-const API_BASE_URL = 'http://20.249.154.2:8000/';
+// API 기본 설정 (게이트웨이는 일반적으로 80포트에서 실행됨)
+const API_BASE_URL = 'http://20.249.154.2/';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

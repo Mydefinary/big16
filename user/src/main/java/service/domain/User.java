@@ -24,21 +24,30 @@ import service.domain.UserSaved;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long userId;
 
+    @Column(name = "login_id", unique = true, nullable = false, length = 50)
     private String loginId;
 
+    @Column(name = "email", unique = true, nullable = false, length = 255)
     private String email;
 
+    @Column(name = "nickname", nullable = false, length = 100)
     private String nickname;
 
+    @Column(name = "created_at")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
+    @Column(name = "role", length = 50)
     private String role;
 
+    @Column(name = "status", length = 50)
     private String status;
 
+    @Column(name = "company", length = 100)
     private String company;
 
     @PostPersist
