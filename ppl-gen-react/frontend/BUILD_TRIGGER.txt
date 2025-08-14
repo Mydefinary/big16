@@ -1,0 +1,6 @@
+Build trigger file - Updated at 2025-08-14 16:15:00
+This file is created to force CI/CD pipeline trigger for ppl-gen frontend.
+Changes made:
+- Fixed nginx configuration
+- Removed homepage setting
+- Updated index.html with proper PPL service interface
