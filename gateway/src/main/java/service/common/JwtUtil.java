@@ -4,15 +4,16 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.JwtException;
-import io.github.cdimascio.dotenv.Dotenv;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.nio.charset.StandardCharsets;
 
 public class JwtUtil {
     
-    private static final Dotenv dotenv = Dotenv.load();
-    private static final String SECRET_KEY = dotenv.get("JWT_SECRET");
+    // ✅ 환경변수 접근 방식 수정 (dotenv 대신 System.getenv 사용)
+    private static final String SECRET_KEY = System.getenv("JWT_SECRET") != null 
+        ? System.getenv("JWT_SECRET") 
+        : "your-super-secret-jwt-key-here-make-it-long-and-secure-at-least-32-characters";
     
     // 🔑 JJWT 0.11+에서는 SecretKey 객체 사용
     private static final SecretKey signingKey = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));

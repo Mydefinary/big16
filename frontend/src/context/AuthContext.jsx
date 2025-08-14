@@ -1,7 +1,7 @@
 // frontend/src/context/AuthContext.js
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { authAPI } from '../services/api';
+import { authAPI, userAPI } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -34,7 +34,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (loginId, password) => {
     try {
-      const response = await authAPI.login(loginId, password);
+      const credentials = { loginId, password };
+      const response = await authAPI.login(credentials);
       const { accessToken, refreshToken: newRefreshToken } = response.data;
       
       setToken(accessToken);
@@ -55,7 +56,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (registerData) => {
     try {
-      const response = await authAPI.register(registerData);
+      const response = await userAPI.register(registerData);
       return { success: true, data: response.data };
     } catch (error) {
       return { 

@@ -209,9 +209,21 @@ public class AuthController {
 
     // User 서비스에서 직접 호출하는 비밀번호 저장 API
     @PostMapping("/save-password")
-    public ResponseEntity<?> savePassword(@RequestBody Map<String, Object> userData) {
+    public ResponseEntity<?> savePassword(@RequestBody Object rawUserData) {
         try {
-            System.out.println("비밀번호 저장 요청 수신: " + userData);
+            System.out.println("비밀번호 저장 요청 수신: " + rawUserData);
+            System.out.println("Data Type: " + (rawUserData != null ? rawUserData.getClass().getName() : "null"));
+            
+            Map<String, Object> userData = null;
+            
+            if (rawUserData instanceof Map) {
+                userData = (Map<String, Object>) rawUserData;
+            } else if (rawUserData instanceof String) {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                userData = mapper.readValue((String) rawUserData, Map.class);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 데이터 형식입니다.");
+            }
             
             // Auth 엔티티 생성
             Auth auth = new Auth();
@@ -236,36 +248,47 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody(required = false) Map<String, Object> loginData, 
+    public ResponseEntity<?> login(@RequestBody(required = false) Object rawLoginData, 
                                   HttpServletRequest httpRequest) {
-        System.out.println("=== 로그인 요청 시작 (Map 방식) ===");
+        System.out.println("=== 로그인 요청 시작 ===");
         System.out.println("Request URL: " + httpRequest.getRequestURL());
         System.out.println("Content Type: " + httpRequest.getContentType());
-        System.out.println("Raw Login Data: " + loginData);
+        System.out.println("Raw Data Type: " + (rawLoginData != null ? rawLoginData.getClass().getName() : "null"));
+        System.out.println("Raw Login Data: " + rawLoginData);
         
-        // 입력값 검증
-        if (loginData == null) {
-            System.out.println("ERROR: loginData is null");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 데이터가 없습니다.");
-        }
-        
-        String loginId = (String) loginData.get("loginId");
-        String password = (String) loginData.get("password");
-        
-        System.out.println("Extracted LoginId: " + loginId);
-        System.out.println("Extracted Password: " + (password != null ? "[PROVIDED]" : "[NULL]"));
-        
-        if (loginId == null || loginId.trim().isEmpty()) {
-            System.out.println("ERROR: LoginId is empty");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 아이디를 입력해주세요.");
-        }
-        
-        if (password == null || password.trim().isEmpty()) {
-            System.out.println("ERROR: Password is empty");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호를 입력해주세요.");
-        }
+        String loginId = null;
+        String password = null;
         
         try {
+            if (rawLoginData instanceof Map) {
+                Map<String, Object> mapData = (Map<String, Object>) rawLoginData;
+                loginId = (String) mapData.get("loginId");
+                password = (String) mapData.get("password");
+            } else if (rawLoginData instanceof String) {
+                System.out.println("문자열 데이터 수신, JSON 파싱 시도");
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                Map<String, Object> parsedData = mapper.readValue((String) rawLoginData, Map.class);
+                loginId = (String) parsedData.get("loginId");
+                password = (String) parsedData.get("password");
+            }
+            
+            if (rawLoginData == null) {
+                System.out.println("ERROR: rawLoginData is null");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 데이터가 없습니다.");
+            }
+        
+            System.out.println("Extracted LoginId: " + loginId);
+            System.out.println("Extracted Password: " + (password != null ? "[PROVIDED]" : "[NULL]"));
+            
+            if (loginId == null || loginId.trim().isEmpty()) {
+                System.out.println("ERROR: LoginId is empty");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 아이디를 입력해주세요.");
+            }
+            
+            if (password == null || password.trim().isEmpty()) {
+                System.out.println("ERROR: Password is empty");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호를 입력해주세요.");
+            }
             // 1. 사용자 조회
             System.out.println("사용자 조회 시작: " + loginId);
             Auth auth = authRepository.findByLoginId(loginId)
@@ -303,14 +326,19 @@ public class AuthController {
             tokens.put("tokenType", "Bearer");
             
             return ResponseEntity.ok(tokens);
+            
         } catch (IllegalArgumentException e) {
             // 로그인 실패 이벤트 발행 해야하는데 auth를 
             // 못불러온거라 기능도 없으니 그냥 주석 처리
             // LoginFailed event = new LoginFailed(auth);
             // event.publish();
-
+            System.err.println("로그인 실패: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("로그인 실패: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("로그인 처리 중 오류: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 실패: " + e.getMessage());
         }
     }
 
