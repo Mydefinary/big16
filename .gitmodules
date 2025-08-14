@@ -1,3 +1,6 @@
 [submodule "webtoon-dashboard/frontend"]
 	path = webtoon-dashboard/frontend
 	url = https://github.com/sinyoung0110/webtoon-analytics-dashboard
+[submodule "webtoon-dashboard/backend"]
+	path = webtoon-dashboard/backend
+	url = https://github.com/sinyoung0110/webtoon-analytics-backend
