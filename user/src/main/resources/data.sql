@@ -1,11 +1,11 @@
--- User Service 데이터베이스 초기화 스크립트
--- AUTO_INCREMENT 설정을 강제로 적용
+-- User Service 데이터베이스 AUTO_INCREMENT 보장 스크립트
+-- 테이블 삭제 대신 ALTER로 AUTO_INCREMENT 설정만 수정
 
--- 기존 테이블이 잘못 생성되어 있으면 제거하고 재생성
-DROP TABLE IF EXISTS User_table;
+-- 기존 테이블이 있는지 확인하고 AUTO_INCREMENT 설정
+ALTER TABLE User_table MODIFY user_id BIGINT AUTO_INCREMENT;
 
--- 올바른 AUTO_INCREMENT 설정으로 테이블 재생성
-CREATE TABLE User_table (
+-- 혹시 테이블이 없다면 생성
+CREATE TABLE IF NOT EXISTS User_table (
     user_id BIGINT NOT NULL AUTO_INCREMENT,
     login_id VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -20,6 +20,6 @@ CREATE TABLE User_table (
 -- AUTO_INCREMENT 시작값 설정
 ALTER TABLE User_table AUTO_INCREMENT = 1;
 
--- 인덱스 생성
-CREATE INDEX idx_user_table_email ON User_table(email);
-CREATE INDEX idx_user_table_login_id ON User_table(login_id);
+-- 인덱스 생성 (이미 있으면 무시)
+CREATE INDEX IF NOT EXISTS idx_user_table_email ON User_table(email);
+CREATE INDEX IF NOT EXISTS idx_user_table_login_id ON User_table(login_id);

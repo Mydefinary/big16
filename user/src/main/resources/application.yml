@@ -33,7 +33,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
@@ -44,9 +44,7 @@ spring:
   
   sql:
     init:
-      mode: always
-      schema-locations: classpath:data.sql
-      continue-on-error: false
+      mode: never
 
   # ✅ [추가] Spring Mail 설정 (Secret 환경변수 사용)
   mail:
