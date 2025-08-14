@@ -21,7 +21,7 @@ spec:
       containers:
         # ✅ 이름 수정
         - name: auth-backend-container-hoa
-          image: kt16big.azurecr.io/auth-backend-hoa:$latest
+          image: kt16big.azurecr.io/auth-backend-hoa:ab94daf5b13f33034909cab7afcd084d37ec3e74
           ports:
             - containerPort: 8080
           env:

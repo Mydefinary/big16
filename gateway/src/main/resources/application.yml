@@ -23,7 +23,7 @@ spring:
         # 1. 인증 서비스 - 공개 경로 (인증 불필요)
         # ===================================================
         - id: auth-public-routes
-          uri: http://auth-backend-service-hoa.default.svc.cluster.local:8080
+          uri: http://auth-backend-service-hoa:8080
           predicates:
             - Path=/api/auths/login, /api/auths/register, /api/auths/verify-code, /api/auths/resend-code, /api/auths/check-email, /api/auths/check-login-id, /api/auths/refresh, /api/auths/reset-password
           filters:
@@ -34,7 +34,7 @@ spring:
         # 2. 사용자 서비스 - 공개 경로 (인증 불필요)
         # ===================================================
         - id: user-public-routes
-          uri: http://user-backend-service-hoa.default.svc.cluster.local:8081
+          uri: http://user-backend-service-hoa:8081
           predicates:
             - Path=/api/users/register, /api/users/check-email, /api/users/find-id
           filters:
@@ -45,7 +45,7 @@ spring:
         # 3. 인증 서비스 - 보호된 경로 (인증 필요)
         # ===================================================
         - id: auth-secure-routes
-          uri: http://auth-backend-service-hoa.default.svc.cluster.local:8080
+          uri: http://auth-backend-service-hoa:8080
           predicates:
             - Path=/api/auths/**
           filters:
@@ -57,7 +57,7 @@ spring:
         # 4. 사용자 서비스 - 보호된 경로 (인증 필요)
         # ===================================================
         - id: user-secure-routes
-          uri: http://user-backend-service-hoa.default.svc.cluster.local:8081
+          uri: http://user-backend-service-hoa:8081
           predicates:
             - Path=/api/users/**
           filters:

@@ -1,8 +1,11 @@
 {
   "permissions": {
-    "defaultMode": "acceptEdits",
     "allow": [
-      "Bash(curl:*)"
-    ]
+      "Bash(curl:*)",
+      "Bash(kubectl describe:*)",
+      "Bash(kubectl exec:*)",
+      "Bash(kubectl logs:*)"
+    ],
+    "defaultMode": "acceptEdits"
   }
 }
