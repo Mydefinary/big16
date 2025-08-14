@@ -68,17 +68,21 @@ spring:
         # ===================================================
         # 프론트엔드 서비스 라우팅 (실제 서비스 페이지)
         # ===================================================
-        # ppl-gen 정적 자산 먼저 처리
+        # ppl-gen 정적 자산 먼저 처리 
         - id: ppl-gen-assets
           uri: http://ppl-gen-frontend-service:80
           predicates:
             - Path=/ppl-gen/assets/**, /ppl-gen/static/**, /ppl-gen/*.js, /ppl-gen/*.css, /ppl-gen/*.png, /ppl-gen/*.jpg, /ppl-gen/*.svg
+          filters:
+            - StripPrefix=1
           order: 4
 
         - id: ppl-gen-frontend
           uri: http://ppl-gen-frontend-service:80
           predicates:
             - Path=/ppl-gen, /ppl-gen/**
+          filters:
+            - StripPrefix=1
           order: 5
 
         # goods-gen 정적 자산 먼저 처리
@@ -86,12 +90,16 @@ spring:
           uri: http://goods-gen-frontend-service:80
           predicates:
             - Path=/goods-gen/assets/**, /goods-gen/static/**, /goods-gen/*.js, /goods-gen/*.css, /goods-gen/*.png, /goods-gen/*.jpg, /goods-gen/*.svg
+          filters:
+            - StripPrefix=1
           order: 5.5
 
         - id: goods-gen-frontend  
           uri: http://goods-gen-frontend-service:80
           predicates:
             - Path=/goods-gen, /goods-gen/**
+          filters:
+            - StripPrefix=1
           order: 6
 
         - id: webtoon-hl-frontend
@@ -99,7 +107,7 @@ spring:
           predicates:
             - Path=/webtoon-hl, /webtoon-hl/**
           filters:
-            - name: JwtAuthenticationFilter
+            - StripPrefix=1
           order: 7
 
         - id: webtoon-dashboard-frontend
@@ -107,7 +115,7 @@ spring:
           predicates:
             - Path=/webtoon-dashboard, /webtoon-dashboard/**
           filters:
-            - name: JwtAuthenticationFilter
+            - StripPrefix=1
           order: 8
 
         - id: board-frontend
@@ -115,7 +123,7 @@ spring:
           predicates:
             - Path=/board, /board/**
           filters:
-            - name: JwtAuthenticationFilter
+            - StripPrefix=1
           order: 9
 
         # ===================================================
