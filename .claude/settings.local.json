@@ -14,7 +14,10 @@
       "Bash(npx vite:*)",
       "Bash(grep:*)",
       "Bash(find:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(rm:*)",
+      "WebFetch(domain:20.249.154.2)",
+      "Bash(git push:*)"
     ],
     "defaultMode": "acceptEdits"
   }
