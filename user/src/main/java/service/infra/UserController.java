@@ -88,18 +88,7 @@ public class UserController {
     public ResponseEntity<?> registerUser(@RequestBody(required = false) UserRegisterRequest request, 
                                          HttpServletRequest httpRequest) {
         System.out.println("=== 회원가입 요청 시작 ===");
-        System.out.println("Request Method: " + httpRequest.getMethod());
-        System.out.println("Request URL: " + httpRequest.getRequestURL());
-        System.out.println("Content Type: " + httpRequest.getContentType());
-        System.out.println("Content Length: " + httpRequest.getContentLength());
-        
-        // 헤더 정보 상세 확인
-        System.out.println("Accept Header: " + httpRequest.getHeader("Accept"));
-        System.out.println("User-Agent: " + httpRequest.getHeader("User-Agent"));
-        System.out.println("Origin: " + httpRequest.getHeader("Origin"));
-        
         System.out.println("Request Body Object: " + request);
-        System.out.println("Request Object Class: " + (request != null ? request.getClass().getName() : "null"));
         
         try {
             // 1) 입력 값 검증
@@ -107,6 +96,10 @@ public class UserController {
                 System.out.println("ERROR: request is null - RequestBody parsing failed");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("요청 데이터가 없습니다. JSON 형식을 확인해주세요.");
             }
+            
+            System.out.println("LoginId: " + request.getLoginId());
+            System.out.println("Email: " + request.getEmail());
+            System.out.println("Nickname: " + request.getNickname());
             
             if (request.getLoginId() == null || request.getLoginId().trim().isEmpty()) {
                 System.out.println("ERROR: loginId is empty");
@@ -122,38 +115,43 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호를 입력해주세요.");
             }
 
-            // 2) 중복 아이디/이메일 체크 (필요 시)
+            System.out.println("입력값 검증 완료");
+
+            // 2) 중복 아이디/이메일 체크
+            System.out.println("중복 체크 시작");
             if(userRepository.findByLoginId(request.getLoginId()).isPresent()) {
+                System.out.println("중복 아이디 발견: " + request.getLoginId());
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 로그인 아이디입니다.");
             }
             if(userRepository.findByEmail(request.getEmail()).isPresent()) {
+                System.out.println("중복 이메일 발견: " + request.getEmail());
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일입니다.");
             }
+            System.out.println("중복 체크 완료");
 
-            // 3) User 엔티티 생성 및 저장
+            // 3) User 엔티티 생성 및 저장 (이벤트 발행 없이)
+            System.out.println("User 엔티티 생성 시작");
             User user = new User();
             user.setLoginId(request.getLoginId().trim());
             user.setEmail(request.getEmail().trim());
             user.setNickname(request.getNickname().trim());
-            user.setStatus("TRY_TO_REGISTERED"); // 가입 후 이메일 인증 대기 상태
+            user.setStatus("EMAIL_VERIFIED"); // 이메일 인증 생략
             user.setCreatedAt(new Date());
-            userRepository.save(user);
+            
+            System.out.println("User 저장 시작");
+            User savedUser = userRepository.save(user);
+            System.out.println("User 저장 완료. ID: " + savedUser.getUserId());
 
-            // 4) 비밀번호 저장 등 Auth BC와 연동 (이벤트 발행 또는 직접 호출)
-            // User 저장이 완료된 후에 이벤트를 발행하여 Auth BC로 비밀번호 정보 전달
-            UserSaved userSavedEvent = new UserSaved(user);
-            // 비밀번호는 반드시 암호화된 상태로 포함시켜야 함
-            userSavedEvent.setPassword(encryptPassword(request.getPassword())); 
-            // 트랜잭션 커밋 후 이벤트 발행
-            userSavedEvent.publishAfterCommit();
-
-            // 5) 응답 반환
-            return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 완료되었습니다. 이메일 인증을 진행해 주세요");
+            // 4) 이벤트 발행 없이 단순 완료
+            System.out.println("회원가입 성공!");
+            return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 완료되었습니다!");
+            
         } catch (Exception e) {
             // 상세한 로그 출력
             System.err.println("=== 회원가입 처리 중 오류 발생 ===");
             System.err.println("오류 메시지: " + e.getMessage());
             System.err.println("오류 클래스: " + e.getClass().getName());
+            System.err.println("스택 트레이스:");
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원가입 처리 중 오류가 발생했습니다: " + e.getMessage());
         }
