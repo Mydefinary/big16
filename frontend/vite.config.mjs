@@ -24,7 +24,7 @@ export default defineConfig({
   },
   server: {
     host: true, // 0.0.0.0 허용
-    port: 8080,
+    port: 3000,
     strictPort: true,
     cors: true,
     allowedHosts: ['all'], // or 정확한 호스트 명시

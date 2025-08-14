@@ -1,4 +1,7 @@
 # auth application.yml
+server:
+  port: 8080
+
 spring:
   datasource:
     # Azure MySQL 연결 설정 (SSL 및 타임존 설정 포함)
@@ -6,6 +9,15 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:kt16jo}
     password: ${SPRING_DATASOURCE_PASSWORD:kt!6jojo}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
 
   # Kafka 설정
   cloud:
@@ -33,12 +45,4 @@ logging:
     org.hibernate.SQL: debug
     org.springframework.cloud.stream: debug
     org.apache.kafka: info
-
-# JPA 설정
-jpa:
-  hibernate:
-    ddl-auto: update
-  show-sql: true
-  properties:
-    hibernate:
-      format_sql: true
+    service: debug

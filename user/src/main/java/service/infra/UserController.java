@@ -52,15 +52,19 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRegisterRequest request) {
+    public ResponseEntity<?> registerUser(@RequestBody(required = false) UserRegisterRequest request, 
+                                         HttpServletRequest httpRequest) {
         System.out.println("=== 회원가입 요청 시작 ===");
-        System.out.println("Request: " + request);
+        System.out.println("Request Method: " + httpRequest.getMethod());
+        System.out.println("Request URL: " + httpRequest.getRequestURL());
+        System.out.println("Content Type: " + httpRequest.getContentType());
+        System.out.println("Request Body Object: " + request);
         
         try {
             // 1) 입력 값 검증
             if (request == null) {
-                System.out.println("ERROR: request is null");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("요청 데이터가 없습니다.");
+                System.out.println("ERROR: request is null - RequestBody parsing failed");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("요청 데이터가 없습니다. JSON 형식을 확인해주세요.");
             }
             
             if (request.getLoginId() == null || request.getLoginId().trim().isEmpty()) {
