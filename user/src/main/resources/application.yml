@@ -1,8 +1,8 @@
 # ✅ [수정] user/src/main/resources/application.yml
 
-# 서버 포트는 deployment.yaml에서 지정하므로 여기서 삭제하거나 주석 처리합니다.
-# server:
-#   port: 8081
+# User 서비스는 8081 포트에서 실행 (Gateway 설정과 일치)
+server:
+  port: 8081
 
 spring:
   # 데이터베이스 설정을 최상위로 이동하여 항상 적용되도록 합니다.

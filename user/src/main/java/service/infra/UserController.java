@@ -53,9 +53,18 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRegisterRequest request) {
+        System.out.println("=== 회원가입 요청 시작 ===");
+        System.out.println("Request: " + request);
+        
         try {
             // 1) 입력 값 검증
+            if (request == null) {
+                System.out.println("ERROR: request is null");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("요청 데이터가 없습니다.");
+            }
+            
             if (request.getLoginId() == null || request.getLoginId().trim().isEmpty()) {
+                System.out.println("ERROR: loginId is empty");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 아이디를 입력해주세요.");
             }
             if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
@@ -96,10 +105,12 @@ public class UserController {
             // 5) 응답 반환
             return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 완료되었습니다. 이메일 인증을 진행해 주세요");
         } catch (Exception e) {
-            // 로그 출력
-            System.err.println("회원가입 처리 중 오류 발생: " + e.getMessage());
+            // 상세한 로그 출력
+            System.err.println("=== 회원가입 처리 중 오류 발생 ===");
+            System.err.println("오류 메시지: " + e.getMessage());
+            System.err.println("오류 클래스: " + e.getClass().getName());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원가입 처리 중 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원가입 처리 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
 

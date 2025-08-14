@@ -4,7 +4,8 @@
       "Bash(curl:*)",
       "Bash(kubectl describe:*)",
       "Bash(kubectl exec:*)",
-      "Bash(kubectl logs:*)"
+      "Bash(kubectl logs:*)",
+      "Bash(kubectl get pods:*)"
     ],
     "defaultMode": "acceptEdits"
   }
