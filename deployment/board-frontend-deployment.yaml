@@ -22,7 +22,7 @@ spec:
         - name: board-frontend-container
           image: kt16big.azurecr.io/board-frontend:latest
           ports:
-            - containerPort: 3000
+            - containerPort: 80
 ---
 # ===================================================
 # 29. 게시판(Board) - 프론트엔드 서비스
@@ -38,4 +38,4 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 3000
+      targetPort: 80
