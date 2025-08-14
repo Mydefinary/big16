@@ -1,6 +1,5 @@
 {
   "name": "ppl-gen-frontend",
-  "homepage": "/ppl-gen/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

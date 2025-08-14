@@ -1,6 +1,5 @@
 {
   "name": "goods-gen-frontend",
-  "homepage": "/goods-gen/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
