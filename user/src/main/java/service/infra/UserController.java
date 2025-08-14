@@ -142,7 +142,14 @@ public class UserController {
             User savedUser = userRepository.save(user);
             System.out.println("User 저장 완료. ID: " + savedUser.getUserId());
 
-            // 4) 회원가입 완료 응답 (이메일 인증 생략)
+            // 4) Auth 서비스로 비밀번호 정보 전달 (이벤트 발행)
+            System.out.println("UserSaved 이벤트 발행 시작");
+            UserSaved userSavedEvent = new UserSaved(savedUser);
+            userSavedEvent.setPassword(encryptPassword(request.getPassword()));
+            userSavedEvent.publishAfterCommit();
+            System.out.println("UserSaved 이벤트 발행 완료");
+
+            // 5) 회원가입 완료 응답
             System.out.println("회원가입 성공!");
             Map<String, Object> response = new HashMap<>();
             response.put("message", "회원가입이 완료되었습니다!");
