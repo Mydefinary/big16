@@ -1,10 +1,10 @@
 # auth application.yml
 spring:
   datasource:
-    # deployment.yaml의 환경변수명과 매칭
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/auth}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    # Azure MySQL 연결 설정 (SSL 및 타임존 설정 포함)
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://kt16sql.mysql.database.azure.com:3306/kt16sql?useSSL=true&requireSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:kt16jo}
+    password: ${SPRING_DATASOURCE_PASSWORD:kt!6jojo}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   # Kafka 설정

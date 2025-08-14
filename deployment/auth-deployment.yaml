@@ -25,31 +25,41 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            # JWT Secret 설정
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: api-keys-secret
                   key: JWT_SECRET_KEY
+            
+            # 데이터베이스 설정
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:
                   name: api-keys-secret
                   key: DB_URL
-            - name: spring.datasource.username
+            - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: api-keys-secret
                   key: DB_USER
-            - name: spring.datasource.password
+            - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: api-keys-secret
                   key: DB_PASSWORD
+            
+            # 이메일 설정
             - name: SPRING_MAIL_HOST
               valueFrom:
                 secretKeyRef:
                   name: api-keys-secret
                   key: spring.mail.host
+            - name: SPRING_MAIL_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: spring.mail.port
             - name: SPRING_MAIL_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -60,31 +70,6 @@ spec:
                 secretKeyRef:
                   name: api-keys-secret
                   key: spring.mail.password
-            - name: SPRING_MAIL_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: api-keys-secret
-                  key: spring.mail.port
-            # 다른 필요한 환경변수들도 추가
-            - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH
-              value: "true"
-            - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE
-              value: "true"
-            - name: spring.datasource.url
-              valueFrom:
-                secretKeyRef:
-                  name: api-keys-secret
-                  key: DB_URL
-            - name: spring.datasource.username
-              valueFrom:
-                secretKeyRef:
-                  name: api-keys-secret
-                  key: DB_USER
-            - name: spring.datasource.password
-              valueFrom:
-                secretKeyRef:
-                  name: api-keys-secret
-                  key: DB_PASSWORD
             
             # ✅ Kafka 설정 추가
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS

@@ -7,10 +7,10 @@
 spring:
   # 데이터베이스 설정을 최상위로 이동하여 항상 적용되도록 합니다.
   datasource:
-    # 쿠버네티스 Secret의 환경변수 이름을 직접 참조합니다.
-    url: ${spring.datasource.url}
-    username: ${spring.datasource.username}
-    password: ${spring.datasource.password}
+    # Azure MySQL 연결 설정 (SSL 및 타임존 설정 포함)
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://kt16sql.mysql.database.azure.com:3306/kt16sql?useSSL=true&requireSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:kt16jo}
+    password: ${SPRING_DATASOURCE_PASSWORD:kt!6jojo}
     driver-class-name: com.mysql.cj.jdbc.Driver
 # Kafka 설정
   cloud:
@@ -33,7 +33,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
@@ -41,12 +41,12 @@ spring:
         show_sql: true
     show-sql: true
 
-  # ✅ [추가] Spring Mail 설정
+  # ✅ [추가] Spring Mail 설정 (Secret 환경변수 사용)
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: 'mydefinary@gmail.com'
-    password: '!Q2w3e4r'
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:mydefinary@gmail.com}
+    password: ${SPRING_MAIL_PASSWORD:password}
     properties:
       mail:
         smtp:
@@ -54,5 +54,13 @@ spring:
           starttls:
             enable: true
 
+# 디버그 로깅 설정
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.springframework.cloud.stream: debug
+    org.apache.kafka: info
+    service: debug
+    org.springframework.web: debug
 
 # --- 프로필 구분선을 모두 제거 ---

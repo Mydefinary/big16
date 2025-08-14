@@ -1,7 +1,8 @@
--- Big16 인증 시스템 데이터베이스 스키마 (MySQL용)
+-- Big16 인증 시스템 데이터베이스 스키마 (Azure MySQL용)
 
--- 데이터베이스 생성 (필요한 경우)
--- CREATE DATABASE big16_auth;
+-- Azure MySQL kt16sql 데이터베이스 사용
+-- 데이터베이스는 이미 생성되어 있음: kt16sql.mysql.database.azure.com:3306/kt16sql
+-- USE kt16sql;
 
 -- 사용자 테이블 생성 (User.java 엔티티와 일치하도록 수정)
 CREATE TABLE IF NOT EXISTS User_table (

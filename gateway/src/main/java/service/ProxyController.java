@@ -29,7 +29,7 @@ public class ProxyController {
             String[] urls = {
                 "http://user-backend-service-hoa.default.svc.cluster.local:8081/users/register",
                 "http://user-backend-service-hoa:8081/users/register",
-                "http://localhost:8081/users/register"
+                "http://user-backend-service-hoa.default.svc:8081/users/register"
             };
             
             for (String url : urls) {

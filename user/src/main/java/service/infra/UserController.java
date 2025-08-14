@@ -17,6 +17,9 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.time.Instant;
 
 
 //<<< Clean Arch / Inbound Adaptor
@@ -28,6 +31,25 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
+
+    @GetMapping("/health")
+    public ResponseEntity<Map<String, String>> health() {
+        Map<String, String> status = new HashMap<>();
+        status.put("status", "UP");
+        status.put("service", "user-service");
+        status.put("timestamp", Instant.now().toString());
+        
+        // 데이터베이스 연결 확인
+        try {
+            long userCount = userRepository.count();
+            status.put("database", "CONNECTED");
+            status.put("userCount", String.valueOf(userCount));
+        } catch (Exception e) {
+            status.put("database", "ERROR: " + e.getMessage());
+        }
+        
+        return ResponseEntity.ok(status);
+    }
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserRegisterRequest request) {
