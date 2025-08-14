@@ -20,7 +20,7 @@ spec:
         agentpool: userpool
       containers:
         - name: goods-gen-backend-container
-          image: kt16big.azurecr.io/goods-gen-backend:latest
+          image: kt16big.azurecr.io/goods-gen-backend:${IMAGE_TAG}
           ports:
             - containerPort: 8001
           env:

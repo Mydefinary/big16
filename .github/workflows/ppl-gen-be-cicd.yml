@@ -4,14 +4,14 @@ on:
   push:
     branches: [ "img-gen-cicd","login-ok" ]
     paths:
-      - 'ppl-gen-fastapi/backend/**'
+      - 'ppl-gen-react/backend/**'
       - '.github/workflows/ppl-gen-be-cicd.yml'
       # ✅ [수정]
-      - 'deployment/ppl-gen-backend.yaml'
+      - 'deployment/ppl-gen-backend-deployment.yaml'
   pull_request:
     branches: [ "img-gen-cicd" ]
     paths:
-      - 'ppl-gen-fastapi/backend/**'
+      - 'ppl-gen-react/backend/**'
 
 env:
   ACR_NAME: "kt16big"

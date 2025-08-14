@@ -11,7 +11,7 @@ on:
       - 'goods-gen-react/backend/**'
       - '.github/workflows/goods-gen-be-cicd.yml'
       # ✅ [수정] 공용 배포 파일 대신, 이 서비스에 해당하는 배포 파일을 감지합니다.
-      - 'deployment/goods-gen-backend.yaml'
+      - 'deployment/goods-gen-backend-deployment.yaml'
   # 'img-gen-cicd' 브랜치를 대상으로 하는 Pull Request가 생성/업데이트될 때 실행됩니다.
   pull_request:
     branches: [ "img-gen-cicd" ]

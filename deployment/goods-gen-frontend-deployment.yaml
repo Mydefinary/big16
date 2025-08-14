@@ -20,7 +20,7 @@ spec:
         agentpool: userpool
       containers:
         - name: goods-gen-frontend-container
-          image: kt16big.azurecr.io/goods-gen-frontend:latest
+          image: kt16big.azurecr.io/goods-gen-frontend:${IMAGE_TAG}
           ports:
             - containerPort: 80
 ---
