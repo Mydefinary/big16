@@ -121,6 +121,30 @@ public class AuthController {
         */
     }
 
+    // 로그인 테스트용 간단한 엔드포인트 - Map으로 받기
+    @PostMapping("/test-login")
+    public ResponseEntity<?> testLogin(@RequestBody(required = false) Map<String, Object> rawData) {
+        System.out.println("=== 로그인 테스트 (Map 방식) ===");
+        System.out.println("Raw Data: " + rawData);
+        
+        String loginId = null;
+        String password = null;
+        
+        if (rawData != null) {
+            loginId = (String) rawData.get("loginId");
+            password = (String) rawData.get("password");
+            System.out.println("Extracted LoginId: " + loginId);
+            System.out.println("Extracted Password: " + (password != null ? "[PROVIDED]" : "[NULL]"));
+        }
+        
+        return ResponseEntity.ok(Map.of(
+            "status", "success",
+            "message", "로그인 테스트 완료 (Map)", 
+            "receivedLoginId", loginId != null ? loginId : "null",
+            "receivedPassword", password != null ? "[PROVIDED]" : "null"
+        ));
+    }
+
     // User 서비스에서 직접 호출하는 비밀번호 저장 API
     @PostMapping("/save-password")
     public ResponseEntity<?> savePassword(@RequestBody Map<String, Object> userData) {
@@ -150,10 +174,40 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginCommand command) {
+    public ResponseEntity<?> login(@RequestBody(required = false) LoginCommand command, 
+                                  HttpServletRequest httpRequest) {
         System.out.println("=== 로그인 요청 시작 ===");
+        System.out.println("Request URL: " + httpRequest.getRequestURL());
+        System.out.println("Content Type: " + httpRequest.getContentType());
+        System.out.println("Content Length: " + httpRequest.getContentLength());
+        
+        // 헤더 정보 출력
+        java.util.Enumeration<String> headerNames = httpRequest.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            System.out.println("Header " + headerName + ": " + httpRequest.getHeader(headerName));
+        }
+        
+        System.out.println("Command Object: " + command);
+        
+        // 입력값 검증
+        if (command == null) {
+            System.out.println("ERROR: LoginCommand is null - JSON parsing failed");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 데이터가 없습니다.");
+        }
+        
         System.out.println("LoginId: " + command.getLoginId());
         System.out.println("Password: " + (command.getPassword() != null ? "[PROVIDED]" : "[NULL]"));
+        
+        if (command.getLoginId() == null || command.getLoginId().trim().isEmpty()) {
+            System.out.println("ERROR: LoginId is empty");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("로그인 아이디를 입력해주세요.");
+        }
+        
+        if (command.getPassword() == null || command.getPassword().trim().isEmpty()) {
+            System.out.println("ERROR: Password is empty");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호를 입력해주세요.");
+        }
         
         try {
             // 1. 사용자 조회
