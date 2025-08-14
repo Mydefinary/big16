@@ -8,3 +8,6 @@ python-jose==3.3.0  # [cryptography] 제거 또는 별도 설치
 cryptography==41.0.3  # 명시적으로 추가
 python-dotenv==1.0.0
 pydantic>=2.6,<3.0   # FastAPI와 안정적으로 호환되는 버전
+konlpy==0.6.0  # 한국어 자연어 처리
+nltk==3.8.1  # 자연어 처리 도구
+mecab-python3==1.0.6  # 형태소 분석기
