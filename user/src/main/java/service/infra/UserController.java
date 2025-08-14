@@ -142,9 +142,15 @@ public class UserController {
             User savedUser = userRepository.save(user);
             System.out.println("User 저장 완료. ID: " + savedUser.getUserId());
 
-            // 4) 이벤트 발행 없이 단순 완료
+            // 4) 회원가입 완료 응답 (이메일 인증 생략)
             System.out.println("회원가입 성공!");
-            return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 완료되었습니다!");
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "회원가입이 완료되었습니다!");
+            response.put("userId", savedUser.getUserId());
+            response.put("loginId", savedUser.getLoginId());
+            response.put("email", savedUser.getEmail());
+            response.put("skipEmailVerification", true);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
             
         } catch (Exception e) {
             // 상세한 로그 출력

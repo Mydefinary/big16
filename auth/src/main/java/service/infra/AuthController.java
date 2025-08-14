@@ -86,13 +86,20 @@ public class AuthController {
         return ResponseEntity.ok("인증 코드가 재발송되었습니다.");
     }
 
-    // 인증 코드 검증
+    // 인증 코드 검증 (현재는 이메일 인증 생략)
     @PostMapping("/verify-code")
     public ResponseEntity<?> verifyCode(@RequestBody VerifyCodeRequest request) {
         String email = request.getEmail();
         String code = request.getCode();
         
-
+        System.out.println("인증 코드 검증 요청: " + email + " / " + code);
+        
+        // 이메일 인증 생략 - 모든 요청을 성공으로 처리
+        System.out.println("이메일 인증 생략 모드 - 자동 성공 처리");
+        return ResponseEntity.ok("인증 성공 (개발 모드)");
+        
+        /*
+        // 원래 로직 (나중에 활성화)
         Optional<Auth> authOpt = authRepository.findByEmail(email);
         if (authOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("이메일 없음");
@@ -110,6 +117,7 @@ public class AuthController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("인증에 실패했습니다. 코드를 확인해주세요.");
         }
+        */
     }
 
     @PostMapping("/login")
