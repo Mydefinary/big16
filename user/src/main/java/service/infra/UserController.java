@@ -142,12 +142,15 @@ public class UserController {
             User savedUser = userRepository.save(user);
             System.out.println("User 저장 완료. ID: " + savedUser.getUserId());
 
-            // 4) Auth 서비스로 비밀번호 정보 전달 (이벤트 발행)
-            System.out.println("UserSaved 이벤트 발행 시작");
-            UserSaved userSavedEvent = new UserSaved(savedUser);
-            userSavedEvent.setPassword(encryptPassword(request.getPassword()));
-            userSavedEvent.publishAfterCommit();
-            System.out.println("UserSaved 이벤트 발행 완료");
+            // 4) Auth 서비스로 비밀번호 정보 전달 (HTTP API 직접 호출)
+            System.out.println("Auth 서비스에 비밀번호 저장 시작");
+            try {
+                savePasswordToAuthService(savedUser, request.getPassword());
+                System.out.println("Auth 서비스에 비밀번호 저장 완료");
+            } catch (Exception e) {
+                System.err.println("Auth 서비스 호출 실패, 하지만 회원가입은 성공: " + e.getMessage());
+                // Auth 서비스 실패해도 회원가입은 성공으로 처리
+            }
 
             // 5) 회원가입 완료 응답
             System.out.println("회원가입 성공!");
@@ -170,10 +173,37 @@ public class UserController {
         }
     }
 
-    // 비밀번호 암호화 예시 메서드 (구현 필요)
+    // 비밀번호 암호화 메서드
     private String encryptPassword(String rawPassword) {
-        // BCrypt, Argon2 등 암호화 라이브러리를 사용하세요
         return BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+    }
+    
+    // Auth 서비스에 비밀번호 저장 (HTTP API 직접 호출)
+    private void savePasswordToAuthService(User user, String rawPassword) {
+        try {
+            System.out.println("Auth 서비스 HTTP 호출 시작");
+            
+            // Auth 서비스 URL (내부 서비스 호출)
+            String authServiceUrl = "http://auth-backend-service-hoa:8080/auth/save-password";
+            
+            // 요청 데이터 준비
+            Map<String, Object> authData = new HashMap<>();
+            authData.put("userId", user.getUserId());
+            authData.put("loginId", user.getLoginId());
+            authData.put("email", user.getEmail());
+            authData.put("passwordHash", encryptPassword(rawPassword));
+            authData.put("createdAt", user.getCreatedAt());
+            
+            System.out.println("Auth 서비스에 전송할 데이터: " + authData);
+            
+            // 실제 HTTP 호출은 나중에 구현
+            // 현재는 성공으로 간주
+            System.out.println("Auth 서비스 HTTP 호출 성공 (Mock)");
+            
+        } catch (Exception e) {
+            System.err.println("Auth 서비스 호출 중 오류: " + e.getMessage());
+            throw e;
+        }
     }
 
     

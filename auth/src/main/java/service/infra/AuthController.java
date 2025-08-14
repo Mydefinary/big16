@@ -120,6 +120,34 @@ public class AuthController {
         */
     }
 
+    // User 서비스에서 직접 호출하는 비밀번호 저장 API
+    @PostMapping("/save-password")
+    public ResponseEntity<?> savePassword(@RequestBody Map<String, Object> userData) {
+        try {
+            System.out.println("비밀번호 저장 요청 수신: " + userData);
+            
+            // Auth 엔티티 생성
+            Auth auth = new Auth();
+            auth.setUserId(((Number) userData.get("userId")).longValue());
+            auth.setLoginId((String) userData.get("loginId"));
+            auth.setEmail((String) userData.get("email"));
+            auth.setPasswordHash((String) userData.get("passwordHash"));
+            auth.setStatus("EMAIL_VERIFIED"); // 이메일 인증 생략
+            auth.setCreatedAt(new Date());
+            
+            authRepository.save(auth);
+            System.out.println("Auth 엔티티 저장 완료. UserId: " + auth.getUserId());
+            
+            return ResponseEntity.ok("비밀번호 저장 완료");
+            
+        } catch (Exception e) {
+            System.err.println("비밀번호 저장 중 오류: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("비밀번호 저장 실패: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginCommand command) {
         try {
