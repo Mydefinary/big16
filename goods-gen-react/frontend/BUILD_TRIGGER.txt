@@ -1,6 +1,8 @@
-Build trigger file - Updated at 2025-08-14 20:50:00
+Build trigger file - Updated at 2025-08-14 21:00:00
 This file is created to force CI/CD pipeline trigger for goods-gen frontend.
-Final deployment ready:
+Fixed TypeScript import issues:
+- Fixed GoodsForm.tsx import statement (removed .tsx extension)
+- Fixed App.jsx import statement (removed .tsx extension) 
 - All routing configurations verified and working  
 - Gateway properly routes /goods-gen to goods-gen-frontend-service
 - API routes /api/goods-gen/** configured without JWT auth

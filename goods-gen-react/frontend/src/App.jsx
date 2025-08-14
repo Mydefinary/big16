@@ -1,8 +1,8 @@
-// src/App.tsx
+// src/App.jsx
 
 import React from 'react';
 import './App.css';
-import GoodsForm from './components/GoodsForm.tsx'; // GoodsForm을 불러옵니다.
+import GoodsForm from './components/GoodsForm'; // GoodsForm을 불러옵니다.
 
 function App() {
   return (

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
-import NavBar from "./NavBar.tsx";
+import NavBar from "./NavBar";
 
 // 샘플 이미지 임포트
 import sampleImage1 from "../assets/input_sample1.png";
