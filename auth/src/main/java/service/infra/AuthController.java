@@ -151,15 +151,29 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginCommand command) {
+        System.out.println("=== 로그인 요청 시작 ===");
+        System.out.println("LoginId: " + command.getLoginId());
+        System.out.println("Password: " + (command.getPassword() != null ? "[PROVIDED]" : "[NULL]"));
+        
         try {
+            // 1. 사용자 조회
+            System.out.println("사용자 조회 시작: " + command.getLoginId());
             Auth auth = authRepository.findByLoginId(command.getLoginId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
             
+            System.out.println("사용자 찾음. UserId: " + auth.getUserId() + ", Verified: " + auth.isVerified());
+            
+            // 2. 이메일 인증 상태 확인
             if (!auth.isVerified()){
+                System.out.println("이메일 미인증 상태");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("로그인 실패 : 이메일 미인증 상태");
             }
+            
+            // 3. 비밀번호 검증
+            System.out.println("비밀번호 검증 시작");
             auth.verifyPassword(command.getPassword());
+            System.out.println("비밀번호 검증 성공");
             
             // Access Token과 Refresh Token 생성
             String accessToken = JwtUtil.generateToken(auth.getUserId());

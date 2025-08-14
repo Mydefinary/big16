@@ -196,9 +196,20 @@ public class UserController {
             
             System.out.println("Auth 서비스에 전송할 데이터: " + authData);
             
-            // 실제 HTTP 호출은 나중에 구현
-            // 현재는 성공으로 간주
-            System.out.println("Auth 서비스 HTTP 호출 성공 (Mock)");
+            // 실제 HTTP 호출 구현
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+            
+            org.springframework.http.HttpEntity<Map<String, Object>> request = new org.springframework.http.HttpEntity<>(authData, headers);
+            
+            try {
+                org.springframework.http.ResponseEntity<String> response = restTemplate.postForEntity(authServiceUrl, request, String.class);
+                System.out.println("Auth 서비스 HTTP 호출 성공. 응답: " + response.getBody());
+            } catch (Exception httpError) {
+                System.err.println("Auth 서비스 HTTP 호출 실패: " + httpError.getMessage());
+                // HTTP 호출 실패해도 회원가입은 성공으로 처리
+            }
             
         } catch (Exception e) {
             System.err.println("Auth 서비스 호출 중 오류: " + e.getMessage());

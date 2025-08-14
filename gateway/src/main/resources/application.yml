@@ -113,5 +113,15 @@ spring:
             - StripPrefix=2
           order: 14
 
+        - id: chatbot-service
+          uri: http://chatbot-backend-service:8080
+          predicates:
+            - Path=/api/chatbot/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 15
+
+
 jwt:
   secret: ${JWT_SECRET:your-super-secret-jwt-key-here-make-it-long-and-secure}
