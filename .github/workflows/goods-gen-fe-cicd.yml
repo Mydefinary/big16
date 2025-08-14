@@ -2,7 +2,7 @@ name: 'CI/CD for GOODS-GEN Frontend'
 
 on:
   push:
-    branches: [ "img-gen-cicd" ]
+    branches: [ "img-gen-cicd", "login-ok"]
     paths:
       - 'goods-gen-react/frontend/**'
       - '.github/workflows/goods-gen-fe-cicd.yml'

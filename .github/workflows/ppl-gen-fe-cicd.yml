@@ -2,7 +2,7 @@ name: 'CI/CD for PPL-GEN Frontend'
 
 on:
   push:
-    branches: [ "img-gen-cicd" ]
+    branches: [ "img-gen-cicd","login-ok"]
     paths:
       - 'ppl-gen-fastapi/frontend/**'
       - '.github/workflows/ppl-gen-fe-cicd.yml'
