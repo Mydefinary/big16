@@ -1,5 +1,6 @@
 server:
   port: 9000
+  address: 0.0.0.0
 
 ---
 spring:
@@ -99,8 +100,7 @@ spring:
         cors-configurations:
           '[/**]':
             allowed-origins:
-              - "http://localhost:9000"  # Gateway 포트
-              - "http://frontend-lee-service:9003"   # Docker 내부 통신
+              - "http://20.249.140.17:9000"        # 외부 LB
             allowed-methods:
               - "GET"
               - "POST"

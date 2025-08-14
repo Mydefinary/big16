@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 // API 기본 설정
-const API_BASE_URL = 'https://bug-free-lamp-579q4455pp9hpprr-8088.app.github.dev';
+const API_BASE_URL = 'http://20.249.140.17:9000';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

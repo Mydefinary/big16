@@ -25,7 +25,9 @@ spec:
           ports:
             - containerPort: 9001
           env:
-            - name: jwt.secret
+            - name: SERVER_PORT    # 🔥 이것 추가!
+              value: "9001"
+            - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: api-keys-secret
@@ -45,6 +47,16 @@ spec:
                 secretKeyRef:
                   name: api-keys-secret
                   key: DB_PASSWORD
+            - name: GMAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: GMAIL_USERNAME
+            - name: GMAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: GMAIL_PASSWORD
 ---
 # ===================================================
 # 10. 통합 인증(Auth) 백엔드 서비스

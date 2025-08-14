@@ -11,7 +11,7 @@ ENV REACT_APP_API_HOST=$REACT_APP_API_HOST
 ENV TZ=Asia/Seoul
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-EXPOSE 8080
+EXPOSE 9003
 
 ADD run.sh /opt/run.sh
 ENTRYPOINT ["sh", "/opt/run.sh"]

@@ -24,6 +24,8 @@ spec:
           ports:
             - containerPort: 9002
           env:
+            - name: SERVER_PORT    # 🔥 이것 추가!
+              value: "9002"
             - name: spring.datasource.url
               valueFrom:
                 secretKeyRef:
