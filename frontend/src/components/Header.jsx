@@ -35,17 +35,18 @@ const Header = () => {
 
   // JWT 토큰과 함께 외부 서비스로 이동하는 함수
   const handleServiceNavigation = (servicePath) => {
-    if (!isAuthenticated()) {
-      toast.error('로그인이 필요합니다.', {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      navigate('/login');
-      return;
-    }
-    
-    // 현재 도메인으로 서비스 경로로 이동 (Gateway에서 라우팅)
+    // 임시로 JWT 체크 비활성화 - 직접 서비스 접근 허용
     window.location.href = `${window.location.origin}${servicePath}`;
+    
+    // TODO: 나중에 JWT 인증이 필요하면 아래 코드 활성화
+    // if (!isAuthenticated()) {
+    //   toast.error('로그인이 필요합니다.', {
+    //     position: "top-right",
+    //     autoClose: 3000,
+    //   });
+    //   navigate('/login');
+    //   return;
+    // }
   };
 
   // 현재 경로가 활성 상태인지 확인하는 함수

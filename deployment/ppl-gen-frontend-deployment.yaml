@@ -20,7 +20,7 @@ spec:
         agentpool: userpool
       containers:
         - name: ppl-gen-frontend-container
-          image: kt16big.azurecr.io/ppl-gen-frontend:${IMAGE_TAG}
+          image: kt16big.azurecr.io/ppl-gen-frontend:latest
           ports:
             - containerPort: 80
 ---

@@ -72,16 +72,12 @@ spring:
           uri: http://ppl-gen-frontend-service:80
           predicates:
             - Path=/ppl-gen, /ppl-gen/**
-          filters:
-            - name: JwtAuthenticationFilter
           order: 5
 
         - id: goods-gen-frontend  
           uri: http://goods-gen-frontend-service:80
           predicates:
             - Path=/goods-gen, /goods-gen/**
-          filters:
-            - name: JwtAuthenticationFilter
           order: 6
 
         - id: webtoon-hl-frontend
