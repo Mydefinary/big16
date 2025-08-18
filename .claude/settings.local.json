@@ -19,7 +19,9 @@
       "WebFetch(domain:20.249.154.2)",
       "Bash(git push:*)",
       "Bash(kubectl apply:*)",
-      "Bash(kubectl rollout status:*)"
+      "Bash(kubectl rollout status:*)",
+      "Bash(kubectl create configmap:*)",
+      "Bash(kubectl delete:*)"
     ],
     "defaultMode": "acceptEdits"
   }

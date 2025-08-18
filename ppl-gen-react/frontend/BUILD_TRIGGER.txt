@@ -1,7 +1,0 @@
-Build trigger file - Updated at 2025-08-14 21:30:00
-This file is created to force CI/CD pipeline trigger for ppl-gen frontend.
-CRITICAL FIX: React app homepage 설정 수정됨 "/" 
-- Gateway StripPrefix=1과 올바르게 동작하도록 수정
-- React 앱 정적 파일 경로가 이제 올바르게 생성됨
-- nginx 설정과 Gateway 라우팅 완전 호환
-- 모든 라우팅 이슈 해결됨
