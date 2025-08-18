@@ -24,6 +24,13 @@ spec:
           ports:
             - containerPort: 80
           workingDir: /usr/share/nginx/html
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
 ---
 # ===================================================
 # 21. 웹툰 대시보드 - 프론트엔드 서비스 (ClusterIP)
@@ -40,3 +47,25 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 80
+---
+# ===================================================
+# Ingress for Frontend
+# ===================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webtoon-dashboard-frontend-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: webtoon-dashboard-frontend-service
+                port:
+                  number: 80
