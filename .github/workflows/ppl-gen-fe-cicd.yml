@@ -2,14 +2,14 @@ name: 'CI/CD for PPL-GEN Frontend'
 
 on:
   push:
-    branches: [ "img-gen-cicd","login-ok"]
+    branches: [ "all-service"]
     paths:
       - 'ppl-gen-react/frontend/**'
       - '.github/workflows/ppl-gen-fe-cicd.yml'
       # ✅ [수정]
-      - 'deployment/ppl-gen-frontend-deployment.yaml'
+      - 'deployment/ppl-gen-deployment-fixed.yaml'
   pull_request:
-    branches: [ "img-gen-cicd" ]
+    branches: [ "all-service" ]
     paths:
       - 'ppl-gen-react/frontend/**'
 
@@ -20,7 +20,7 @@ env:
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
   # ✅ [추가]
-  DEPLOYMENT_FILE: "deployment/ppl-gen-frontend-deployment.yaml"
+  DEPLOYMENT_FILE: "deployment/ppl-gen-deployment-fixed.yaml"
 
 jobs:
   build-and-push-to-acr:
@@ -50,7 +50,6 @@ jobs:
           file: ${{ env.WORKING_DIR }}/Dockerfile
           push: true
           tags: |
-            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ steps.get_sha.outputs.sha }}
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
 
   deploy-to-aks:

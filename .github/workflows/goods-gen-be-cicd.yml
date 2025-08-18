@@ -3,18 +3,18 @@ name: 'CI/CD for GOODS-GEN Backend'
 
 # 어떤 이벤트가 발생했을 때 이 워크플로우를 실행할지 정의합니다.
 on:
-  # 'img-gen-cicd' 브랜치에 코드가 푸시될 때 실행됩니다.
+  # 'all-service' 브랜치에 코드가 푸시될 때 실행됩니다.
   push:
-    branches: [ "img-gen-cicd" , "login-ok"]
+    branches: [ "all-service"]
     # 'paths'에 지정된 파일 경로가 변경되었을 때만 워크플로우를 실행하여 효율성을 높입니다.
     paths:
       - 'goods-gen-react/backend/**'
       - '.github/workflows/goods-gen-be-cicd.yml'
       # ✅ [수정] 공용 배포 파일 대신, 이 서비스에 해당하는 배포 파일을 감지합니다.
-      - 'deployment/goods-gen-backend-deployment.yaml'
-  # 'img-gen-cicd' 브랜치를 대상으로 하는 Pull Request가 생성/업데이트될 때 실행됩니다.
+      - 'deployment/goods-gen-deployment-fixed.yaml'
+  # 'all-service' 브랜치를 대상으로 하는 Pull Request가 생성/업데이트될 때 실행됩니다.
   pull_request:
-    branches: [ "img-gen-cicd" ]
+    branches: [ "all-service" ]
     paths:
       - 'goods-gen-react/backend/**'
 
@@ -26,7 +26,7 @@ env:
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
   # ✅ [추가] 배포할 YAML 파일의 경로를 변수로 지정하여 관리 용이성을 높입니다.
-  DEPLOYMENT_FILE: "deployment/goods-gen-backend-deployment.yaml"
+  DEPLOYMENT_FILE: "deployment/goods-gen-deployment-fixed.yaml"
 
 # 실제 작업(task)들의 묶음인 잡(job)을 정의합니다.
 jobs:
