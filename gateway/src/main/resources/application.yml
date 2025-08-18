@@ -77,15 +77,10 @@ spring:
         # ===================================================
         # 프론트엔드 서비스 라우팅 (실제 서비스 페이지)
         # ===================================================
-        # ppl-gen 정적 자산 먼저 처리 
-        - id: ppl-gen-assets
-          uri: http://ppl-gen-frontend-service:80
-          predicates:
-            - Path=/ppl-gen/assets/**, /ppl-gen/static/**, /ppl-gen/*.js, /ppl-gen/*.css, /ppl-gen/*.png, /ppl-gen/*.jpg, /ppl-gen/*.svg
-          filters:
-            - StripPrefix=1
-          order: 4
-
+        # ===================================================
+        # 보호된 서비스들 - 메인보다 먼저 처리 (JWT 인증 필요)
+        # ===================================================
+        
         - id: ppl-gen-frontend
           uri: http://ppl-gen-frontend-service:80
           predicates:
@@ -93,16 +88,7 @@ spring:
           filters:
             - name: JwtAuthenticationFilter
             - StripPrefix=1
-          order: 5
-
-        # goods-gen 정적 자산 먼저 처리
-        - id: goods-gen-assets
-          uri: http://goods-gen-frontend-service:80
-          predicates:
-            - Path=/goods-gen/assets/**, /goods-gen/static/**, /goods-gen/*.js, /goods-gen/*.css, /goods-gen/*.png, /goods-gen/*.jpg, /goods-gen/*.svg
-          filters:
-            - StripPrefix=1
-          order: 5.5
+          order: 4
 
         - id: goods-gen-frontend  
           uri: http://goods-gen-frontend-service:80
@@ -111,7 +97,7 @@ spring:
           filters:
             - name: JwtAuthenticationFilter
             - StripPrefix=1
-          order: 6
+          order: 5
 
         - id: webtoon-hl-frontend
           uri: http://webtoon-hl-frontend-service:80
@@ -120,7 +106,7 @@ spring:
           filters:
             - name: JwtAuthenticationFilter
             - StripPrefix=1
-          order: 7
+          order: 6
 
         - id: webtoon-dashboard-frontend
           uri: http://webtoon-dashboard-frontend-service:80
@@ -129,7 +115,7 @@ spring:
           filters:
             - name: JwtAuthenticationFilter
             - StripPrefix=1
-          order: 8
+          order: 7
 
         - id: board-frontend
           uri: http://board-frontend-service:80
@@ -138,7 +124,7 @@ spring:
           filters:
             - name: JwtAuthenticationFilter
             - StripPrefix=1
-          order: 9
+          order: 8
 
         # ===================================================
         # 메인 프론트엔드 정적 자산 먼저 처리
@@ -146,7 +132,7 @@ spring:
         - id: main-frontend-assets
           uri: http://auth-frontend-service-hoa:80
           predicates:
-            - Path=/assets/**, /static/**, /*.js, /*.css, /*.png, /*.jpg, /*.svg, /favicon.ico, /vite.svg
+            - Path=/assets/**, /static/**, /favicon.ico, /vite.svg, /robots.txt, /manifest.json
           order: 90
 
         # ===================================================

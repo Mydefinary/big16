@@ -1,0 +1,92 @@
+name: "CI/CD for Webtoon Highlight Backend"
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "backend/**"
+      - "deployments/webtoon-highlight-backend-deployment.yaml"
+      - ".github/workflows/webtoon-hl-be-cicd.yml"
+  pull_request:
+    branches: ["**"]
+    paths:
+      - "backend/**"
+      - "deployments/webtoon-highlight-backend-deployment.yaml"
+
+concurrency:
+  group: webtoon-hl-be-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  ACR_NAME: "kt16big"
+  IMAGE_NAME: "webtoon-hl-backend"
+  WORKING_DIR: "backend"
+  AKS_CLUSTER_NAME: "kt16big-aks"
+  AKS_RESOURCE_GROUP: "kt16big"
+  DEPLOYMENT_NAME: "webtoon-hl-backend-deployment"
+  CONTAINER_NAME: "webtoon-hl-backend-container"
+  K8S_NAMESPACE: "default"
+
+jobs:
+  build-and-push-to-acr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Log in to ACR
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      # (필수) Buildx를 docker-container 드라이버로 생성
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+          buildkitd-flags: --debug
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ env.WORKING_DIR }}
+          file: ${{ env.WORKING_DIR }}/Dockerfile
+          push: true
+          tags: |
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          builder: ${{ steps.buildx.outputs.name }}  # <-- 중요
+
+  deploy-to-aks:
+    runs-on: ubuntu-latest
+    needs: build-and-push-to-acr
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set AKS context
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ env.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ env.AKS_CLUSTER_NAME }}
+
+      - name: Apply manifest if deployment not found
+        run: |
+          if ! kubectl -n $K8S_NAMESPACE get deploy ${{ env.DEPLOYMENT_NAME }} >/dev/null 2>&1; then
+            kubectl -n $K8S_NAMESPACE apply -f deployments/webtoon-highlight-backend-deployment.yaml
+          fi
+
+      - name: Rollout by updating image
+        run: |
+          kubectl -n $K8S_NAMESPACE set image deployment/${{ env.DEPLOYMENT_NAME }} \
+            ${{ env.CONTAINER_NAME }}=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          kubectl -n $K8S_NAMESPACE rollout status deployment/${{ env.DEPLOYMENT_NAME }} --timeout=180s

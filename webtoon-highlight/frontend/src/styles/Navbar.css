@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap');
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 2rem; 
+  border-bottom: 1px solid #ccc;
+  background-color: white;
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 1.05rem; 
+  color: #5B5B5B;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-left .logo {
+  font-weight: 800;
+  font-style: italic;
+  margin-right: 12rem;
+  font-size: 1.5rem;
+  color : #09AA5C;
+}
+
+.navbar-left ul {
+  list-style: none;
+  display: flex;
+  gap: 10rem; 
+  margin: 0;
+  padding: 0;
+  font-weight: 700;
+  font-size: 0.9rem; 
+  color: #5B5B5B;
+}
+
+.navbar-left li {
+  transition: color 0.2s ease-in-out;
+}
+
+.navbar-left li:hover {
+  color: #09AA5C;
+  cursor: pointer;
+}
+
+.navbar-left .active {
+  color: #09AA5C;
+  font-weight: 800;
+}
+
+.navbar-right {
+  display: flex;
+  font-size: 1rem; 
+  align-items: center;
+  color : #000000
+}
+
+.navbar-right span {
+  margin-left: 1.5rem;
+  font-weight: 800;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 1.1rem; 
+  transition: color 0.2s ease-in-out;
+}
+
+.navbar-right span:hover {
+  color: #09AA5C;
+}
