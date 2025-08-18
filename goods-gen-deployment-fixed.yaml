@@ -1,0 +1,158 @@
+# ===================================================
+# 굿즈 생성기 서비스 배포 파일 (수정된 버전)
+# ===================================================
+
+# ===================================================
+# 1. 굿즈 생성기 - 백엔드(FastAPI) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goods-gen-backend-deployment
+  labels:
+    app: goods-gen-backend
+    service: goods-gen
+    tier: backend
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: goods-gen-backend
+  template:
+    metadata:
+      labels:
+        app: goods-gen-backend
+        service: goods-gen
+        tier: backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: goods-gen-backend-container
+          image: kt16big.azurecr.io/goods-gen-backend:latest
+          ports:
+            - containerPort: 8001
+              name: http
+          env:
+            - name: BFL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: BFL_API_KEY
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: 8001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: 8001
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+---
+# ===================================================
+# 2. 굿즈 생성기 - 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: goods-gen-backend-service
+  labels:
+    app: goods-gen-backend
+    service: goods-gen
+    tier: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: goods-gen-backend
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8001
+      targetPort: 8001
+
+---
+# ===================================================
+# 3. 굿즈 생성기 - 프론트엔드(React) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goods-gen-frontend-deployment
+  labels:
+    app: goods-gen-frontend
+    service: goods-gen
+    tier: frontend
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: goods-gen-frontend
+  template:
+    metadata:
+      labels:
+        app: goods-gen-frontend
+        service: goods-gen
+        tier: frontend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: goods-gen-frontend-container
+          image: kt16big.azurecr.io/goods-gen-frontend:latest
+          ports:
+            - containerPort: 3000
+              name: http
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+---
+# ===================================================
+# 4. 굿즈 생성기 - 프론트엔드 서비스 (수정됨)
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: goods-gen-frontend-service
+  labels:
+    app: goods-gen-frontend
+    service: goods-gen
+    tier: frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: goods-gen-frontend
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 3000  # 수정: 기존 80 → 3000
