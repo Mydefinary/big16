@@ -6,11 +6,12 @@ import mimetypes
 import uuid
 from pathlib import Path
 from typing import Optional
-from fastapi import FastAPI, File, UploadFile, Form, Request
+from fastapi import FastAPI, File, UploadFile, Form, Request, HTTPException, Depends
 from fastapi.responses import JSONResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.concurrency import run_in_threadpool
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 import replicate
 import requests
@@ -35,6 +36,28 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# JWT 인증 설정
+security = HTTPBearer()
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    JWT 토큰을 검증하는 함수
+    Gateway에서 X-User-Id 헤더를 전달받아 인증 확인
+    """
+    token = credentials.credentials
+    if not token:
+        raise HTTPException(status_code=401, detail="토큰이 필요합니다")
+    return token
+
+def get_user_id(request: Request):
+    """
+    Gateway에서 전달받은 X-User-Id 헤더 값을 반환
+    """
+    user_id = request.headers.get("X-User-Id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="사용자 인증이 필요합니다")
+    return user_id
 
 # --- ✨✨✨ 새로운 코드 추가 ✨✨✨ ---
 # 'static' 폴더를 정적 파일 경로로 지정합니다.
@@ -62,9 +85,14 @@ async def generate_image(
     output_format: str = Form(...),
     safety_tolerance: int = Form(...),
     input_image_1: UploadFile = File(...),
-    input_image_2: UploadFile = File(...)
+    input_image_2: UploadFile = File(...),
+    token: str = Depends(verify_token)
 ):
     try:
+        # 사용자 인증 확인
+        user_id = get_user_id(request)
+        print(f"✅ 인증된 사용자 ID: {user_id}")
+        
         encoded_img1 = encode_file(input_image_1)
         encoded_img2 = encode_file(input_image_2)
 

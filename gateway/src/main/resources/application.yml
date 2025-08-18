@@ -145,13 +145,14 @@ spring:
           order: 100
 
         # ===================================================
-        # PPL & Goods Generation APIs - 공개 경로 (인증 불필요)
+        # PPL & Goods Generation APIs - 보호된 경로 (인증 필요)
         # ===================================================
         - id: ppl-gen-service
           uri: http://ppl-gen-backend-service:8000
           predicates:
             - Path=/api/ppl-gen/**
           filters:
+            - name: JwtAuthenticationFilter
             - StripPrefix=2
           order: 10
 
@@ -160,6 +161,7 @@ spring:
           predicates:
             - Path=/api/goods-gen/**
           filters:
+            - name: JwtAuthenticationFilter
             - StripPrefix=2
           order: 11
 

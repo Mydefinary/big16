@@ -7,9 +7,10 @@ import uuid
 from pathlib import Path
 
 # Request 객체와 Response 객체를 사용하기 위해 추가
-from fastapi import FastAPI, File, UploadFile, Form, Request
+from fastapi import FastAPI, File, UploadFile, Form, Request, HTTPException, Depends
 from fastapi.responses import JSONResponse, FileResponse, Response # Response 추가
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 import requests
 
@@ -33,6 +34,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# JWT 인증 설정
+security = HTTPBearer()
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    JWT 토큰을 검증하는 함수
+    Gateway에서 X-User-Id 헤더를 전달받아 인증 확인
+    """
+    token = credentials.credentials
+    if not token:
+        raise HTTPException(status_code=401, detail="토큰이 필요합니다")
+    return token
+
+def get_user_id(request: Request):
+    """
+    Gateway에서 전달받은 X-User-Id 헤더 값을 반환
+    """
+    user_id = request.headers.get("X-User-Id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="사용자 인증이 필요합니다")
+    return user_id
+
 
 def encode_image_file(file: UploadFile) -> str:
     """FastAPI의 UploadFile 객체를 Base64 문자열로 인코딩합니다."""
@@ -43,13 +66,19 @@ def encode_image_file(file: UploadFile) -> str:
 
 @app.post("/generate")
 async def generate_goods(
+    request: Request,
     prompt: str = Form(...),
     input_image: UploadFile = File(...),
     aspect_ratio: str = Form(...),
     seed: int = Form(...),
-    safety_tolerance: int = Form(...)
+    safety_tolerance: int = Form(...),
+    token: str = Depends(verify_token)
 ):
     try:
+        # 사용자 인증 확인
+        user_id = get_user_id(request)
+        print(f"✅ 인증된 사용자 ID: {user_id}")
+        
         print("✅ 굿즈 생성 요청 받음. BFL.ai API 호출 시작...")
         
         encoded_img = encode_image_file(input_image)
