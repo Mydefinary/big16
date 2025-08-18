@@ -8,16 +8,14 @@ const Header = () => {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      // 서버에 로그아웃 요청
-      await authAPI.logout(refreshToken);
+      // 로컬 스토리지 정리 및 로그인 페이지로 이동
+      logout();
+      window.location.href = `${window.location.origin}/login`;
       alert('로그아웃이 완료되었습니다.');
     } catch (error) {
       console.error('Logout error:', error);
       alert('로그아웃 처리 중 오류가 발생했습니다.');
     } finally {
-      // 로컬 스토리지 정리 및 로그인 페이지로 이동
-      logout();
-      window.location.href = `${window.location.origin}/login`;
       setLoading(false);
     }
   };
@@ -86,24 +84,15 @@ const Header = () => {
 
         {/* 우측 버튼들 */}
         <div className="header-actions">
-          <button
-            onClick={() => handleServiceNavigation('/register')}
-            className="header-btn signup-btn"
-          >
+          <a href={`${window.location.origin}/register`} className="header-btn signup-btn">
             Sign Up
-          </button>
-          <button
-            onClick={() => handleServiceNavigation('/login')}
-            className="header-btn signin-btn"
-          >
+          </a>
+          <a href={`${window.location.origin}/login`} className="header-btn signin-btn">
             Sign In
-          </button>
-          <button
-            onClick={() => handleServiceNavigation('/faq')}
-            className="header-btn faq-btn"
-          >
+          </a>
+          <a href={`${window.location.origin}/faq`} className="header-btn faq-btn">
             FAQ
-          </button>
+          </a>
         </div>
       </div>
     </header>
