@@ -6,7 +6,7 @@ export default defineConfig({
     server: {
     host: true, // optional: allows external access
     port: 3000,
-    allowedHosts: ['all', "3000-mydefinary-big16-ujilnpryys6.ws-us121.gitpod.io"],
+    allowedHosts: ['all', "3000-realuew-kt16big-vw58tccrfn7.ws-us121.gitpod.io"],
     proxy: {
       "/api": {
         target: "http://127.0.0.1:8083",

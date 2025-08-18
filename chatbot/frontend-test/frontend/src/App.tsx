@@ -1,201 +1,128 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
 import axios from "axios";
-import type { Intent } from './types'
-
-/**
- * Webtoon Chatbot UI (React + TypeScript + CSS only)
- * - Persistent top navigation bar
- * - Routing: Home, 작품 질의하기(챗봇), 하이라이트 제작, 웹툰 상세분석, 광고 초안 생성, 광고 파트너쉽 문의, Sign up, Sign in, FAQ
- * - KakaoTalk-like chat bubbles for the chatbot page
- * - Networking optional with Axios; toggle via USE_NETWORK
- */
 
 export default function App() {
   return (
     <BrowserRouter>
       <GlobalStyles />
-      <NavBar />
       <main className="container">
-        <AppRoutes />
+        <ChatbotPage />
       </main>
-      <Footer />
     </BrowserRouter>
   );
 }
 
 function GlobalStyles() {
   const css = `
+    {채팅 말풍선 --me, --bot}
+    {보내기 버튼: --brand}
+    {시간표시: --sub}
     :root{
-      --bg:#0b0c10; --panel:#111318; --muted:#2a2d39; --text:#e6e8ef; --sub:#a8adbd;
-      --brand:#7c9cff; --brand-2:#9bffd6; --me:#7c9cff; --bot:#2f343f; --danger:#ff6767;
+      --muted:#22c55e; --text:#000000; --sub:#a8adbd;
+      --me:#22c55e; --bot:#22c55e; --danger:#ff6767;
+      --brand:#22c55e;
     }
     *{box-sizing:border-box}
     html,body,#root{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic","맑은 고딕",sans-serif}
-    a{color:inherit;text-decoration:none}
+    body{margin:0;
+    background:#f0fdf4;
+    color:var(--text);
+    font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic","맑은 고딕",sans-serif;
+    }
 
-    .navbar{position:sticky;top:0;z-index:20;background:rgba(11,12,16,0.8);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--muted)}
-    .nav-inner{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px}
-    .brand{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:999px;transition:transform .08s ease;}
-    .brand:hover{transform:translateY(-1px)}
-    .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:inline-block}
-    .brand-title{font-weight:700;letter-spacing:.2px}
-
-    .nav-links{display:flex;gap:8px;flex-wrap:wrap;margin-left:8px}
-    .nav-btn{padding:8px 12px;border:1px solid var(--muted);background:#0e1015;color:var(--text);border-radius:10px;font-size:13px;line-height:1;transition:all .15s ease}
-    .nav-btn:hover{border-color:#3a3f52;background:#121521}
-    .nav-btn.primary{border-color:transparent;background:var(--brand);color:#0b0c10;font-weight:700}
-
-    .spacer{flex:1}
-    .auth-links{display:flex;gap:8px}
-
-    .container{max-width:1120px;margin:0 auto;padding:20px 16px}
-
-    .footer{max-width:1120px;margin:40px auto 24px auto;padding:0 16px;color:var(--sub);font-size:12px}
-    .footer a{color:var(--brand)}
-
-    .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:center}
-    .card{background:var(--panel);border:1px solid var(--muted);border-radius:16px;padding:20px}
-    .card h2{margin:0 0 8px}
-    .cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-    @media (max-width: 900px){.hero{grid-template-columns:1fr}}
+    .container{
+    max-width:830px;
+    margin:0 auto;
+    }
 
     /* Chat */
-    .chat-wrap{display:flex;flex-direction:column;height:min(72vh,760px)}
-    .chat{flex:1;overflow:auto;padding:16px;background:radial-gradient(1800px 400px at 20% -20%,rgba(124,156,255,0.12),transparent),linear-gradient(#0d1016,#0b0c10);border:1px solid var(--muted);border-radius:16px}
+    .chat-wrap{
+    display:flex;
+    flex-direction:column;
+    height:min(100vh);
+    }
+    .chat{
+    flex:1;
+    overflow:auto;
+    padding:16px;
+    }
 
-    .msg-row{display:flex;margin:10px 0;gap:8px;align-items:flex-end}
-    .msg-row.me{justify-content:flex-end}
-    .avatar{width:32px;height:32px;border-radius:10px;background:#1b1f2b;flex-shrink:0;border:1px solid var(--muted)}
+    .msg-row{
+    display:flex;
+    margin:10px 0;
+    gap:8px;
+    align-items:flex-end
+    }
+    .msg-row.me{
+    justify-content:flex-end
+    }
 
     .stack{display:flex;flex-direction:column;max-width:48%} /* 중앙에서 양옆 한 글자 폭 여유 */
     .msg-row.me .stack{margin-left:auto}
 
-    .bubble{width:fit-content;max-width:100%;padding:10px 12px;border-radius:14px;font-size:14px;line-height:1.5;word-break:break-word;white-space:pre-wrap}
-    .bubble.me{background:var(--me);color:#0b0c10;border-top-right-radius:4px}
-    .bubble.bot{background:var(--bot);color:var(--text);border-top-left-radius:4px}
+    .bubble{
+    width:fit-content;
+    max-width:100%;
+    padding:10px 12px;
+    border-radius:14px;
+    font-size:14px;
+    line-height:1.5;
+    word-break:break-word;
+    white-space:pre-wrap
+    }
+    .bubble.me{
+    background:var(--me);
+    color:#0b0c10;
+    border-top-right-radius:4px
+    }
+    .bubble.bot{
+    background:var(--bot);
+    color:var(--text);
+    border-top-left-radius:4px
+    }
 
-    .meta{margin-top:4px;font-size:11px;color:var(--sub)}
+    .meta{
+    margin-top:4px;
+    font-size:11px;
+    color:var(--sub)
+    }
     .msg-row.me .meta{ text-align:right }
 
-    .input-row{display:flex;gap:8px;margin-top:12px}
-    .field{flex:1;background:#0e1117;border:1px solid var(--muted);border-radius:12px;padding:12px 12px;color:var(--text);font-size:14px}
-    .field:focus{outline:none;border-color:#3b4160;box-shadow:0 0 0 3px rgba(124,156,255,0.15)}
-    .send{padding:12px 14px;border-radius:12px;background:var(--brand);color:#0b0c10;border:none;font-weight:700;cursor:pointer}
-    .send:disabled{opacity:.6;cursor:default}
+    .input-row{
+    display:flex;
+    gap:8px;
+    margin-top:12px
+    }
+    .field{
+    flex:1;
+    background:#FFFFFF;
+    border:1px solid var(--muted);
+    border-radius:12px;
+    padding:12px 12px;color:var(--text);
+    font-size:14px
+    }
+    .field:focus{
+    outline:none;
+    border-color:#3b4160;
+    box-shadow:0 0 0 3px #22c55e}
+    .send{
+    padding:12px 14px;
+    border-radius:12px;
+    background:var(--brand);
+    color:#0b0c10;border:none;
+    font-weight:700;
+    cursor:pointer
+    }
+    .send:disabled{
+    opacity:.6;
+    cursor:default
+    }
 
     .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 8px;border-radius:999px;background:#141824;border:1px solid var(--muted);font-size:12px;color:var(--sub)}
     .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;border:1px solid var(--muted);padding:2px 6px;border-radius:6px;background:#0e1117;color:var(--sub);font-size:11px}
-
-    .nav-btn.active{outline:2px solid var(--brand);outline-offset:1px}
   `;
   return <style dangerouslySetInnerHTML={{ __html: css }} />;
-}
-
-function NavBar() {
-  const { pathname } = useLocation();
-  const isActive = (to: string) => (pathname === to ? "nav-btn active" : "nav-btn");
-
-  return (
-    <header className="navbar" role="navigation" aria-label="Global">
-      <div className="nav-inner">
-        <Link to="/" className="brand" aria-label="메인 페이지로 이동">
-          <i className="logo" aria-hidden />
-          <span className="brand-title">WEBTOON AI</span>
-        </Link>
-
-        <nav className="nav-links" aria-label="주요 기능">
-          <Link className={isActive("/ask")} to="/ask">작품 질의하기</Link>
-          <Link className={isActive("/highlight")} to="/highlight">하이라이트 제작</Link>
-          <Link className={isActive("/analysis")} to="/analysis">웹툰 상세분석</Link>
-          <Link className={isActive("/ad-draft")} to="/ad-draft">광고 초안 생성</Link>
-          <Link className={isActive("/ad-partnership")} to="/ad-partnership">광고 파트너쉽 문의</Link>
-          <Link className={isActive("/faq")} to="/faq">FAQ</Link>
-        </nav>
-
-        <div className="spacer" />
-
-        <div className="auth-links" aria-label="인증">
-          <Link className="nav-btn" to="/signup">sign up</Link>
-          <Link className="nav-btn primary" to="/signin">sign in</Link>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function AppRoutes() {
-  return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/ask" element={<ChatbotPage />} />
-      <Route path="/highlight" element={<Placeholder title="하이라이트 제작" />} />
-      <Route path="/analysis" element={<Placeholder title="웹툰 상세분석" />} />
-      <Route path="/ad-draft" element={<Placeholder title="광고 초안 생성" />} />
-      <Route path="/ad-partnership" element={<Placeholder title="광고 파트너쉽 문의" />} />
-      <Route path="/signup" element={<Placeholder title="Sign up" />} />
-      <Route path="/signin" element={<Placeholder title="Sign in" />} />
-      <Route path="/faq" element={<FAQPage />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  );
-}
-
-function HomePage() {
-  return (
-    <section className="hero">
-      <div className="card">
-        <h2>웹툰 IP를 더 똑똑하게 활용하세요</h2>
-        <p style={{color:"var(--sub)"}}>
-          작품 정보 검색, 통계/현황 질의, 2차 창작 추천까지.
-          <br />
-          <span className="pill">FastAPI 백엔드 준비 완료</span>{" "}
-          <span className="pill">React + TypeScript + CSS</span>
-        </p>
-        <div className="cta-row">
-          <Link className="nav-btn primary" to="/ask">작품 질의하기 시작하기 →</Link>
-          <Link className="nav-btn" to="/faq">FAQ 보기</Link>
-        </div>
-      </div>
-      <div className="card" aria-label="단축키 안내">
-        <h3 style={{marginTop:0}}>빠른 사용법</h3>
-        <ul>
-          <li>상단 네비게이션은 모든 페이지에서 고정 유지됩니다.</li>
-          <li>Enter로 전송, Shift + Enter로 줄바꿈 <span className="kbd">Enter</span></li>
-          <li>보내기 후 입력창 자동초점, 목록 자동 스크롤</li>
-        </ul>
-      </div>
-    </section>
-  );
-}
-
-function Placeholder({ title }: { title: string }) {
-  return (
-    <section className="card">
-      <h2 style={{marginTop:0}}>{title}</h2>
-      <p style={{color:"var(--sub)"}}>이 섹션은 다른 팀에서 개발 중입니다. 현재는 라우팅만 연결되어 있습니다.</p>
-      <div className="cta-row">
-        <Link className="nav-btn" to="/ask">작품 질의하기로 이동</Link>
-      </div>
-    </section>
-  );
-}
-
-function FAQPage(){
-  return (
-    <section className="card">
-      <h2 style={{marginTop:0}}>FAQ</h2>
-      <details open>
-        <summary>네트워킹은 구현되어 있나요?</summary>
-        <p style={{color:"var(--sub)"}}>옵션입니다. UI는 완성되어 있고, Axios로 FastAPI의 <code>/ask</code>와 연결할 수 있습니다.</p>
-      </details>
-      <details>
-        <summary>어떤 브라우저를 지원하나요?</summary>
-        <p style={{color:"var(--sub)"}}>최신 Chromium/Firefox/Safari 최신 2버전 범위를 권장합니다.</p>
-      </details>
-    </section>
-  );
 }
 
 // -------------------------------
@@ -214,8 +141,7 @@ function ChatbotPage(){
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const api = useMemo(() => axios.create({ baseURL: "/api", timeout: 20000, headers: { "Content-Type": "application/json" } }), []);
-  // const USE_NETWORK = false; // ← 서버 준비되면 true로
-  const USE_NETWORK = true;
+  const USE_NETWORK = true; // ← 서버 준비되면 true로
   
   useEffect(() => {
     const el = listRef.current; if(!el) return; el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
@@ -253,11 +179,7 @@ ${classifyHint(q)}`);
   }
 
   return (
-    <section className="card">
-      <header style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-        <div className="pill">작품 질의하기</div>
-      </header>
-
+    <section>
       <div className="chat-wrap">
         <div ref={listRef} className="chat" role="log" aria-live="polite" aria-relevant="additions">
           {msgs.map(m => (<MessageRow key={m.id} msg={m} />))}
@@ -289,16 +211,11 @@ function MessageRow({ msg }: { msg: ChatMsg }){
   const isMe = msg.role === "user";
   return (
     <div className={"msg-row "+(isMe?"me":"bot") }>
-      {/* 봇 메시지에는 왼쪽 아바타 표시 */}
-      {!isMe && <div className="avatar" aria-hidden />}
-
       {/* bubble + timestamp를 하나의 stack으로 묶어 정렬 */}
       <div className="stack">
         <div className={"bubble "+(isMe?"me":"bot")}>{msg.text}</div>
         <div className="meta" aria-label="전송 시간">{msg.time}</div>
       </div>
-
-      {/* 사용자 메시지는 오른쪽 끝에 밀착시키기 위해 아바타 placeholder 제거 */}
     </div>
   );
 }
@@ -306,7 +223,6 @@ function MessageRow({ msg }: { msg: ChatMsg }){
 function Typing(){
   return (
     <div className="msg-row bot" aria-label="답변 작성 중">
-      <div className="avatar" aria-hidden />
       <div className="stack">
         <div className="bubble bot"><Dots /></div>
         <div className="meta">입력 중...</div>
@@ -324,15 +240,5 @@ function Dots(){
       <span style={{animation:"blink 1s infinite .2s"}}>. </span>
       <span style={{animation:"blink 1s infinite .4s"}}>. </span>
     </span>
-  );
-}
-
-function Footer(){
-  return (
-    <footer className="footer">
-      <div>
-        © {new Date().getFullYear()} WEBTOON AI — Built with React + TypeScript + CSS. <span style={{marginLeft:8}}>백엔드: FastAPI <code>/ask</code> 엔드포인트 연동(axios) 옵션 제공.</span>
-      </div>
-    </footer>
   );
 }
