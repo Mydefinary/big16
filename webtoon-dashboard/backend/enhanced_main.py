@@ -32,7 +32,8 @@ load_dotenv()
 app = FastAPI(
     title="웹툰 분석 API - TF-IDF Enhanced",
     description="TF-IDF 기반 줄거리 분석이 추가된 웹툰 추천 시스템 API",
-    version="2.0.0"
+    version="2.0.0",
+    root_path="/webtoon-api"
 )
 
 # CORS 설정
