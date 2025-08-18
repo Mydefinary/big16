@@ -1,0 +1,13 @@
+# ✅ [수정] user/src/main/resources/bootstrap.yml (Kubernetes 설정 비활성화)
+
+spring:
+  application:
+    name: user-backend-hoa # user 서비스의 경우 user-backend-hoa 로 자동 설정됩니다.
+  # cloud:
+  #   kubernetes:
+  #     # 'secrets' 블록을 사용하여 Secret 리소스를 읽도록 명시합니다.
+  #     secrets:
+  #       sources:
+  #         - name: api-keys-secret
+  #     reload:
+  #       enabled: true

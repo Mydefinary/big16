@@ -1,0 +1,63 @@
+# deployment/rbac.yaml
+
+# --- 1. 네임스페이스 레벨 Role (기존 + 추가 권한) ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: microservice-role
+  namespace: default
+rules:
+# Secret과 ConfigMap 읽기 권한 (기존)
+- apiGroups: [""]
+  resources: ["secrets", "configmaps"]
+  verbs: ["get", "list", "watch"]
+# 서비스 디스커버리를 위한 권한 (추가)
+- apiGroups: [""]
+  resources: ["services", "endpoints", "pods"]
+  verbs: ["get", "list", "watch"]
+
+---
+# --- 2. 클러스터 레벨 권한 (서비스 디스커버리용) ---
+# 일부 Kubernetes 버전에서는 클러스터 레벨 권한이 필요할 수 있습니다
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: service-discovery-role
+rules:
+- apiGroups: [""]
+  resources: ["services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list", "watch"]
+
+---
+# --- 3. Role과 ServiceAccount 연결 (기존 수정) ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: microservice-binding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
+roleRef:
+  kind: Role
+  name: microservice-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# --- 4. ClusterRole과 ServiceAccount 연결 (추가) ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: service-discovery-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: service-discovery-role
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default

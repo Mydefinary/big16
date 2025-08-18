@@ -1,0 +1,41 @@
+# ===================================================
+# 13. 로그인/회원가입/인증 프론트엔드 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-frontend-deployment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: auth-frontend
+  template:
+    metadata:
+      labels:
+        app: auth-frontend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: auth-frontend-container
+          image: kt16big.azurecr.io/auth-frontend:latest
+          ports:
+            - containerPort: 80
+---
+# ===================================================
+# 14. 로그인/회원가입/인증 프론트엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: auth-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

@@ -1,0 +1,11 @@
+# ✅ [생성] gateway/src/main/resources/bootstrap.yml
+spring:
+  application:
+    name: gateway
+  # cloud:
+  #   kubernetes:
+  #     secrets:
+  #       sources:
+  #         - name: api-keys-secret
+  #     reload:
+  #       enabled: true

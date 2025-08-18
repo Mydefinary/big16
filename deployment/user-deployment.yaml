@@ -1,0 +1,86 @@
+# deployment/user-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # ✅ 이름 수정
+  name: user-backend-deployment-hoa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      # ✅ 이름 수정
+      app: user-backend-hoa
+  template:
+    metadata:
+      labels:
+        # ✅ 이름 수정
+        app: user-backend-hoa
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        # ✅ 이름 수정
+        - name: user-backend-container-hoa
+          image: kt16big.azurecr.io/user-backend-hoa:ab94daf5b13f33034909cab7afcd084d37ec3e74
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: DB_URL
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: DB_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: DB_PASSWORD
+            
+            # ✅ Kafka 설정 추가
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka-service:9092"
+            - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+              value: "kafka-service:9092"
+            
+            # ✅ 이메일 설정 추가 (Secret에서 가져오기)
+            - name: SPRING_MAIL_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: spring.mail.host
+            - name: SPRING_MAIL_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: spring.mail.port
+            - name: SPRING_MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: spring.mail.username
+            - name: SPRING_MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: spring.mail.password
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  # ✅ 이름 수정
+  name: user-backend-service-hoa
+spec:
+  type: ClusterIP
+  selector:
+    # ✅ 이름 수정
+    app: user-backend-hoa
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081

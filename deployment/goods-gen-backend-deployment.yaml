@@ -1,0 +1,47 @@
+# ===================================================
+# 5. 굿즈 생성기 - 백엔드(FastAPI) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goods-gen-backend-deployment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: goods-gen-backend
+  template:
+    metadata:
+      labels:
+        app: goods-gen-backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: goods-gen-backend-container
+          image: kt16big.azurecr.io/goods-gen-backend:${IMAGE_TAG}
+          ports:
+            - containerPort: 8001
+          env:
+            - name: BFL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: BFL_API_KEY
+---
+# ===================================================
+# 6. 굿즈 생성기 - 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: goods-gen-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: goods-gen-backend
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8001

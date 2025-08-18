@@ -1,0 +1,10 @@
+Build trigger file - Updated at 2025-08-14 21:45:00
+This file is created to force CI/CD pipeline trigger for goods-gen frontend.
+CRITICAL FIX: TypeScript 빌드 오류 해결
+- App.jsx → App.tsx로 변경하여 TypeScript 일관성 확보
+- React app homepage 설정 수정됨 "/"
+- Gateway StripPrefix=1과 올바르게 동작하도록 수정
+- React 앱 정적 파일 경로가 이제 올바르게 생성됨
+- nginx 설정과 Gateway 라우팅 완전 호환
+- 모든 라우팅 이슈 해결됨
+- Complete React app with professional UI/UX ready

@@ -1,0 +1,1290 @@
+=== BIG16 프로젝트 분석 정보 추출 시작 ===
+추출 시간: 2025년 08월 13일 수 오후  5:10:58
+
+=== 1. Git 브랜치 정보 ===
+현재 브랜치: login-ok
+모든 브랜치:
+* login-ok
+  main
+  remotes/origin/login-ok
+
+=== 2. 프로젝트 구조 ===
+.
+./.github
+./.github/workflows
+./.idea
+./.idea/inspectionProfiles
+./.vscode
+./auth
+./auth/.vscode
+./auth/kubernetes
+./auth/src
+./auth/src/main
+./auth/src/main/java
+./auth/src/main/java/service
+./auth/src/main/java/service/common
+./auth/src/main/java/service/config
+./auth/src/main/java/service/config/kafka
+./auth/src/main/java/service/domain
+./auth/src/main/java/service/dto
+./auth/src/main/java/service/infra
+./auth/src/main/resources
+./deployment
+./frontend
+./frontend/.vscode
+./frontend/current
+./frontend/current/api
+./frontend/current/components
+./frontend/current/pages
+./frontend/current/router
+./frontend/current/styles
+./frontend/kubernetes
+
+=== 3. Docker 설정 파일들 ===
+--- docker-compose.yml ---
+docker-compose 파일을 찾을 수 없습니다.
+
+--- Dockerfile 목록 ---
+./auth/Dockerfile
+./frontend/Dockerfile
+./gateway/Dockerfile
+./user/Dockerfile
+
+=== 4. 패키지/의존성 관리 파일들 ===
+--- Java/Spring Boot 프로젝트 ---
+파일: ./auth/pom.xml
+내용:
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.7.0</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>service</groupId>
+	<artifactId>auth</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>auth</name>
+	<description>Demo project for Spring Boot</description>
+
+	<properties>
+		<java.version>11</java.version>
+		<spring-cloud.version>2021.0.4</spring-cloud.version>
+		<spring-cloud-stream.version>Germantown.SR1</spring-cloud-stream.version>
+		<cucumber.version>6.8.1</cucumber.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-rest</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-hateoas</artifactId>
+		</dependency>
+		
+		<!-- 메일 발송을 위한 의존성. 오류 지속 발생으로 주석처리
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>  -->
+		
+		<!-- 비밀번호 암호화를 위한 BCrypt -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-crypto</artifactId>
+		</dependency>
+		
+	<dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-kubernetes-client-config</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-stream-binder-kafka</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-stream-kafka</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+
+
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.12</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- mysql 사용 -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-sleuth</artifactId>
+		</dependency>
+
+		<!-- kafka streams -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-stream-kafka</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- cucumber test -->
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-java</artifactId>
+			<version>${cucumber.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-junit</artifactId>
+			<version>${cucumber.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-spring</artifactId>
+			<version>${cucumber.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- JWT 발행을 위한 의존성 -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.5</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+
+		<!-- 환경변수 로딩을 위한 dotenv -->
+		<dependency>
+			<groupId>io.github.cdimascio</groupId>
+			<artifactId>dotenv-java</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+
+		<!-- jBCrypt -->
+		<dependency>
+			<groupId>org.mindrot</groupId>
+			<artifactId>jbcrypt</artifactId>
+			<version>0.4</version>
+		</dependency>
+
+		<!-- Spring Boot Security (필요시 주석 해제) -->
+		<!-- <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency> -->
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-kubernetes-dependencies</artifactId>
+                <version>2.1.4</version> <!-- spring-cloud 2021.0.4와 호환되는 버전 -->
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-stream-dependencies</artifactId>
+				<version>${spring-cloud-stream.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
+파일: ./gateway/pom.xml
+내용:
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.7.18</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>com.example</groupId>
+  <artifactId>boot-camp-gateway</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>gateway</name>
+  <description>Gateway project for Spring Boot</description>
+
+  <properties>
+    <java.version>11</java.version>
+    <spring-cloud.version>2021.0.8</spring-cloud.version>
+    <!-- ✅ 검증된 안정 버전 사용 -->
+    <spring-cloud-k8s.version>2.1.7</spring-cloud-k8s.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-gateway</artifactId>
+    </dependency>
+
+    <!-- JWT -->
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-api</artifactId>
+      <version>0.11.5</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-impl</artifactId>
+      <version>0.11.5</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-jackson</artifactId>
+      <version>0.11.5</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- ✅ Dotenv 라이브러리 추가 -->
+    <dependency>
+      <groupId>io.github.cdimascio</groupId>
+      <artifactId>dotenv-java</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+
+    <!-- ✅ Spring Cloud Kubernetes - BOM 관리 방식 -->
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-kubernetes-fabric8-all</artifactId>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${spring-cloud.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-kubernetes-dependencies</artifactId>
+        <version>${spring-cloud-k8s.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+파일: ./user/pom.xml
+내용:
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.7.0</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>service</groupId>
+	<artifactId>user</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>user</name>
+	<description>Demo project for Spring Boot</description>
+
+	<properties>
+		<java.version>11</java.version>
+		<spring-cloud.version>2021.0.4</spring-cloud.version>
+		<spring-cloud-stream.version>Germantown.SR1</spring-cloud-stream.version>
+		<cucumber.version>6.8.1</cucumber.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-rest</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-hateoas</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+      <!-- lombok -->
+		<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>1.18.12</version>
+				<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-openfeign</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-sleuth</artifactId>
+		</dependency>
+
+		<!-- mysql 사용 -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- ✅ [추가] Kubernetes Secret을 읽기 위한 의존성 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-kubernetes-client-config</artifactId>
+        </dependency>
+
+        <!-- ✅ [추가] Kafka Binder 의존성 (필수) -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-stream-binder-kafka</artifactId>
+        </dependency>
+
+		<!-- kafka streams -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-stream-kafka</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- cucumber test -->
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-java</artifactId>
+			<version>${cucumber.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-junit</artifactId>
+			<version>${cucumber.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-spring</artifactId>
+			<version>${cucumber.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- jBCrypt -->
+		<dependency>
+			<groupId>org.mindrot</groupId>
+			<artifactId>jbcrypt</artifactId>
+			<version>0.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+            <!-- ✅ [추가] Spring Cloud Kubernetes 버전 관리 -->			
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-kubernetes-dependencies</artifactId>
+                <version>2.1.4</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-stream-dependencies</artifactId>
+				<version>${spring-cloud-stream.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
+
+--- Python 프로젝트 ---
+--- Node.js/React 프로젝트 ---
+파일: ./frontend/package.json
+내용:
+{
+  "name": "react-project",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --port 5050",
+    "lint": "eslint . --ext .ts,.js,.jsx,.tsx"
+  },
+  "dependencies": {
+    "@casl/ability": "^6.2.0",
+    "@floating-ui/dom": "1.0.0",
+    "@mdi/font": "^7.0.96",
+    "@popperjs/core": "^2.11.8",
+    "apexcharts-clevision": "^3.28.5",
+    "axios": "^0.27.2",
+    "axios-mock-adapter": "^1.21.2",
+    "chart.js": "^3.9.1",
+    "eslint-import-resolver-alias": "^1.1.2",
+    "json2yaml": "^1.1.0",
+    "jwt-decode": "^3.1.2",
+    "partial-json-parser": "^1.2.2",
+    "prismjs": "^1.29.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.14.1",
+    "react-toastify": "^11.0.5",
+    "react-transition-group": "^4.4.5",
+    "sass": "^1.85.0",
+    "webfontloader": "^1.6.28"
+  },
+  "devDependencies": {
+    "@fullcalendar/core": "^5.11.3",
+    "@fullcalendar/daygrid": "^5.11.3",
+    "@fullcalendar/interaction": "^5.11.3",
+    "@fullcalendar/list": "^5.11.3",
+    "@fullcalendar/timegrid": "^5.11.3",
+    "@iconify-json/mdi": "^1.1.33",
+    "@iconify/tools": "^2.1.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "eslint": "^8.23.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsx-a11y": "^6.6.1",
+    "eslint-plugin-react": "^7.33.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "postcss-html": "^1.5.0",
+    "stylelint": "^14.12.0",
+    "stylelint-config-idiomatic-order": "^8.1.0",
+    "stylelint-config-standard-scss": "^5.0.0",
+    "stylelint-use-logical-spec": "^4.1.0",
+    "vite": "^4.5.14"
+  },
+  "packageManager": "yarn@1.22.18",
+  "resolutions": {
+    "postcss": "8",
+    "stylelint-order": "5",
+    "postcss-sorting": "^7.0.1"
+  }
+}
+
+=== 5. 애플리케이션 설정 파일들 ===
+--- ./auth/src/main/resources/application.yml ---
+spring:
+  datasource:
+    # deployment.yaml의 환경변수명과 매칭
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/auth}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # Kafka 설정
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: ${SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS:kafka-service:9092}
+          auto-create-topics: true
+  
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka-service:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:auth-service}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+jwt:
+  secret: ${JWT_SECRET:your-default-jwt-secret}
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.springframework.cloud.stream: debug
+    org.apache.kafka: info
+
+# JPA 설정
+jpa:
+  hibernate:
+    ddl-auto: update
+  show-sql: true
+  properties:
+    hibernate:
+      format_sql: true
+--- ./auth/target/classes/application.yml ---
+spring:
+  datasource:
+    # deployment.yaml의 환경변수명과 매칭
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/auth}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # Kafka 설정
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: ${SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS:kafka-service:9092}
+          auto-create-topics: true
+  
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka-service:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:auth-service}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+jwt:
+  secret: ${JWT_SECRET:your-default-jwt-secret}
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.springframework.cloud.stream: debug
+    org.apache.kafka: info
+
+# JPA 설정
+jpa:
+  hibernate:
+    ddl-auto: update
+  show-sql: true
+  properties:
+    hibernate:
+      format_sql: true
+--- ./gateway/src/main/resources/application.yml ---
+# 서버 포트 설정
+server:
+  port: 8000
+# cicd 작동
+# Spring Cloud Gateway 설정
+spring:
+  cloud:
+    gateway:
+      # 전역 CORS 설정
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://20.249.154.2"
+            allowedMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+            allowedHeaders: "*"
+            maxAge: 3600
+
+      # 라우팅 규칙 정의
+      routes:
+        # ===================================================
+        # 1. 인증/인가 (Auth) 서비스 라우팅 (인증 불필요)
+        # ===================================================
+        - id: auth-service
+          uri: lb://auth-backend-service-hoa
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
+          order: 0
+
+        # ===================================================
+        # 2. 사용자 정보 (User) 서비스 라우팅
+        # ===================================================
+        # 2-1. 회원가입 등 공개 경로 (인증 불필요)
+        - id: user-public-routes
+          uri: lb://user-backend-service-hoa
+          predicates:
+            - Path=/api/users/register, /api/users/check-email, /api/users/find-id
+          filters:
+            - StripPrefix=1
+          order: 1
+
+        # 2-2. 인증이 필요한 나머지 경로
+        - id: user-secure-routes
+          uri: lb://user-backend-service-hoa
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=1
+          order: 2
+
+        # ===================================================
+        # 3. PPL 생성기 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: ppl-gen-service
+          uri: lb://ppl-gen-backend-service
+          predicates:
+            - Path=/api/ppl-gen/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 10
+
+        # ===================================================
+        # 4. 굿즈 생성기 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: goods-gen-service
+          uri: lb://goods-gen-backend-service
+          predicates:
+            - Path=/api/goods-gen/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 11
+
+        # ===================================================
+        # 5. 웹툰 대시보드 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: webtoon-dashboard-service
+          uri: lb://webtoon-dashboard-backend-service
+          predicates:
+            - Path=/api/webtoon/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 12
+
+        # ===================================================
+        # 6. 웹툰 하이라이트 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: webtoon-hl-service
+          uri: lb://webtoon-hl-backend-service
+          predicates:
+            - Path=/api/webtoon-hl/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 13
+
+        # ===================================================
+        # 7. 게시판 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: board-service
+          uri: lb://board-backend-service
+          predicates:
+            - Path=/api/board/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 14
+
+      # ✅ [수정] 모든 경로에 필터를 강제하던 default-filters 섹션을 완전히 삭제합니다.
+
+--- ./gateway/target/classes/application.yml ---
+# 서버 포트 설정
+server:
+  port: 8000
+# cicd 작동
+# Spring Cloud Gateway 설정
+spring:
+  cloud:
+    gateway:
+      # 전역 CORS 설정
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://20.249.154.2"
+            allowedMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+            allowedHeaders: "*"
+            maxAge: 3600
+
+      # 라우팅 규칙 정의
+      routes:
+        # ===================================================
+        # 1. 인증/인가 (Auth) 서비스 라우팅 (인증 불필요)
+        # ===================================================
+        - id: auth-service
+          uri: lb://auth-backend-service-hoa
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
+          order: 0
+
+        # ===================================================
+        # 2. 사용자 정보 (User) 서비스 라우팅
+        # ===================================================
+        # 2-1. 회원가입 등 공개 경로 (인증 불필요)
+        - id: user-public-routes
+          uri: lb://user-backend-service-hoa
+          predicates:
+            - Path=/api/users/register, /api/users/check-email, /api/users/find-id
+          filters:
+            - StripPrefix=1
+          order: 1
+
+        # 2-2. 인증이 필요한 나머지 경로
+        - id: user-secure-routes
+          uri: lb://user-backend-service-hoa
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=1
+          order: 2
+
+        # ===================================================
+        # 3. PPL 생성기 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: ppl-gen-service
+          uri: lb://ppl-gen-backend-service
+          predicates:
+            - Path=/api/ppl-gen/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 10
+
+        # ===================================================
+        # 4. 굿즈 생성기 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: goods-gen-service
+          uri: lb://goods-gen-backend-service
+          predicates:
+            - Path=/api/goods-gen/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 11
+
+        # ===================================================
+        # 5. 웹툰 대시보드 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: webtoon-dashboard-service
+          uri: lb://webtoon-dashboard-backend-service
+          predicates:
+            - Path=/api/webtoon/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 12
+
+        # ===================================================
+        # 6. 웹툰 하이라이트 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: webtoon-hl-service
+          uri: lb://webtoon-hl-backend-service
+          predicates:
+            - Path=/api/webtoon-hl/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 13
+
+        # ===================================================
+        # 7. 게시판 서비스 라우팅 (인증 필요)
+        # ===================================================
+        - id: board-service
+          uri: lb://board-backend-service
+          predicates:
+            - Path=/api/board/**
+          filters:
+            - name: JwtAuthenticationFilter
+            - StripPrefix=2
+          order: 14
+
+      # ✅ [수정] 모든 경로에 필터를 강제하던 default-filters 섹션을 완전히 삭제합니다.
+
+--- ./user/src/main/resources/application.yml ---
+# ✅ [수정] user/src/main/resources/application.yml
+
+# 서버 포트는 deployment.yaml에서 지정하므로 여기서 삭제하거나 주석 처리합니다.
+# server:
+#   port: 8081
+
+spring:
+  # 데이터베이스 설정을 최상위로 이동하여 항상 적용되도록 합니다.
+  datasource:
+    # 쿠버네티스 Secret의 환경변수 이름을 직접 참조합니다.
+    url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+# Kafka 설정
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: ${SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS:kafka-service:9092}
+          auto-create-topics: true
+  
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka-service:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:auth-service}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+
+  # ✅ [추가] Spring Mail 설정
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: 'mydefinary@gmail.com'
+    password: '!Q2w3e4r'
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+# --- 프로필 구분선을 모두 제거 ---
+--- ./user/target/classes/application.yml ---
+# ✅ [수정] user/src/main/resources/application.yml
+
+# 서버 포트는 deployment.yaml에서 지정하므로 여기서 삭제하거나 주석 처리합니다.
+# server:
+#   port: 8081
+
+spring:
+  # 데이터베이스 설정을 최상위로 이동하여 항상 적용되도록 합니다.
+  datasource:
+    # 쿠버네티스 Secret의 환경변수 이름을 직접 참조합니다.
+    url: ${spring.datasource.url}
+    username: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+# Kafka 설정
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: ${SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS:kafka-service:9092}
+          auto-create-topics: true
+  
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka-service:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:auth-service}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+
+  # ✅ [추가] Spring Mail 설정
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: 'mydefinary@gmail.com'
+    password: '!Q2w3e4r'
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+# --- 프로필 구분선을 모두 제거 ---
+--- ./auth/.env.example ---
+# 테스트용 메일트랩 (홈페이지가서 만들기), 시크릿 jwt (직접 작성)
+MAIL_USERNAME=your-mailtrap-username-here
+MAIL_PASSWORD=***MASKED***
+MAIL_FROM_ADDRESS=noreply@yourapp.com
+MAIL_FROM_NAME=인증서비스
+JWT_SECRET=***MASKED***
+--- ./gateway/.env.example ---
+JWT_SECRET=***MASKED***
+
+=== 6. 주요 소스코드 파일 구조 ===
+--- Java 메인 클래스들 ---
+파일: ./auth/src/main/java/service/AuthApplication.java
+내용:
+// ✅ [수정] auth/src/main/java/service/AuthApplication.java
+package service;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import service.config.kafka.KafkaProcessor;
+
+@SpringBootApplication
+@EnableBinding(KafkaProcessor.class) // ✅ Kafka 사용을 위해 다시 활성화
+@EnableFeignClients
+@EnableScheduling
+public class AuthApplication {
+
+    public static ApplicationContext applicationContext;
+
+    public static void main(String[] args) {
+        applicationContext = SpringApplication.run(AuthApplication.class, args);
+    }
+}
+
+
+/* 이전 코드
+package service;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import service.config.kafka.KafkaProcessor;
+
+@SpringBootApplication
+@EnableBinding(KafkaProcessor.class)
+@EnableFeignClients
+@EnableScheduling
+public class AuthApplication {
+
+    public static ApplicationContext applicationContext;
+
+    public static void main(String[] args) {
+        applicationContext = SpringApplication.run(AuthApplication.class, args);
+    }
+} */
+
+파일: ./gateway/src/main/java/service/Application.java
+내용:
+package service;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+
+@SpringBootApplication
+public class Application {
+
+    public static ApplicationContext applicationContext;
+
+    public static void main(String[] args) {
+        applicationContext = SpringApplication.run(Application.class, args);
+    }
+}
+
+파일: ./user/src/main/java/service/UserApplication.java
+내용:
+package service;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.context.ApplicationContext;
+import service.config.kafka.KafkaProcessor;
+// 주석추가
+@SpringBootApplication
+@EnableBinding(KafkaProcessor.class)
+@EnableFeignClients
+public class UserApplication {
+
+    public static ApplicationContext applicationContext;
+
+    public static void main(String[] args) {
+        applicationContext = SpringApplication.run(UserApplication.class, args);
+    }
+}
+
+--- Python 메인 파일들 ---
+--- React 메인 파일들 ---
+파일: ./frontend/current/App.jsx
+내용 (처음 50줄):
+// src/App.jsx
+import React from 'react'
+import Router from './router'
+
+const App = () => <Router />
+
+export default App
+파일: ./frontend/src/App.jsx
+내용 (처음 50줄):
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Header from './components/Header';
+import TokenRequiredPage from './components/TokenRequiredPage';
+import ComingSoonPage from './components/ComingSoonPage';
+import WebtoonDetail from './components/WebtoonDetail';
+import Main from './pages/Main';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import EmailVerification from './pages/EmailVerification';
+import FindId from './pages/FindId';
+import FindPassword from './pages/FindPassword';
+import Dashboard from './pages/Dashboard';
+import MyPage from './pages/MyPage'; // MyPage 추가
+import FAQ from './pages/FAQ';
+import './App.css';
+// redeploy trigger
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Header />
+          <main className="main-content">
+            <Routes>
+                      
+              <Route path="/" element={<Main />}/>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/email-verification" element={<EmailVerification />} />
+              <Route path="/find-id" element={<FindId />} />
+              <Route path="/find-password" element={<FindPassword />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              
+              {/* MyPage 추가 - 보호된 라우트 */}
+              <Route
+                path="/mypage"
+                element={
+                  <ProtectedRoute>
+                    <MyPage />
+                  </ProtectedRoute>
+
+=== 7. 서비스별 폴더 구조 ===
+--- gateway 서비스 구조 ---
+total 2033
+drwxr-xr-x 1 hoa 197121       0  8월 13 13:56 .
+drwxr-xr-x 1 hoa 197121       0  8월 13 17:10 ..
+-rw-r--r-- 1 hoa 197121      56  8월 12 16:07 .env.example
+-rw-r--r-- 1 hoa 197121     459  8월 12 16:07 .gitignore
+-rw-r--r-- 1 hoa 197121 2047416  8월 13 13:54 build_log.txt
+-rw-r--r-- 1 hoa 197121    2188  8월 12 16:07 cloudbuild.yaml
+-rw-r--r-- 1 hoa 197121    2880  8월 13 13:51 debug_maven.bat
+-rw-r--r-- 1 hoa 197121    1661  8월 13 14:11 Dockerfile
+drwxr-xr-x 1 hoa 197121       0  8월 12 16:07 kubernetes
+drwxr-xr-x 1 hoa 197121       0  8월 13 13:51 maven_analysis_2025-08-13_13-51-44
+drwxr-xr-x 1 hoa 197121       0  8월 13 13:53 maven_analysis_2025-08-13_13-53-28
+-rw-r--r-- 1 hoa 197121    3321  8월 13 13:56 pom.xml
+drwxr-xr-x 1 hoa 197121       0  8월 12 16:07 src
+drwxr-xr-x 1 hoa 197121       0  8월 13 13:56 target
+
+
+--- frontend 서비스 구조 ---
+total 342
+drwxr-xr-x 1 hoa 197121      0  8월 12 17:47 .
+drwxr-xr-x 1 hoa 197121      0  8월 13 17:10 ..
+-rw-r--r-- 1 hoa 197121    808  8월 12 16:07 .editorconfig
+-rw-r--r-- 1 hoa 197121   1174  8월 12 16:07 .eslintrc.js
+-rw-r--r-- 1 hoa 197121     58  8월 12 16:07 .eslintrc-auto-import.json
+-rw-r--r-- 1 hoa 197121    356  8월 12 16:07 .gitignore
+-rw-r--r-- 1 hoa 197121     17  8월 12 16:07 .prettierignore
+-rw-r--r-- 1 hoa 197121    469  8월 12 16:07 .prettierrc.json
+drwxr-xr-x 1 hoa 197121      0  8월 12 16:07 .vscode
+drwxr-xr-x 1 hoa 197121      0  8월 12 16:07 current
+-rw-r--r-- 1 hoa 197121    808  8월 12 17:47 Dockerfile
+-rw-r--r-- 1 hoa 197121    364  8월 12 16:07 index.html
+-rw-r--r-- 1 hoa 197121    838  8월 12 16:07 jsconfig.json
+drwxr-xr-x 1 hoa 197121      0  8월 12 16:07 kubernetes
+drwxr-xr-x 1 hoa 197121      0  8월 12 17:47 nginx
+-rw-r--r-- 1 hoa 197121   1789  8월 12 16:07 package.json
+-rw-r--r-- 1 hoa 197121 290002  8월 12 16:07 package-lock.json
+drwxr-xr-x 1 hoa 197121      0  8월 12 16:07 public
+-rw-r--r-- 1 hoa 197121    220  8월 12 16:07 README.md
+-rwxr-xr-x 1 hoa 197121     43  8월 12 16:07 run.sh
+drwxr-xr-x 1 hoa 197121      0  8월 12 16:07 src
+-rw-r--r-- 1 hoa 197121    983  8월 12 16:07 tsconfig.json
+-rw-r--r-- 1 hoa 197121   1513  8월 12 16:07 vite.config.mjs
+
+파일: frontend/.eslintrc.js
+파일: frontend/current/api/api.js
+파일: frontend/current/api/auth.js
+파일: frontend/current/App.jsx
+파일: frontend/current/components/Stars.jsx
+파일: frontend/current/main.jsx
+파일: frontend/current/pages/Login.jsx
+파일: frontend/current/pages/PasswordResetConfirm.jsx
+파일: frontend/current/pages/PasswordResetRequest.jsx
+파일: frontend/current/pages/Register.jsx
+
+=== 8. Docker 컨테이너 상태 ===
+--- 실행 중인 컨테이너 ---
+
+--- 모든 컨테이너 (중지된 것 포함) ---
+
+=== 9. 사용 중인 포트 확인 ===
+
+=== 10. 최근 Git 커밋 로그 ===
+985559b gateway-deployment.yml env 2번선언 정정
+9b4dd69 gateway cicd 재수정
+e7294a3 kafka 설정 application.yml 과 deployment.yaml 파일에 추가
+19a9d84 kafka 설정 변경 auth application.yml auth-deployment.yaml
+a946147 mail secretkey deployment.yaml에 저장
+5f9da1f gateway dockerfile, cicd.yml 수정
+6fd602d gateway pom.xml 의존성 문제 해결 claude
+5f5bff8 gateway spring-boot 버젼 2.7
+3ccf8bd gateway xml.yml 파일 수정 dependencies 버젼관리 추가
+8aecee4 mail 계정 kube secret으로 추가, gateway pom.xml dependecis 관리 추가
+
+=== 정보 추출 완료 ===
+결과 파일: project_analysis_20250813_171057.txt

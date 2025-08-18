@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "target": "esnext",
+    "useDefineForClassFields": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "strict": true,
+    "jsx": "react-jsx",              // React JSX 변환 옵션으로 변경
+    "sourceMap": false,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@layouts/*": ["src/@layouts/*"],
+      "@layouts": ["src/@layouts"],
+      "@core/*": ["src/@core/*"],
+      "@core": ["src/@core"],
+      "@axios": ["src/plugins/axios"]
+    },
+    "lib": ["esnext", "dom", "dom.iterable"],
+    "skipLibCheck": true,
+    "types": ["vite/client"]
+  },
+  "include": [
+    "vite.config.*",
+    "env.d.ts",
+    "src/**/*",
+    "src/**/*.tsx",
+    "src/**/*.ts"
+, "current/App.jsx", "current/main.jsx", "current/router", "current/pages", "current/components", "current/api"  ],
+  "exclude": ["dist", "node_modules", "src/@iconify/*"]
+}

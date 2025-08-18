@@ -1,0 +1,54 @@
+# 워크플로우의 전체 이름을 정의합니다. GitHub Actions 탭에 이 이름이 표시됩니다.
+name: 'CI/CD for GOODS-GEN Backend'
+
+# 어떤 이벤트가 발생했을 때 이 워크플로우를 실행할지 정의합니다.
+on:
+  # 'img-gen-cicd' 브랜치에 코드가 푸시될 때 실행됩니다.
+  push:
+    branches: [ "img-gen-cicd" , "login-ok"]
+    # 'paths'에 지정된 파일 경로가 변경되었을 때만 워크플로우를 실행하여 효율성을 높입니다.
+    paths:
+      - 'goods-gen-react/backend/**'
+      - '.github/workflows/goods-gen-be-cicd.yml'
+      # ✅ [수정] 공용 배포 파일 대신, 이 서비스에 해당하는 배포 파일을 감지합니다.
+      - 'deployment/goods-gen-backend-deployment.yaml'
+  # 'img-gen-cicd' 브랜치를 대상으로 하는 Pull Request가 생성/업데이트될 때 실행됩니다.
+  pull_request:
+    branches: [ "img-gen-cicd" ]
+    paths:
+      - 'goods-gen-react/backend/**'
+
+# 이 워크플로우의 모든 잡(job)에서 공통적으로 사용할 환경 변수를 설정합니다.
+env:
+  ACR_NAME: "kt16big"
+  IMAGE_NAME: "goods-gen-backend" # ACR에 저장될 Docker 이미지의 이름
+  WORKING_DIR: "goods-gen-react/backend"
+  AKS_CLUSTER_NAME: "kt16big-aks"
+  AKS_RESOURCE_GROUP: "kt16big"
+  # ✅ [추가] 배포할 YAML 파일의 경로를 변수로 지정하여 관리 용이성을 높입니다.
+  DEPLOYMENT_FILE: "deployment/goods-gen-backend-deployment.yaml"
+
+# 실제 작업(task)들의 묶음인 잡(job)을 정의합니다.
+jobs:
+  # 'ACR에 빌드하고 푸시한다'는 이름의 잡입니다.
+  build-and-push-to-acr:
+    runs-on: ubuntu-latest
+    # ✅ [추가] job의 출력을 정의하여 다음 job에서 이미지 태그를 사용할 수 있도록 합니다.
+    outputs:
+      image_tag: ${{ steps.get_sha.outputs.sha }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ✅ [추가] 이미지 태그로 사용할 고유한 SHA 값을 생성하는 단계입니다.
+      - name: Get short SHA
+        id: get_sha
+        run: echo "sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Log in to ACR
+        run: az acr login --name ${{ env.ACR_NAME }}

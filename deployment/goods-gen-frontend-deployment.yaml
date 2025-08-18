@@ -1,0 +1,41 @@
+# ===================================================
+# 7. 굿즈 생성기 - 프론트엔드(React) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goods-gen-frontend-deployment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: goods-gen-frontend
+  template:
+    metadata:
+      labels:
+        app: goods-gen-frontend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: goods-gen-frontend-container
+          image: kt16big.azurecr.io/goods-gen-frontend:${IMAGE_TAG}
+          ports:
+            - containerPort: 80
+---
+# ===================================================
+# 8. 굿즈 생성기 - 프론트엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: goods-gen-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: goods-gen-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000

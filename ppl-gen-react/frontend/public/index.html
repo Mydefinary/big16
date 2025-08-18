@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPL 생성기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 800px;
+            width: 90%;
+        }
+        
+        .title {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .status {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #28a745;
+            margin-bottom: 30px;
+        }
+        
+        .success {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .form-section {
+            text-align: left;
+            margin-top: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .preview-area {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            background: #f9f9f9;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🎭 웹툰 캐릭터 PPL 생성기</h1>
+        <p class="subtitle">AI를 활용한 웹툰 캐릭터 상품 배치 이미지 생성 서비스</p>
+        
+        <div class="status">
+            <div class="success">✅ PPL 생성 서비스가 정상적으로 로드되었습니다!</div>
+        </div>
+        
+        <div class="form-section">
+            <div class="form-group">
+                <label for="prompt">생성할 이미지 설명 (프롬프트)</label>
+                <textarea id="prompt" placeholder="예: 이 가방을 들고 걷고 있는 그림 속 여성을 그려줘"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>캐릭터 이미지 업로드</label>
+                <input type="file" accept="image/*" id="character-image">
+            </div>
+            
+            <div class="form-group">
+                <label>제품 이미지 업로드</label>
+                <input type="file" accept="image/*" id="product-image">
+            </div>
+            
+            <button class="btn" onclick="generatePPL()">✨ PPL 이미지 생성하기</button>
+        </div>
+        
+        <div class="preview-area">
+            <p>생성된 이미지가 여기에 표시됩니다</p>
+        </div>
+    </div>
+
+    <script>
+        function generatePPL() {
+            const prompt = document.getElementById('prompt').value;
+            const characterImage = document.getElementById('character-image').files[0];
+            const productImage = document.getElementById('product-image').files[0];
+            
+            if (!prompt) {
+                alert('프롬프트를 입력해주세요!');
+                return;
+            }
+            
+            if (!characterImage || !productImage) {
+                alert('캐릭터 이미지와 제품 이미지를 모두 업로드해주세요!');
+                return;
+            }
+            
+            // 실제 API 호출 로직이 들어갈 부분
+            alert('PPL 이미지 생성 기능이 곧 구현됩니다! 🚀\n\n입력된 정보:\n- 프롬프트: ' + prompt + '\n- 캐릭터 이미지: ' + characterImage.name + '\n- 제품 이미지: ' + productImage.name);
+        }
+        
+        // 페이지 로드 시
+        console.log('PPL 생성기가 성공적으로 로드되었습니다!');
+    </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+# ===================================================
+# 24. 웹툰 하이라이트 - 프론트엔드(React) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoon-hl-frontend-deployment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: webtoon-hl-frontend
+  template:
+    metadata:
+      labels:
+        app: webtoon-hl-frontend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: webtoon-hl-frontend-container
+          image: kt16big.azurecr.io/webtoon-hl-frontend:latest
+          ports:
+            - containerPort: 80
+---
+# ===================================================
+# 25. 웹툰 하이라이트 - 프론트엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoon-hl-frontend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: webtoon-hl-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

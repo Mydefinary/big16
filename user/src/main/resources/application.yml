@@ -1,0 +1,71 @@
+# ✅ [수정] user/src/main/resources/application.yml
+
+# User 서비스는 8081 포트에서 실행 (Gateway 설정과 일치)
+server:
+  port: 8081
+
+spring:
+  # 데이터베이스 설정을 최상위로 이동하여 항상 적용되도록 합니다.
+  datasource:
+    # Azure MySQL 연결 설정 (SSL 및 타임존 설정 포함)
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://kt16sql.mysql.database.azure.com:3306/kt16sql?useSSL=true&requireSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:kt16jo}
+    password: ${SPRING_DATASOURCE_PASSWORD:kt!6jojo}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+# Kafka 설정
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: ${SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS:kafka-service:9092}
+          auto-create-topics: true
+  
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka-service:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:auth-service}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        show_sql: true
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+  
+  sql:
+    init:
+      mode: never
+
+  # ✅ [추가] Spring Mail 설정 (Secret 환경변수 사용)
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:mydefinary@gmail.com}
+    password: ${SPRING_MAIL_PASSWORD:password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# 디버그 로깅 설정
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.springframework.cloud.stream: debug
+    org.apache.kafka: info
+    service: debug
+    org.springframework.web: debug
+
+# --- 프로필 구분선을 모두 제거 ---
