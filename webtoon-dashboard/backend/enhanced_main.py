@@ -127,7 +127,12 @@ class KoreanTFIDFAnalyzer:
         self.vectorizer = None
         self.tfidf_matrix = None
         self.feature_names = None
-        self.okt = Okt() if KONLPY_AVAILABLE else None
+        # KoNLPy 사용 시도 (Java 필요)
+        try:
+            self.okt = Okt() if KONLPY_AVAILABLE else None
+        except Exception as e:
+            print(f"Warning: Failed to initialize KoNLPy Okt: {e}")
+            self.okt = None
         
         # 한국어 불용어 리스트 (웹툰 도메인 특화)
         self.korean_stopwords = {
