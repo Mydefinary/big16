@@ -10,6 +10,11 @@
   box-sizing: border-box;
   margin: 7rem auto;
   max-width: 1200px;
+
+  flex-direction: column;
+  justify-content: center; /* 세로 가운데 */
+  align-items: center;     /* 가로 가운데 */
+  text-align: center;      /* 텍스트 중앙 */
 }
 
 .upload-container h2 {

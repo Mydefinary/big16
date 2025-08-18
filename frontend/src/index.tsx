@@ -1,4 +1,4 @@
-import React from 'react';
+/*import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
@@ -10,6 +10,26 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <App />
+  </React.StrictMode>
+);*/
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+import { HashRouter } from 'react-router-dom';
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+
+root.render(
+  <React.StrictMode>
+    {/* HashRouter를 사용하면 /webtoon-hl 같은 서브패스 문제 없이 동작 */}
+    <HashRouter>
+      <App />
+    </HashRouter>
   </React.StrictMode>
 );
 
