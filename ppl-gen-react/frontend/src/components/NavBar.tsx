@@ -3,6 +3,40 @@ import React, { useState } from "react";
 export default function NavBar() {
   const [hover, setHover] = useState(false);
 
+  // 서비스로 이동하는 함수
+  const handleServiceNavigation = (servicePath: string) => {
+    window.location.href = `${window.location.origin}${servicePath}`;
+  };
+
+  const navButtonStyle = {
+    fontWeight: 700,
+    fontSize: 16,
+    color: "#5B5B5B",
+    whiteSpace: "nowrap" as const,
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    padding: "8px 0",
+  };
+
+  const activeButtonStyle = {
+    ...navButtonStyle,
+    fontWeight: 800,
+    color: "#09AA5C",
+  };
+
+  const rightButtonStyle = {
+    fontFamily: "Inter",
+    fontStyle: "italic" as const,
+    fontWeight: 700,
+    fontSize: 20,
+    whiteSpace: "nowrap" as const,
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    padding: "8px 12px",
+  };
+
   return (
     <nav
       style={{
@@ -21,7 +55,7 @@ export default function NavBar() {
           minHeight: "77px",
           height: "auto",
           display: "flex",
-          flexWrap: "wrap", // ✅ 전체 nav 줄바꿈 허용
+          flexWrap: "wrap",
           alignItems: "center",
           justifyContent: "space-between",
           boxSizing: "border-box",
@@ -29,7 +63,8 @@ export default function NavBar() {
         }}
       >
         {/* 왼쪽 로고 */}
-        <div
+        <button
+          onClick={() => handleServiceNavigation('/')}
           style={{
             fontFamily: "Inter",
             fontStyle: "italic",
@@ -39,16 +74,20 @@ export default function NavBar() {
             color: "#000",
             whiteSpace: "nowrap",
             flexShrink: 0,
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: 0,
           }}
         >
-          Service Name
-        </div>
+          ToonConnect
+        </button>
 
         {/* 중앙 네비게이션 링크들 */}
         <div
           style={{
             display: "flex",
-            flexWrap: "wrap",        // ✅ 내부 링크도 줄바꿈 가능
+            flexWrap: "wrap",
             gap: 24,
             justifyContent: "center",
             alignItems: "center",
@@ -56,9 +95,24 @@ export default function NavBar() {
             minWidth: 0,
           }}
         >
-          <a style={{ fontWeight: 700, fontSize: 16, color: "#5B5B5B", whiteSpace: "nowrap" }}>작품 질의하기</a>
-          <a style={{ fontWeight: 700, fontSize: 16, color: "#5B5B5B", whiteSpace: "nowrap" }}>하이라이트 제작</a>
-          <a style={{ fontWeight: 700, fontSize: 16, color: "#5B5B5B", whiteSpace: "nowrap" }}>웹툰 상세 분석</a>
+          <button
+            onClick={() => handleServiceNavigation('/ppl-gen')}
+            style={activeButtonStyle}
+          >
+            작품 질의하기
+          </button>
+          <button
+            onClick={() => handleServiceNavigation('/webtoon-hl')}
+            style={navButtonStyle}
+          >
+            하이라이트 제작
+          </button>
+          <button
+            onClick={() => handleServiceNavigation('/webtoon-dashboard')}
+            style={navButtonStyle}
+          >
+            웹툰 상세 분석
+          </button>
 
           {/* 드롭다운 포함 영역 */}
           <div
@@ -66,17 +120,18 @@ export default function NavBar() {
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
           >
-            <a
+            <span
               style={{
                 fontWeight: 800,
                 fontSize: 16,
                 color: "#09AA5C",
                 paddingBottom: 4,
                 whiteSpace: "nowrap",
+                cursor: "pointer",
               }}
             >
               광고 초안 생성
-            </a>
+            </span>
 
             {hover && (
               <div
@@ -92,32 +147,53 @@ export default function NavBar() {
                   zIndex: 10,
                 }}
               >
-                <div
+                <button
+                  onClick={() => handleServiceNavigation('/ppl-gen')}
                   style={{
                     fontSize: 12,
                     fontWeight: 700,
                     color: "#09AA5C",
                     whiteSpace: "nowrap",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "4px 0",
+                    display: "block",
+                    width: "100%",
+                    textAlign: "left" as const,
                   }}
                 >
                   웹툰 캐릭터 PPL
-                </div>
-                <div
+                </button>
+                <button
+                  onClick={() => handleServiceNavigation('/goods-gen')}
                   style={{
                     fontSize: 12,
                     fontWeight: 700,
                     color: "#000",
                     marginTop: 8,
                     whiteSpace: "nowrap",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "4px 0",
+                    display: "block",
+                    width: "100%",
+                    textAlign: "left" as const,
                   }}
                 >
                   웹툰 캐릭터 굿즈
-                </div>
+                </button>
               </div>
             )}
           </div>
 
-          <a style={{ fontWeight: 700, fontSize: 16, color: "#5B5B5B", whiteSpace: "nowrap" }}>광고 파트너십 문의</a>
+          <button
+            onClick={() => handleServiceNavigation('/board')}
+            style={navButtonStyle}
+          >
+            광고 파트너십 문의
+          </button>
         </div>
 
         {/* 오른쪽 메뉴 */}
@@ -131,40 +207,24 @@ export default function NavBar() {
             alignItems: "center",
           }}
         >
-          <div
-            style={{
-              fontFamily: "Inter",
-              fontStyle: "italic",
-              fontWeight: 700,
-              fontSize: 20,
-              whiteSpace: "nowrap",
-            }}
+          <button
+            onClick={() => handleServiceNavigation('/register')}
+            style={rightButtonStyle}
           >
             Sign Up
-          </div>
-          <div
-            style={{
-              fontFamily: "Inter",
-              fontStyle: "italic",
-              fontWeight: 700,
-              fontSize: 20,
-              whiteSpace: "nowrap",
-            }}
+          </button>
+          <button
+            onClick={() => handleServiceNavigation('/login')}
+            style={rightButtonStyle}
           >
             Sign In
-          </div>
-          <div
-            style={{
-              fontFamily: "Inter",
-              fontStyle: "italic",
-              fontWeight: 700,
-              fontSize: 20,
-              color: "#000",
-              whiteSpace: "nowrap",
-            }}
+          </button>
+          <button
+            onClick={() => handleServiceNavigation('/faq')}
+            style={rightButtonStyle}
           >
             FAQ
-          </div>
+          </button>
         </div>
       </div>
     </nav>
