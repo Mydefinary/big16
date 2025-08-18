@@ -2,17 +2,13 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import './App.css'
-// (선택) 마크다운 렌더링을 원하면 아래 주석 해제 후 패키지 설치
-// import ReactMarkdown from "react-markdown";
-// import remarkGfm from "remark-gfm";
 
 // --------------------------------------------------
-// ChatGPT-처럼 보이는 UI로 전면 개편한 App (1).tsx
+// ChatGPT처럼 보이는 UI로 전면 개편한 App2.tsx
 // - 기존 me/bot 채팅 로직 유지
 // - 상단 헤더 + 좌측 사이드바(대화 목록) + 중앙 채팅 영역
-// - Enter 전송, Shift+Enter 줄바꿈
+// - Enter 전송, Shift + Enter 줄바꿈
 // - 메시지 복사, 로딩 중 중단(Stop)
-// - (선택) Markdown 렌더링 지원
 // - 로컬스토리지에 최근 대화 저장
 // --------------------------------------------------
 
@@ -388,53 +384,10 @@ interface ThreadSummary{ id: string; title: string; updatedAt: number }
 const nowHM = () => { const d = new Date(); return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; };
 const newId = () => (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()));
 
-// -------------------- 상단 네비게이션바 --------------------
-// function NavBar({
-//   title,
-//   onTitle,
-//   onNew,
-//   onDelete,
-//   model,
-//   onModel,
-// }: {
-//   title: string;
-//   onTitle: (t: string) => void;
-//   onNew: () => void;
-//   onDelete: () => void;
-//   model: string;
-//   onModel: (m: string) => void;
-// }){
-//   const [local, setLocal] = useState(title);
-//   useEffect(()=>{ setLocal(title); }, [title]);
-//   function commit(){ onTitle(local.trim() || "새 대화"); }
-//   return (
-//     <div className="navbar" role="navigation" aria-label="주요 메뉴">
-//       <div className="brand">
-//         <span className="logo">◎</span>
-//         <span>My Chat</span>
-//       </div>
-//       <div className="nav-center">
-//         <input className="title-edit" value={local} onChange={(e)=>setLocal(e.target.value)} onBlur={commit} onKeyDown={(e)=>{ if(e.key==='Enter') commit(); }} aria-label="대화 제목" />
-//       </div>
-//       <div className="nav-right">
-//         <select className="select" value={model} onChange={(e)=>onModel(e.target.value)} aria-label="모델 선택">
-//           <option value="default">Default</option>
-//           <option value="fast">Fast</option>
-//           <option value="quality">Quality</option>
-//         </select>
-//         <button className="btn" onClick={onNew}>+ 새 대화</button>
-//         <button className="btn danger" onClick={onDelete}>삭제</button>
-//       </div>
-//     </div>
-//   );
-// }
-
 // -------------------- 메인 레이아웃 --------------------
 function ChatLayout(){
   const [threads, setThreads] = useState<ThreadSummary[]>(() => loadThreads());
   const [activeId, setActiveId] = useState<string>(() => threads[0]?.id ?? createNewThread(setThreads));
-  const active = threads.find(t=>t.id===activeId);
-  const [model, setModel] = useState("default");
 
   function handleDeleteThread(id:string){
     deleteThread(id, setThreads);
@@ -457,15 +410,6 @@ function ChatLayout(){
               onDelete={handleDeleteThread}
             />
             <div className="main">
-                {/* <NavBar
-                title={active?.title ?? "새 대화"}
-                onTitle={(t)=> renameThread(activeId, t, setThreads)}
-                onNew={() => setActiveId(createNewThread(setThreads))}
-                onDelete={() => { deleteThread(activeId, setThreads); const next = loadThreads()[0]?.id ?? createNewThread(setThreads); setActiveId(next); }}
-                model={model}
-                onModel={setModel}
-                /> */}
-
                 <ChatArea
                 threadId={activeId}
                 onTitle={(title) => renameThread(activeId, title, setThreads)}
