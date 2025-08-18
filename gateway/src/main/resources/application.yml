@@ -34,7 +34,21 @@ spring:
           filters:
             - name: JwtAuthenticationFilter
             
-        # 🎯 프론트엔드 라우트는 JWT 필터 제거 (정적 파일이므로)
+        # 🆕 웹툰 대시보드 백엔드 추가 (충돌 방지를 위해 구체적 경로)
+        - id: webtoon-backend
+          uri: http://localhost:8002
+          predicates:
+            - Path=/webtoon-api/**
+          # JWT 필터 필요시 추가 가능
+            
+        # 🆕 웹툰 대시보드 프론트엔드 추가
+        - id: webtoon-frontend
+          uri: http://localhost:8080
+          predicates:
+            - Path=/webtoon/**
+          # 정적 파일이므로 JWT 필터 없음
+        
+        # 🎯 프론트엔드 라우트는 가장 마지막 (우선순위 낮음)
         - id: frontend
           uri: http://localhost:9003
           predicates:
@@ -46,7 +60,7 @@ spring:
         cors-configurations:  # 🔧 오타 수정: corsConfigurations -> cors-configurations
           '[/**]':
             allowed-origins:  # 🔧 camelCase -> kebab-case
-              - "*"    # Vite 개발서버 (커스텀 포트)
+              - "*"    # 모든 origins 허용
             allowed-methods:
               - "GET"
               - "POST" 
@@ -90,6 +104,21 @@ spring:
           filters:
             - name: JwtAuthenticationFilter
             
+        # 🆕 웹툰 대시보드 라우트 추가 (Docker 환경)
+        - id: webtoon-backend
+          uri: http://webtoon-dashboard-backend-service:8002
+          predicates:
+            - Path=/webtoon-api/**
+          # JWT 필터 필요시 추가:
+          # filters:
+          #   - name: JwtAuthenticationFilter
+            
+        - id: webtoon-frontend  
+          uri: http://webtoon-dashboard-frontend-service:80
+          predicates:
+            - Path=/webtoon/**
+          # 정적 파일이므로 JWT 필터 없음
+            
         - id: frontend
           uri: http://frontend-lee-service:9003
           predicates:
@@ -100,7 +129,7 @@ spring:
         cors-configurations:
           '[/**]':
             allowed-origins:
-              - "http://20.249.140.17:9000"        # 외부 LB
+              - "http://20.249.113.18:9000"        # 외부 LB
             allowed-methods:
               - "GET"
               - "POST"

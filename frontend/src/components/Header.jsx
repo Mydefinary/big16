@@ -45,6 +45,14 @@ const Header = () => {
     }
   };
 
+  // 웹툰 대시보드로 이동하는 함수 (같은 탭에서 이동)
+  const goToWebtoonDashboard = () => {
+    // 외부 이동이 아니라 내부 라우팅으로 변경
+    navigate('/webtoon-dashboard');
+    
+    console.log('🎯 웹툰 대시보드 페이지로 이동 (내부 임베딩)');
+  };
+
   // 현재 경로가 활성 상태인지 확인하는 함수
   const isActive = (path) => {
     if (path === '/') {
@@ -105,6 +113,24 @@ const Header = () => {
               >
                 광고 파트너십 문의
               </Link>
+            </li>
+            {/* 🆕 웹툰 대시보드 링크 추가 */}
+            <li className="nav-item">
+              <button
+                onClick={goToWebtoonDashboard}
+                className="nav-link webtoon-dashboard-link"
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  cursor: 'pointer',
+                  color: 'inherit',
+                  textDecoration: 'none',
+                  padding: 0,
+                  font: 'inherit'
+                }}
+              >
+                웹툰 대시보드 📊
+              </button>
             </li>
           </ul>
         </nav>

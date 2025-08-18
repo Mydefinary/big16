@@ -6,6 +6,7 @@ import Header from './components/Header';
 import TokenRequiredPage from './components/TokenRequiredPage';
 import ComingSoonPage from './components/ComingSoonPage';
 import WebtoonDetail from './components/WebtoonDetail';
+import WebtoonDashboardEmbed from './components/WebtoonDashboardEmbed';
 import Main from './pages/Main';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -98,6 +99,16 @@ function App() {
                   />
                 }
                />
+              <Route
+                path="/webtoon-dashboard"  // "/webtoon"에서 "/webtoon-dashboard"로 변경
+                element={
+                  <TokenRequiredPage
+                    pageName="웹툰 대시보드"
+                    description="웹툰 대시보드 페이지입니다. 웹툰 관련 데이터와 분석 정보를 확인할 수 있습니다."
+                    DetailComponent={WebtoonDashboardEmbed}
+                  />
+                }
+              />
                              
               {/* FAQ는 토큰 없이도 접근 가능 */}
               <Route

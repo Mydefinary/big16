@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'url'
 
 export default defineConfig({
+  base: '/', // 이 줄 추가
   plugins: [
     react(),
   ],
@@ -23,18 +24,11 @@ export default defineConfig({
     chunkSizeWarningLimit: 5000,
   },
   server: {
-    host: true, // 0.0.0.0 허용
+    host: true,
     port: 8080,
     strictPort: true,
     cors: true,
-    allowedHosts: ['all'], // or 정확한 호스트 명시
-    // proxy: { // 만약 CORS 문제가 생기면 주석 헤제
-    //   '/api': {
-    //     target: import.meta.env.VITE_API_BASE_URL,
-    //     changeOrigin: true,
-    //     secure: false,
-    //   },
-    // }, // 
+    allowedHosts: ['all'],
   },
   css: {
     preprocessorOptions: {
