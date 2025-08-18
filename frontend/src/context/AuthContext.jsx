@@ -18,13 +18,50 @@ export const AuthProvider = ({ children }) => {
   const [refreshToken, setRefreshToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const attemptTokenRefresh = async (refreshTokenValue) => {
+    try {
+      const response = await authAPI.refreshToken(refreshTokenValue);
+      const { accessToken, refreshToken: newRefreshToken } = response.data;
+      
+      setToken(accessToken);
+      setRefreshToken(newRefreshToken);
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', newRefreshToken);
+      
+      return true;
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      return false;
+    }
+  };
+
   useEffect(() => {
     const savedToken = localStorage.getItem('accessToken');
     const savedRefreshToken = localStorage.getItem('refreshToken');
     
     if (savedToken) {
-      setToken(savedToken);
+      // 토큰 유효성 간단 검증
+      try {
+        const payload = JSON.parse(atob(savedToken.split('.')[1]));
+        const now = Date.now() / 1000;
+        
+        if (payload.exp > now) {
+          setToken(savedToken);
+        } else {
+          // 토큰이 만료된 경우 자동으로 갱신 시도
+          if (savedRefreshToken) {
+            attemptTokenRefresh(savedRefreshToken);
+          } else {
+            localStorage.removeItem('accessToken');
+          }
+        }
+      } catch (error) {
+        localStorage.removeItem('accessToken');
+      }
     }
+    
     if (savedRefreshToken) {
       setRefreshToken(savedRefreshToken);
     }
