@@ -1,0 +1,8 @@
+# .gitignore 파일 내용
+
+# 환경 변수 파일 무시
+.env
+
+# 다른 민감한 파일이나 폴더도 추가 가능
+secrets.json
+/node_modules
