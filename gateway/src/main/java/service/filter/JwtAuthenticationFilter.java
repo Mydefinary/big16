@@ -106,12 +106,25 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             return true;
         }
         
-        // 정적 파일 (확장자 기반)
-        if (path.contains(".")) {
+        // 정적 파일 (확장자 기반) - 보다 구체적으로 제한
+        if (path.contains(".") && (
+            path.endsWith(".js") || 
+            path.endsWith(".css") || 
+            path.endsWith(".png") || 
+            path.endsWith(".jpg") || 
+            path.endsWith(".jpeg") || 
+            path.endsWith(".gif") || 
+            path.endsWith(".svg") || 
+            path.endsWith(".ico") || 
+            path.endsWith(".woff") || 
+            path.endsWith(".woff2") || 
+            path.endsWith(".ttf") || 
+            path.endsWith(".eot") ||
+            path.endsWith(".html"))) {
             return true;
         }
         
-        // React 라우트
+        // 메인 auth 프론트엔드의 공개 React 라우트만
         if (path.equals("/login") ||
             path.equals("/register") ||
             path.equals("/email-verification") ||
@@ -120,6 +133,10 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             path.equals("/main")) {
             return true;
         }
+        
+        // 보호된 서비스 프론트엔드 경로들은 인증 필요
+        // /goods-gen, /ppl-gen, /webtoon-dashboard, /webtoon-hl, /board 등은 
+        // 더 이상 공개 경로가 아님
         
         return false;
     }

@@ -91,6 +91,7 @@ spring:
           predicates:
             - Path=/ppl-gen, /ppl-gen/**
           filters:
+            - name: JwtAuthenticationFilter
             - StripPrefix=1
           order: 5
 
@@ -108,6 +109,7 @@ spring:
           predicates:
             - Path=/goods-gen, /goods-gen/**
           filters:
+            - name: JwtAuthenticationFilter
             - StripPrefix=1
           order: 6
 
@@ -116,6 +118,7 @@ spring:
           predicates:
             - Path=/webtoon-hl, /webtoon-hl/**
           filters:
+            - name: JwtAuthenticationFilter
             - StripPrefix=1
           order: 7
 
@@ -124,6 +127,7 @@ spring:
           predicates:
             - Path=/webtoon-dashboard, /webtoon-dashboard/**
           filters:
+            - name: JwtAuthenticationFilter
             - StripPrefix=1
           order: 8
 
@@ -132,6 +136,7 @@ spring:
           predicates:
             - Path=/board, /board/**
           filters:
+            - name: JwtAuthenticationFilter
             - StripPrefix=1
           order: 9
 
