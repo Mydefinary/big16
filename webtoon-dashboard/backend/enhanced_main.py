@@ -32,8 +32,7 @@ load_dotenv()
 app = FastAPI(
     title="웹툰 분석 API - TF-IDF Enhanced",
     description="TF-IDF 기반 줄거리 분석이 추가된 웹툰 추천 시스템 API",
-    version="2.0.0",
-    root_path="/webtoon-api"
+    version="2.0.0"
 )
 
 # CORS 설정
@@ -449,7 +448,7 @@ def calculate_enhanced_similarity(webtoon1_idx, webtoon2_idx, webtoons_data, tfi
 
 # API 엔드포인트들
 
-@app.get("/")
+@app.get("/webtoon-api/")
 async def read_root():
     return {
         "message": "TF-IDF 기반 웹툰 분석 API 서버가 정상 작동 중입니다",
@@ -1234,7 +1233,7 @@ async def get_insights():
         raise HTTPException(status_code=500, detail=f"인사이트 분석 실패: {str(e)}")
 
 
-@app.get("/health")
+@app.get("/webtoon-api/health")
 async def health_check():
     """헬스 체크 엔드포인트"""
     return {
