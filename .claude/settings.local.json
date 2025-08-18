@@ -21,7 +21,8 @@
       "Bash(kubectl apply:*)",
       "Bash(kubectl rollout status:*)",
       "Bash(kubectl create configmap:*)",
-      "Bash(kubectl delete:*)"
+      "Bash(kubectl delete:*)",
+      "Bash(kubectl cp:*)"
     ],
     "defaultMode": "acceptEdits"
   }
