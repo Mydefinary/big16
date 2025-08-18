@@ -18,10 +18,11 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import warnings
 warnings.filterwarnings('ignore')
 
-# 한국어 자연어 처리 (선택적 import)
+# 한국어 자연어 처리 (선택적 import) - 임시로 비활성화
 try:
-    from konlpy.tag import Okt
-    KONLPY_AVAILABLE = True
+    # from konlpy.tag import Okt
+    KONLPY_AVAILABLE = False
+    print("Info: KoNLPy temporarily disabled for Java-free deployment.")
 except ImportError:
     KONLPY_AVAILABLE = False
     print("Warning: KoNLPy not available. Using basic text processing.")
