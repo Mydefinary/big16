@@ -20,12 +20,21 @@ spring:
 
       routes:
         # ===================================================
+        # 0. Gateway 자체 Auth Proxy (쿠키 기반 인증)
+        # ===================================================
+        - id: auth-proxy-routes
+          uri: lb://gateway
+          predicates:
+            - Path=/api/auths/login, /api/auths/logout, /api/auths/check
+          order: -1
+
+        # ===================================================
         # 1. 인증 서비스 - 공개 경로 (인증 불필요)
         # ===================================================
         - id: auth-public-routes
           uri: http://auth-backend-service-hoa:8080
           predicates:
-            - Path=/api/auths/login, /api/auths/register, /api/auths/verify-code, /api/auths/resend-code, /api/auths/check-email, /api/auths/check-login-id, /api/auths/refresh, /api/auths/reset-password, /api/auths/health, /api/auths/save-password, /api/auths/test-login, /api/auths/safe-login, /api/auths/check-user/**
+            - Path=/api/auths/register, /api/auths/verify-code, /api/auths/resend-code, /api/auths/check-email, /api/auths/check-login-id, /api/auths/refresh, /api/auths/reset-password, /api/auths/health, /api/auths/save-password, /api/auths/test-login, /api/auths/safe-login, /api/auths/check-user/**
           filters:
             - StripPrefix=1
           order: 0

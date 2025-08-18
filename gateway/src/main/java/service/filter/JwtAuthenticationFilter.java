@@ -160,17 +160,30 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             
             System.out.println("🔒 Private path - checking JWT token");
             
-            // Authorization 헤더 확인
-            String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-            System.out.println("🎫 Auth Header: " + (authHeader != null ? "Present" : "Missing"));
+            // 토큰 추출 (쿠키 우선, 헤더 대체)
+            String token = null;
             
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                System.out.println("❌ No valid auth header - returning 401");
+            // 1. 쿠키에서 토큰 확인
+            if (request.getCookies().containsKey("accessToken")) {
+                token = request.getCookies().getFirst("accessToken").getValue();
+                System.out.println("🍪 Token found in cookie, length: " + (token != null ? token.length() : 0));
+            }
+            
+            // 2. 쿠키에 없으면 Authorization 헤더 확인 (하위 호환성)
+            if (token == null) {
+                String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+                System.out.println("🎫 Auth Header: " + (authHeader != null ? "Present" : "Missing"));
+                
+                if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                    token = authHeader.substring(7);
+                    System.out.println("🔑 Token extracted from header, length: " + token.length());
+                }
+            }
+            
+            if (token == null || token.isEmpty()) {
+                System.out.println("❌ No valid token found - returning 401");
                 return handleUnauthorized(exchange);
             }
-
-            String token = authHeader.substring(7);
-            System.out.println("🔑 Token extracted, length: " + token.length());
             
             try {
                 if (!JwtUtil.validateToken(token)) {

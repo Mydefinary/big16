@@ -12,55 +12,50 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
-  const [refreshToken, setRefreshToken] = useState(null);
+  const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('accessToken');
-    const savedRefreshToken = localStorage.getItem('refreshToken');
-    
-    if (savedToken) {
-      // 토큰 유효성 간단 검증
-      try {
-        const payload = JSON.parse(atob(savedToken.split('.')[1]));
-        const now = Date.now() / 1000;
-        
-        if (payload.exp > now) {
-          setToken(savedToken);
-        } else {
-          localStorage.removeItem('accessToken');
-        }
-      } catch (error) {
-        localStorage.removeItem('accessToken');
-      }
-    }
-    
-    if (savedRefreshToken) {
-      setRefreshToken(savedRefreshToken);
-    }
-    
-    setLoading(false);
+    checkAuthStatus();
   }, []);
 
-  const logout = () => {
-    setToken(null);
-    setRefreshToken(null);
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    window.location.href = '/';
+  const checkAuthStatus = async () => {
+    try {
+      const response = await axios.get('http://20.249.154.2/api/auths/check', {
+        withCredentials: true
+      });
+      setAuthenticated(response.data.authenticated);
+    } catch (error) {
+      setAuthenticated(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await axios.post('http://20.249.154.2/api/auths/logout', {}, {
+        withCredentials: true
+      });
+      setAuthenticated(false);
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout error:', error);
+      setAuthenticated(false);
+      window.location.href = '/';
+    }
   };
 
   const isAuthenticated = () => {
-    return !!token;
+    return authenticated;
   };
 
   const value = {
-    token,
-    refreshToken,
+    authenticated,
     logout,
     isAuthenticated,
-    loading
+    loading,
+    checkAuthStatus
   };
 
   return (

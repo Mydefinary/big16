@@ -14,72 +14,32 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
-  const [refreshToken, setRefreshToken] = useState(null);
+  const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const attemptTokenRefresh = async (refreshTokenValue) => {
+  useEffect(() => {
+    // 쿠키 기반 인증 상태 확인
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
     try {
-      const response = await authAPI.refreshToken(refreshTokenValue);
-      const { accessToken, refreshToken: newRefreshToken } = response.data;
-      
-      setToken(accessToken);
-      setRefreshToken(newRefreshToken);
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', newRefreshToken);
-      
-      return true;
+      const response = await authAPI.checkAuth();
+      setAuthenticated(response.data.authenticated);
     } catch (error) {
-      console.error('Token refresh failed:', error);
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      return false;
+      setAuthenticated(false);
+    } finally {
+      setLoading(false);
     }
   };
-
-  useEffect(() => {
-    const savedToken = localStorage.getItem('accessToken');
-    const savedRefreshToken = localStorage.getItem('refreshToken');
-    
-    if (savedToken) {
-      // 토큰 유효성 간단 검증
-      try {
-        const payload = JSON.parse(atob(savedToken.split('.')[1]));
-        const now = Date.now() / 1000;
-        
-        if (payload.exp > now) {
-          setToken(savedToken);
-        } else {
-          // 토큰이 만료된 경우 자동으로 갱신 시도
-          if (savedRefreshToken) {
-            attemptTokenRefresh(savedRefreshToken);
-          } else {
-            localStorage.removeItem('accessToken');
-          }
-        }
-      } catch (error) {
-        localStorage.removeItem('accessToken');
-      }
-    }
-    
-    if (savedRefreshToken) {
-      setRefreshToken(savedRefreshToken);
-    }
-    
-    setLoading(false);
-  }, []);
 
   const login = async (loginId, password) => {
     try {
       const credentials = { loginId, password };
       const response = await authAPI.login(credentials);
-      const { accessToken, refreshToken: newRefreshToken } = response.data;
       
-      setToken(accessToken);
-      setRefreshToken(newRefreshToken);
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', newRefreshToken);
-
+      // 로그인 성공 시 쿠키가 자동으로 설정됨
+      setAuthenticated(true);
       return { success: true };
     } catch (error) {
       return { 
@@ -135,33 +95,29 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      if (refreshToken) {
-        await authAPI.logout(refreshToken);
-      }
+      await authAPI.logout();
+      setAuthenticated(false);
     } catch (error) {
       console.error('Logout error:', error);
-    } finally {
-      setToken(null);
-      setRefreshToken(null);
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      // 에러가 발생해도 프론트엔드에서는 로그아웃 처리
+      setAuthenticated(false);
     }
   };
 
   const isAuthenticated = () => {
-    return !!token;
+    return authenticated;
   };
 
   const value = {
-    token,
-    refreshToken,
+    authenticated,
     login,
     register,
     verifyEmail,
     checkEmail,
     logout,
     isAuthenticated,
-    loading
+    loading,
+    checkAuthStatus
   };
 
   return (
