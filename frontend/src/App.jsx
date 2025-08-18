@@ -7,6 +7,8 @@ import TokenRequiredPage from './components/TokenRequiredPage';
 import ComingSoonPage from './components/ComingSoonPage';
 import WebtoonDetail from './components/WebtoonDetail';
 import WebtoonDashboardEmbed from './components/WebtoonDashboardEmbed';
+import PPLGeneratorEmbed from './components/PPLGeneratorEmbed';
+import GoodsGeneratorEmbed from './components/GoodsGeneratorEmbed';
 import Main from './pages/Main';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -82,20 +84,22 @@ function App() {
                 }
                />
               <Route
-                 path="/community"
+                 path="/webtoon-ppl-generator"
                  element={
                   <TokenRequiredPage
-                     pageName="광고 초안 생성"
+                     pageName="광고 생성기"
                      description="창의적인 광고 소재를 자동으로 생성하는 고급 기능입니다. 트렌드에 맞는 소재들을 빠르게 제작할 수 있습니다."
+                     DetailComponent={PPLGeneratorEmbed}
                   />
                 }
                />
               <Route
-                 path="/board"
+                 path="/webtoon-goods-generator"
                  element={
                   <TokenRequiredPage
-                     pageName="광고 파트너십 문의"
-                     description="광고 파트너십과 관련하여 문의하는 페이지입니다."
+                     pageName="굿즈 생성기"
+                     description="굿즈 생성기 페이지입니다."
+                     DetailComponent={GoodsGeneratorEmbed}
                   />
                 }
                />

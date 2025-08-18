@@ -53,6 +53,20 @@ const Header = () => {
     console.log('🎯 웹툰 대시보드 페이지로 이동 (내부 임베딩)');
   };
 
+  // PPL 생성기로 이동하는 함수
+  const goToPPLGenerator = () => {
+    navigate('/webtoon-ppl-generator');
+    
+    console.log('🎬 PPL 생성기 페이지로 이동 (내부 임베딩)');
+  };
+
+  // 굿즈 생성기로 이동하는 함수
+  const goToGoodsGenerator = () => {
+    navigate('/webtoon-goods-generator');
+    
+    console.log('🛍️ 굿즈 생성기 페이지로 이동 (내부 임베딩)');
+  };
+
   // 현재 경로가 활성 상태인지 확인하는 함수
   const isActive = (path) => {
     if (path === '/') {
@@ -99,26 +113,44 @@ const Header = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <Link
-                to="/community"
-                className={`nav-link ${isActive('/community') ? 'active' : ''}`}
+              <button
+                onClick={goToPPLGenerator}
+                className={`nav-link ppl-generator-link ${isActive('webtoon-ppl-generator') ? 'active' : ''}`}
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  cursor: 'pointer',
+                  color: 'inherit',
+                  textDecoration: 'none',
+                  padding: 0,
+                  font: 'inherit'
+                }}
               >
-                광고 초안 생성
-              </Link>
+                광고 생성기 🎬
+              </button>
             </li>
             <li className="nav-item">
-              <Link
-                to="/board"
-                className={`nav-link ${isActive('/board') ? 'active' : ''}`}
+              <button
+                onClick={goToGoodsGenerator}
+                className={`nav-link goods-generator-link ${isActive('/webtoon-goods-generator') ? 'active' : ''}`}
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  cursor: 'pointer',
+                  color: 'inherit',
+                  textDecoration: 'none',
+                  padding: 0,
+                  font: 'inherit'
+                }}
               >
-                광고 파트너십 문의
-              </Link>
+                굿즈 생성기 🛍️
+              </button>
             </li>
             {/* 🆕 웹툰 대시보드 링크 추가 */}
             <li className="nav-item">
               <button
                 onClick={goToWebtoonDashboard}
-                className="nav-link webtoon-dashboard-link"
+                className={`nav-link webtoon-dashboard-link ${isActive('/webtoon-dashboard') ? 'active' : ''}`}
                 style={{ 
                   background: 'none', 
                   border: 'none', 

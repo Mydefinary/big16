@@ -6,55 +6,47 @@ server:
 spring:
   profiles: default
   cloud:
-    gateway: #<<< API Gateway / Routes
+    gateway:
       routes:
-        - id: auth-public
-          uri: http://localhost:9001
-          predicates:
-            - Path=/auths/login,/auths/refresh,/auths/verify-code,/auths/reset-password,/auths/resend-code
-          # 필터 없음 (인증 불필요)
-          
-        - id: auth-private
-          uri: http://localhost:9001
-          predicates:
-            - Path=/auths/**
-          filters:
-            - name: JwtAuthenticationFilter
-            
-        - id: user-public
-          uri: http://localhost:9002
-          predicates:
-            - Path=/users/register,/users/check-email,/users/find-id
-          # 필터 없음
-          
-        - id: user-private
-          uri: http://localhost:9002
-          predicates:
-            - Path=/users/**
-          filters:
-            - name: JwtAuthenticationFilter
-            
-        # 🆕 웹툰 대시보드 백엔드 추가 (충돌 방지를 위해 구체적 경로)
-        - id: webtoon-backend
-          uri: http://localhost:8002
-          predicates:
-            - Path=/webtoon-api/**
-          # JWT 필터 필요시 추가 가능
-            
+        # ... 기존 라우트들 ...
+        
         # 🆕 웹툰 대시보드 프론트엔드 추가
         - id: webtoon-frontend
           uri: http://localhost:8080
           predicates:
             - Path=/webtoon/**
-          # 정적 파일이므로 JWT 필터 없음
-        
-        # 🎯 프론트엔드 라우트는 가장 마지막 (우선순위 낮음)
+
+        # 🆕 PPL 생성기 서비스 추가 (localhost 환경)
+        - id: ppl-gen-backend
+          uri: http://localhost:8000
+          predicates:
+            - Path=/api/ppl-gen/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: ppl-gen-frontend
+          uri: http://localhost:3000  # 또는 다른 포트
+          predicates:
+            - Path=/ppl-gen/**
+
+        # 🆕 굿즈 생성기 서비스 추가 (localhost 환경)
+        - id: goods-gen-backend
+          uri: http://localhost:8001
+          predicates:
+            - Path=/api/goods-gen/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: goods-gen-frontend
+          uri: http://localhost:3001  # 포트 충돌 방지를 위해 변경
+          predicates:
+            - Path=/goods-gen/**
+            
+        # 🎯 프론트엔드 라우트는 가장 마지막
         - id: frontend
           uri: http://localhost:9003
           predicates:
             - Path=/**
-          # 필터 제거! 정적 파일에는 JWT 검증이 불필요
-      #>>> API Gateway / Routes
       
       globalcors:
         cors-configurations:  # 🔧 오타 수정: corsConfigurations -> cors-configurations
@@ -110,14 +102,44 @@ spring:
           predicates:
             - Path=/webtoon-api/**
           # JWT 필터 필요시 추가:
-          # filters:
-          #   - name: JwtAuthenticationFilter
+          filters:
+            - name: JwtAuthenticationFilter
             
         - id: webtoon-frontend  
           uri: http://webtoon-dashboard-frontend-service:80
           predicates:
             - Path=/webtoon/**
           # 정적 파일이므로 JWT 필터 없음
+        # 🆕 PPL 생성기 서비스 추가
+
+        - id: ppl-gen-backend
+          uri: http://ppl-gen-backend-service:8000  # docker 환경
+          predicates:
+            - Path=/api/ppl-gen/**
+          # JWT 필터 필요시 추가:
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: ppl-gen-frontend
+          uri: http://ppl-gen-frontend-service:80
+          predicates:
+            - Path=/ppl-gen/**
+          # 정적 파일이므로 JWT 필터 없음
+
+        # 🆕 굿즈 생성기 서비스 추가  
+        - id: goods-gen-backend
+          uri: http://goods-gen-backend-service:8001  # docker 환경
+          predicates:
+            - Path=/api/goods-gen/**
+          # JWT 필터 필요시 추가:
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: goods-gen-frontend
+          uri: http://goods-gen-frontend-service:80
+          predicates:
+            - Path=/goods-gen/**
+          # 정적 파일이므로 JWT 필터 없음  
             
         - id: frontend
           uri: http://frontend-lee-service:9003
