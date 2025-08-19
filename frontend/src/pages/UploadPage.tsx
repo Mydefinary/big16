@@ -5,7 +5,7 @@ import axios from "axios";
 import "../styles/UploadPage.css";
 
 // 도메인 하드코딩 금지! 현재 오리진 + 프리픽스(/api-hl)만 사용
-const API_BASE = (process.env.REACT_APP_HL_API ?? "/api-hl").replace(/\/+$/, "");
+const API_BASE = (process.env.REACT_APP_HL_API ?? "/api").replace(/\/+$/, "");
 const MAX_FILES = 20;
 
 const UploadPage: React.FC = () => {
