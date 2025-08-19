@@ -87,7 +87,6 @@ spring:
             - Path=/ppl-gen, /ppl-gen/**
           filters:
             - name: JwtAuthenticationFilter
-            - StripPrefix=1
           order: 4
 
         - id: goods-gen-frontend  
@@ -96,7 +95,6 @@ spring:
             - Path=/goods-gen, /goods-gen/**
           filters:
             - name: JwtAuthenticationFilter
-            - StripPrefix=1
           order: 5
 
         - id: webtoon-hl-frontend
@@ -105,7 +103,6 @@ spring:
             - Path=/webtoon-hl, /webtoon-hl/**
           filters:
             - name: JwtAuthenticationFilter
-            - StripPrefix=1
           order: 6
 
         - id: webtoon-dashboard-frontend
@@ -114,7 +111,6 @@ spring:
             - Path=/webtoon-dashboard, /webtoon-dashboard/**
           filters:
             - name: JwtAuthenticationFilter
-            - StripPrefix=1
           order: 7
 
         - id: board-frontend
@@ -123,7 +119,6 @@ spring:
             - Path=/board, /board/**
           filters:
             - name: JwtAuthenticationFilter
-            - StripPrefix=1
           order: 8
 
         # ===================================================

@@ -1,0 +1,167 @@
+# ===================================================
+# 현재 실제 배포 상태 기반 + JWT 인증 적용 배포 파일
+# ===================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: login-ok-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+    nginx.ingress.kubernetes.io/auth-url: "http://gateway-service-hoa.default.svc.cluster.local:8000/api/auths/check"
+    nginx.ingress.kubernetes.io/auth-signin: "http://20.249.154.2/login"
+    nginx.ingress.kubernetes.io/auth-response-headers: "X-User-Id"
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      # ===================================================
+      # 보호된 서비스들 - JWT 인증 필요 (Gateway auth-url 적용)
+      # ===================================================
+      
+      # PPL 생성기 (JWT 인증 필요)
+      - path: /ppl-gen
+        pathType: Prefix
+        backend:
+          service:
+            name: ppl-gen-frontend-service
+            port:
+              number: 80
+              
+      # 굿즈 생성기 (JWT 인증 필요)  
+      - path: /goods-gen
+        pathType: Prefix
+        backend:
+          service:
+            name: goods-gen-frontend-service
+            port:
+              number: 80
+              
+      # 웹툰 하이라이트 (JWT 인증 필요)
+      - path: /webtoon-hl
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-hl-frontend-service
+            port:
+              number: 80
+              
+      # 게시판 (JWT 인증 필요)
+      - path: /board
+        pathType: Prefix
+        backend:
+          service:
+            name: board-frontend-service
+            port:
+              number: 80
+              
+      # ===================================================
+      # 기존 서비스들 (그대로 유지)
+      # ===================================================
+      
+      # 웹툰 대시보드 (이미 보호됨)
+      - path: /webtoon-dashboard
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-dashboard-frontend-service
+            port:
+              number: 80
+              
+      # 웹툰 대시보드 API
+      - path: /webtoon-api
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-dashboard-backend-service
+            port:
+              number: 8002
+              
+      # ===================================================
+      # Gateway - 모든 나머지 경로 (API 및 메인 페이지)
+      # ===================================================
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: gateway-service-hoa
+            port:
+              number: 8000
+
+---
+# ===================================================
+# Ingress 인증 없는 버전 (테스트용)
+# ===================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: login-ok-ingress-no-auth
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:      
+      # PPL 생성기
+      - path: /ppl-gen
+        pathType: Prefix
+        backend:
+          service:
+            name: ppl-gen-frontend-service
+            port:
+              number: 80
+              
+      # 굿즈 생성기
+      - path: /goods-gen
+        pathType: Prefix
+        backend:
+          service:
+            name: goods-gen-frontend-service
+            port:
+              number: 80
+              
+      # 웹툰 하이라이트
+      - path: /webtoon-hl
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-hl-frontend-service
+            port:
+              number: 80
+              
+      # 게시판
+      - path: /board
+        pathType: Prefix
+        backend:
+          service:
+            name: board-frontend-service
+            port:
+              number: 80
+              
+      # 웹툰 대시보드
+      - path: /webtoon-dashboard
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-dashboard-frontend-service
+            port:
+              number: 80
+              
+      # 웹툰 대시보드 API
+      - path: /webtoon-api
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-dashboard-backend-service
+            port:
+              number: 8002
+              
+      # Gateway - 모든 나머지 경로
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: gateway-service-hoa
+            port:
+              number: 8000

@@ -1,0 +1,91 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: login-ok-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+    # JWT 인증을 위한 auth-url 설정
+    nginx.ingress.kubernetes.io/auth-url: "http://gateway-service-hoa:8000/api/auths/check"
+    nginx.ingress.kubernetes.io/auth-signin: "http://20.249.154.2/login"
+    nginx.ingress.kubernetes.io/auth-request-redirect: "$request_uri"
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:      
+      # PPL 생성기 (JWT 인증 필요)
+      - path: /ppl-gen
+        pathType: Prefix
+        backend:
+          service:
+            name: ppl-gen-frontend-service
+            port:
+              number: 80
+              
+      # 굿즈 생성기 (JWT 인증 필요)
+      - path: /goods-gen
+        pathType: Prefix
+        backend:
+          service:
+            name: goods-gen-frontend-service
+            port:
+              number: 80
+              
+      # 웹툰 하이라이트 (JWT 인증 필요)
+      - path: /webtoon-hl
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-hl-frontend-service
+            port:
+              number: 80
+              
+      # 게시판 (JWT 인증 필요)
+      - path: /board
+        pathType: Prefix
+        backend:
+          service:
+            name: board-frontend-service
+            port:
+              number: 80
+              
+      # 웹툰 대시보드 (JWT 인증 필요)
+      - path: /webtoon-dashboard
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-dashboard-frontend-service
+            port:
+              number: 80
+              
+      # 웹툰 대시보드 API (JWT 인증 필요)
+      - path: /webtoon-api
+        pathType: Prefix
+        backend:
+          service:
+            name: webtoon-dashboard-backend-service
+            port:
+              number: 8002
+
+---
+# 공개 경로용 별도 Ingress (인증 없음)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: login-ok-ingress-public
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+    nginx.ingress.kubernetes.io/priority: "100" # 낮은 우선순위
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:              
+      # Gateway - API 및 메인 페이지 (인증 없음)
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: gateway-service-hoa
+            port:
+              number: 8000

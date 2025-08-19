@@ -23,7 +23,8 @@
       "Bash(kubectl create configmap:*)",
       "Bash(kubectl delete:*)",
       "Bash(kubectl cp:*)",
-      "Bash(kubectl rollout undo:*)"
+      "Bash(kubectl rollout undo:*)",
+      "Bash(docker build:*)"
     ],
     "defaultMode": "acceptEdits"
   }
