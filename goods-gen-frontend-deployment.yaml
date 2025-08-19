@@ -1,0 +1,49 @@
+# ===================================================
+# 굿즈 생성기 프론트엔드 (React) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goods-gen-frontend-deployment-lee-2
+  namespace: lee
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goods-gen-frontend-lee-2
+  template:
+    metadata:
+      labels:
+        app: goods-gen-frontend-lee-2
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: goods-gen-frontend-container-lee-2
+        image: kt16big.azurecr.io/goods-gen-frontend-lee-2:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+# ===================================================
+# 굿즈 생성기 프론트엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: goods-gen-frontend-service-lee-2
+  namespace: lee
+spec:
+  type: ClusterIP
+  selector:
+    app: goods-gen-frontend-lee-2
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80

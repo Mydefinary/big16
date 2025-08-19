@@ -1,0 +1,55 @@
+# ===================================================
+# PPL 생성기 백엔드 (FastAPI) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ppl-gen-backend-deployment-lee-2
+  namespace: lee
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ppl-gen-backend-lee-2
+  template:
+    metadata:
+      labels:
+        app: ppl-gen-backend-lee-2
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: ppl-gen-backend-container-lee-2
+        image: kt16big.azurecr.io/ppl-gen-backend-lee-2:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: REPLICATE_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: REPLICATE_API_TOKEN
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+---
+# ===================================================
+# PPL 생성기 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: ppl-gen-backend-service-lee-2
+  namespace: lee
+spec:
+  type: ClusterIP
+  selector:
+    app: ppl-gen-backend-lee-2
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000

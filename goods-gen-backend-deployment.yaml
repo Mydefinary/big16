@@ -1,0 +1,55 @@
+# ===================================================
+# 굿즈 생성기 백엔드 (FastAPI) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goods-gen-backend-deployment-lee-2
+  namespace: lee
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goods-gen-backend-lee-2
+  template:
+    metadata:
+      labels:
+        app: goods-gen-backend-lee-2
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+      - name: goods-gen-backend-container-lee-2
+        image: kt16big.azurecr.io/goods-gen-backend-lee-2:latest
+        ports:
+        - containerPort: 8001
+        env:
+        - name: BFL_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys-secret
+              key: BFL_API_KEY
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+---
+# ===================================================
+# 굿즈 생성기 백엔드 서비스
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: goods-gen-backend-service-lee-2
+  namespace: lee
+spec:
+  type: ClusterIP
+  selector:
+    app: goods-gen-backend-lee-2
+  ports:
+  - protocol: TCP
+    port: 8001
+    targetPort: 8001
