@@ -9,6 +9,9 @@ import WebtoonDetail from './components/WebtoonDetail';
 import WebtoonDashboardEmbed from './components/WebtoonDashboardEmbed';
 import PPLGeneratorEmbed from './components/PPLGeneratorEmbed';
 import GoodsGeneratorEmbed from './components/GoodsGeneratorEmbed';
+import WebtoonHighlightCreator from './components/WebtoonHighlightCreator';
+import ChatbotPage from './components/ChatbotPage';
+import Board from './components/Board';
 import Main from './pages/Main';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -35,6 +38,7 @@ function App() {
               <Route path="/email-verification" element={<EmailVerification />} />
               <Route path="/find-id" element={<FindId />} />
               <Route path="/find-password" element={<FindPassword />} />
+              <Route path="/notice-board" element={<Board />} />
               <Route
                 path="/dashboard"
                 element={
@@ -56,30 +60,22 @@ function App() {
                                          
               {/* 토큰이 필요한 페이지들 */}
                <Route
-                 path="/question"
+                 path="/chat-bot"
                  element={
                   <TokenRequiredPage
-                     pageName="작품 상세페이지"
-                     description="AI 기술을 활용한 웹툰 제작 워크플로우 시스템입니다. 콘텐츠 기획부터 배포까지의 전 과정을 AI가 지원하여 효율적인 웹툰 제작을 가능하게 합니다."
-                    DetailComponent={WebtoonDetail}
+                     pageName="챗봇"
+                     description="AI 기술을 활용한 챗봇 시스템입니다."
+                    DetailComponent={ChatbotPage}
                   />
                 }
                />
               <Route
-                 path="/characters"
+                 path="/webtoon-highlight-creator"
                  element={
                   <TokenRequiredPage
                      pageName="하이라이트 제작"
                      description="AI 기술을 활용하여 하이라이트를 제작할 수 있습니다. 다양한 스타일과 옵션을 통해 나만의 특별한 캐릭터를 만들어보세요."
-                  />
-                }
-               />
-              <Route
-                 path="/gallery"
-                 element={
-                  <TokenRequiredPage
-                     pageName="웹툰 상세 분석"
-                     description="웹툰들을 분석하고 활용할 수 있는 전문 도구입니다. 효과적인 콘텐츠 제작을 위한 인사이트를 얻어보세요."
+                     DetailComponent={WebtoonHighlightCreator}
                   />
                 }
                />

@@ -1,22 +1,20 @@
-// /src/components/PPLGeneratorEmbed.jsx
-
 import React, { useState } from 'react';
 
-const PPLGeneratorEmbed = () => {
+const Board = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-  // 쿠버네티스 내부 DNS를 사용한 서브서버 주소
-  const pplGeneratorUrl = 'http://20.249.113.18:9000/ppl-gen/';
+  // 서브서버 게시판 주소
+  const bulletinBoardUrl = 'http://20.249.113.18:9000/board';
 
   const handleIframeLoad = () => {
-    console.log('✅ PPL 생성기 iframe 로드 완료');
+    console.log('✅ 게시판 iframe 로드 완료');
     setIsLoading(false);
     setHasError(false);
   };
 
   const handleIframeError = () => {
-    console.error('❌ PPL 생성기 iframe 로드 실패');
+    console.error('❌ 게시판 iframe 로드 실패');
     setIsLoading(false);
     setHasError(true);
   };
@@ -25,19 +23,19 @@ const PPLGeneratorEmbed = () => {
     setIsLoading(true);
     setHasError(false);
     // iframe을 다시 로드하기 위해 src를 재설정
-    const iframe = document.getElementById('ppl-generator-iframe');
+    const iframe = document.getElementById('bulletin-board-iframe');
     if (iframe) {
       iframe.src = iframe.src;
     }
   };
 
   return (
-    <div className="ppl-generator-embed-container" style={{
+    <div className="board-embed-container" style={{
       padding: '20px',
       backgroundColor: '#f5f5f5',
       minHeight: '100vh'
     }}>
-      <div className="dashboard-header" style={{
+      <div className="board-header" style={{
         marginBottom: '20px',
         padding: '15px',
         backgroundColor: 'white',
@@ -50,14 +48,14 @@ const PPLGeneratorEmbed = () => {
           fontSize: '24px',
           fontWeight: 'bold'
         }}>
-          🎬 PPL 생성기
+          📝 자유게시판
         </h2>
         <p style={{
           margin: '8px 0 0 0',
           color: '#666',
           fontSize: '14px'
         }}>
-          AI를 활용한 PPL(간접광고) 콘텐츠를 생성하고 관리하세요
+          자유롭게 의견을 나누고 소통하는 공간입니다
         </p>
       </div>
 
@@ -86,7 +84,7 @@ const PPLGeneratorEmbed = () => {
               animation: 'spin 1s linear infinite',
               margin: '0 auto 15px'
             }}></div>
-            <p style={{ margin: 0, color: '#666' }}>PPL 생성기 로딩 중...</p>
+            <p style={{ margin: 0, color: '#666' }}>게시판 로딩 중...</p>
           </div>
         </div>
       )}
@@ -102,7 +100,7 @@ const PPLGeneratorEmbed = () => {
         }}>
           <div style={{ fontSize: '48px', marginBottom: '20px' }}>⚠️</div>
           <h3 style={{ color: '#e74c3c', marginBottom: '15px' }}>
-            PPL 생성기를 로드할 수 없습니다
+            게시판을 로드할 수 없습니다
           </h3>
           <p style={{ color: '#666', marginBottom: '20px' }}>
             서브서버 연결에 문제가 있습니다. 잠시 후 다시 시도해주세요.
@@ -133,12 +131,12 @@ const PPLGeneratorEmbed = () => {
         overflow: 'hidden'
       }}>
         <iframe
-          id="ppl-generator-iframe"
-          src={pplGeneratorUrl}
+          id="bulletin-board-iframe"
+          src={bulletinBoardUrl}
           width="100%"
           height="800px"
           frameBorder="0"
-          title="PPL 생성기"
+          title="📝 자유게시판"
           onLoad={handleIframeLoad}
           onError={handleIframeError}
           style={{
@@ -158,11 +156,11 @@ const PPLGeneratorEmbed = () => {
           100% { transform: rotate(360deg); }
         }
         
-        .ppl-generator-embed-container iframe {
+        .board-embed-container iframe {
           transition: opacity 0.3s ease-in-out;
         }
         
-        .ppl-generator-embed-container iframe:hover {
+        .board-embed-container iframe:hover {
           box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
       `}</style>
@@ -170,4 +168,4 @@ const PPLGeneratorEmbed = () => {
   );
 };
 
-export default PPLGeneratorEmbed;
+export default Board;

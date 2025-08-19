@@ -16,6 +16,19 @@ spring:
           predicates:
             - Path=/webtoon/**
 
+        # 🆕 웹툰 하이라이트 제작 서비스 추가 (localhost 환경)
+        - id: webtoon-hl-backend
+          uri: http://localhost:8003
+          predicates:
+            - Path=/api/webtoon-hl/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: webtoon-hl-frontend
+          uri: http://localhost:3003
+          predicates:
+            - Path=/webtoon-hl/**
+
         # 🆕 PPL 생성기 서비스 추가 (localhost 환경)
         - id: ppl-gen-backend
           uri: http://localhost:8000
@@ -41,6 +54,19 @@ spring:
           uri: http://localhost:3001  # 포트 충돌 방지를 위해 변경
           predicates:
             - Path=/goods-gen/**
+
+        # 🆕 챗봇(질문) 서비스 추가 (localhost 환경)
+        - id: question-backend
+          uri: http://localhost:8083
+          predicates:
+            - Path=/question-api/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: question-frontend
+          uri: http://localhost:3083  # localhost 환경용 포트
+          predicates:
+            - Path=/question/**
             
         # 🎯 프론트엔드 라우트는 가장 마지막
         - id: frontend
@@ -110,8 +136,23 @@ spring:
           predicates:
             - Path=/webtoon/**
           # 정적 파일이므로 JWT 필터 없음
-        # 🆕 PPL 생성기 서비스 추가
 
+        # 🆕 웹툰 하이라이트 제작 서비스 추가 (Docker 환경)
+        - id: webtoon-hl-backend
+          uri: http://webtoon-hl-backend-service-lee-2:8003  # 서비스 포트와 매칭
+          predicates:
+            - Path=/api/highlight/**
+          # JWT 필터 필요시 추가:
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: webtoon-hl-frontend
+          uri: http://webtoon-hl-frontend-service-lee-2:80  # 서비스 포트와 매칭
+          predicates:
+            - Path=/webtoon-hl/**
+          # 정적 파일이므로 JWT 필터 없음
+
+        # 🆕 PPL 생성기 서비스 추가
         - id: ppl-gen-backend
           uri: http://ppl-gen-backend-service-lee-2:8000  # docker 환경
           predicates:
@@ -139,7 +180,35 @@ spring:
           uri: http://goods-gen-frontend-service-lee-2:80
           predicates:
             - Path=/goods-gen/**
-          # 정적 파일이므로 JWT 필터 없음  
+          # 정적 파일이므로 JWT 필터 없음
+
+        # 🆕 챗봇(질문) 서비스 추가 (Docker/Kubernetes 환경)
+        - id: question-backend
+          uri: http://question-backend-service-lee:8083
+          predicates:
+            - Path=/question-api/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: question-frontend
+          uri: http://question-frontend-service-lee:80
+          predicates:
+            - Path=/question/**
+          # 정적 파일이므로 JWT 필터 없음
+
+          # 🆕 게시판 서비스 추가 (Docker/Kubernetes 환경)
+        - id: board-backend
+          uri: http://board-backend-service-lee:8082
+          predicates:
+            - Path=/board/api/**
+          filters:
+            - name: JwtAuthenticationFilter
+
+        - id: board-frontend
+          uri: http://board-frontend-service-lee:80
+          predicates:
+            - Path=/board/**
+          # 정적 파일이므로 JWT 필터 없음
             
         - id: frontend
           uri: http://frontend-lee-service:9003

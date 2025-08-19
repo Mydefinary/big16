@@ -45,12 +45,26 @@ const Header = () => {
     }
   };
 
+  const goToChatBot = () => {
+      // 외부 이동이 아니라 내부 라우팅으로 변경
+      navigate('/chat-bot');
+      
+      console.log('🤖 AI 챗봇 페이지로 이동 (내부 임베딩)');
+    };
+
   // 웹툰 대시보드로 이동하는 함수 (같은 탭에서 이동)
   const goToWebtoonDashboard = () => {
     // 외부 이동이 아니라 내부 라우팅으로 변경
     navigate('/webtoon-dashboard');
     
     console.log('🎯 웹툰 대시보드 페이지로 이동 (내부 임베딩)');
+  };
+
+  const goToWebtoonHighlightCreate = () => {
+    // 외부 이동이 아니라 내부 라우팅으로 변경
+    navigate('/webtoon-highlight-creator');
+    
+    console.log('🎨 웹툰 하이라이트 제작 페이지로 이동 (내부 임베딩)');
   };
 
   // PPL 생성기로 이동하는 함수
@@ -66,6 +80,13 @@ const Header = () => {
     
     console.log('🛍️ 굿즈 생성기 페이지로 이동 (내부 임베딩)');
   };
+
+  const goToNoticeBoard = () => {
+    navigate('/notice-board');
+    
+    console.log('📝 자유게시판 페이지로 이동 (내부 임베딩)');
+  };
+  
 
   // 현재 경로가 활성 상태인지 확인하는 함수
   const isActive = (path) => {
@@ -89,28 +110,38 @@ const Header = () => {
         <nav className="header-nav">
           <ul className="nav-list">
             <li className="nav-item">
-              <Link
-                to="/question"
-                className={`nav-link ${isActive('/question') ? 'active' : ''}`}
+              <button
+                onClick={goToChatBot}
+                className={`nav-link chat-bot-link ${isActive('/question') ? 'active' : ''}`}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'inherit',
+                  textDecoration: 'none',
+                  padding: 0,
+                  font: 'inherit'
+                }}
               >
-                작품 질의하기
-              </Link>
+                🤖 AI 챗봇
+              </button>
             </li>
             <li className="nav-item">
-              <Link
-                to="/characters"
-                className={`nav-link ${isActive('/characters') ? 'active' : ''}`}
+              <button
+                onClick={goToWebtoonHighlightCreate}
+                className={`nav-link highlight-creator-link ${isActive('webtoon-highlight-creator') ? 'active' : ''}`}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'inherit',
+                  textDecoration: 'none',
+                  padding: 0,
+                  font: 'inherit'
+                }}
               >
-                하이라이트 제작
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                to="/gallery"
-                className={`nav-link ${isActive('/gallery') ? 'active' : ''}`}
-              >
-                웹툰 상세 분석
-              </Link>
+                하이라이트 제작 🎨
+              </button>
             </li>
             <li className="nav-item">
               <button
@@ -162,6 +193,23 @@ const Header = () => {
                 }}
               >
                 웹툰 대시보드 📊
+              </button>
+            </li>
+            <li className="nav-item">
+              <button
+                onClick={goToNoticeBoard}
+                className={`nav-link notice-board-link ${isActive('/notice-board') ? 'active' : ''}`}
+                style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  cursor: 'pointer',
+                  color: 'inherit',
+                  textDecoration: 'none',
+                  padding: 0,
+                  font: 'inherit'
+                }}
+              >
+                자유게시판 📝
               </button>
             </li>
           </ul>

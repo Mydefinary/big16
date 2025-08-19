@@ -147,7 +147,6 @@ const GoodsGeneratorEmbed = () => {
             display: hasError ? 'none' : 'block'
           }}
           // 보안 관련 속성들
-          sandbox="allow-same-origin allow-scripts allow-forms allow-navigation"
           referrerPolicy="strict-origin-when-cross-origin"
         />
       </div>
