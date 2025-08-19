@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(kubectl describe:*)",
+      "Bash(kubectl exec:*)",
+      "Bash(kubectl logs:*)",
+      "Bash(kubectl get:*)",
+      "Bash(docker build:*)",
+      "Bash(docker push:*)",
+      "Bash(az acr login:*)",
+      "Bash(kubectl set image:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
