@@ -1,0 +1,32 @@
+The push refers to repository [kt16big.azurecr.io/chatbot-backend]
+ff52a525b32e: Waiting
+fcec5a125fd8: Waiting
+525079e65791: Waiting
+a27cb4be7017: Waiting
+7da60513f293: Waiting
+e57f8e70a9bf: Waiting
+b623d71e23f5: Waiting
+396b1da7636e: Waiting
+1961ca026b04: Waiting
+fcec5a125fd8: Waiting
+525079e65791: Waiting
+a27cb4be7017: Waiting
+7da60513f293: Waiting
+e57f8e70a9bf: Waiting
+b623d71e23f5: Waiting
+396b1da7636e: Waiting
+1961ca026b04: Waiting
+ff52a525b32e: Waiting
+1961ca026b04: Layer already exists
+ff52a525b32e: Layer already exists
+fcec5a125fd8: Layer already exists
+525079e65791: Waiting
+a27cb4be7017: Layer already exists
+7da60513f293: Waiting
+e57f8e70a9bf: Waiting
+b623d71e23f5: Already exists
+396b1da7636e: Layer already exists
+525079e65791: Layer already exists
+7da60513f293: Layer already exists
+e57f8e70a9bf: Pushed
+lee: digest: sha256:2539360f7387924eca1735efa0ef5eb1c5170d643737c5aaac4b05c1e29c79bf size: 856

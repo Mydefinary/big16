@@ -1,0 +1,43 @@
+# ===================================================
+# 웹툰 챗봇 - 프론트엔드(React) 배포 - Lee Namespace
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: question-frontend-deployment-lee
+  namespace: lee
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: question-frontend-lee
+  template:
+    metadata:
+      labels:
+        app: question-frontend-lee
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: chatbot-frontend-container
+          image: kt16big.azurecr.io/chatbot-frontend-lee:latest
+          ports:
+            - containerPort: 80
+---
+# ===================================================
+# 웹툰 챗봇 - 프론트엔드 서비스 - Lee Namespace
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: question-frontend-service-lee
+  namespace: lee
+spec:
+  type: ClusterIP
+  selector:
+    app: question-frontend-lee
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

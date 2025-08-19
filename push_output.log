@@ -1,0 +1,39 @@
+The push refers to repository [kt16big.azurecr.io/chatbot-backend-lee]
+396b1da7636e: Waiting
+a27cb4be7017: Waiting
+fcec5a125fd8: Waiting
+76593dab1c4c: Waiting
+953b26e5ae17: Waiting
+525079e65791: Waiting
+7da60513f293: Waiting
+e57f8e70a9bf: Waiting
+1961ca026b04: Waiting
+7da60513f293: Waiting
+e57f8e70a9bf: Waiting
+1961ca026b04: Waiting
+396b1da7636e: Waiting
+a27cb4be7017: Waiting
+fcec5a125fd8: Waiting
+76593dab1c4c: Waiting
+953b26e5ae17: Waiting
+525079e65791: Waiting
+76593dab1c4c: Waiting
+953b26e5ae17: Waiting
+525079e65791: Waiting
+7da60513f293: Waiting
+e57f8e70a9bf: Waiting
+1961ca026b04: Waiting
+396b1da7636e: Waiting
+a27cb4be7017: Waiting
+fcec5a125fd8: Waiting
+76593dab1c4c: Already exists
+953b26e5ae17: Layer already exists
+525079e65791: Layer already exists
+7da60513f293: Layer already exists
+e57f8e70a9bf: Waiting
+1961ca026b04: Layer already exists
+396b1da7636e: Layer already exists
+a27cb4be7017: Layer already exists
+fcec5a125fd8: Layer already exists
+e57f8e70a9bf: Pushed
+image with reference kt16big.azurecr.io/chatbot-backend-lee:latest was found but does not provide any platform

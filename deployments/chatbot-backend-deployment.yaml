@@ -1,0 +1,49 @@
+# ===================================================
+# 웹툰 챗봇 - 백엔드(FastAPI) 배포 - Lee Namespace
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: question-backend-deployment-lee
+  namespace: lee
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: question-backend-lee
+  template:
+    metadata:
+      labels:
+        app: question-backend-lee
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: chatbot-backend-container
+          image: kt16big.azurecr.io/chatbot-backend:latest
+          ports:
+            - containerPort: 8083
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: OPENAI_API_KEY
+---
+# ===================================================
+# 웹툰 챗봇 - 백엔드 서비스 - Lee Namespace
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: question-backend-service-lee
+  namespace: lee
+spec:
+  type: ClusterIP
+  selector:
+    app: question-backend-lee
+  ports:
+    - protocol: TCP
+      port: 8083
+      targetPort: 8083

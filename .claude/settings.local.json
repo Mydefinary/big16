@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(kubectl get deployment:*)",
+      "Bash(kubectl get:*)",
+      "Bash(kubectl logs:*)",
+      "Bash(kubectl exec:*)",
+      "Bash(curl:*)",
+      "Bash(docker build:*)",
+      "Bash(cat:*)",
+      "Bash(docker push:*)",
+      "Bash(kubectl apply:*)",
+      "Bash(kubectl describe:*)",
+      "Bash(kubectl delete pod:*)",
+      "Bash(az acr repository list:*)",
+      "Bash(docker tag:*)",
+      "Bash(docker rmi:*)",
+      "Bash(az acr repository show-tags:*)",
+      "Bash(kubectl delete deployment:*)",
+      "Bash(kubectl delete:*)",
+      "Bash(kubectl rollout restart:*)",
+      "Bash(az acr login:*)",
+      "Bash(kubectl set image:*)",
+      "Bash(kubectl rollout status:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "additionalDirectories": [
+      "C:\\c\\Users\\hoa\\vscode_project\\chatbot-lee"
+    ]
+  }
+}
