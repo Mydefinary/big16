@@ -1,5 +1,5 @@
 // src/services/api.js
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://20.249.154.2/webtoon-api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://20.249.154.2/webtoon-api/api';
 
 class WebtoonAPI {
   constructor() {
@@ -31,7 +31,7 @@ class WebtoonAPI {
   // 웹툰 데이터 조회
   async fetchWebtoons() {
     try {
-      const data = await this.request('/api/webtoons');
+      const data = await this.request('/webtoons');
       return data.success ? data.data : [];
     } catch (error) {
       console.error('Error fetching webtoons:', error);
@@ -42,7 +42,7 @@ class WebtoonAPI {
   // 태그 분석 데이터 조회 (기존 호환성 유지)
   async fetchTagAnalysis() {
     try {
-      const data = await this.request('/api/analysis/tags');
+      const data = await this.request('/analysis/tags');
       if (data.success) {
         // 기존 App.js 구조에 맞게 변환
         return {
@@ -74,7 +74,7 @@ class WebtoonAPI {
         params.append('selected_tags', selectedTags.join(','));
       }
 
-      const url = `/api/analysis/network?${params}`;
+      const url = `/analysis/network?${params}`;
       console.log('네트워크 API 요청 URL:', `${this.baseURL}${url}`);
       const data = await this.request(url);
       console.log('네트워크 API 응답:', data);
@@ -95,7 +95,7 @@ class WebtoonAPI {
   // 관련 태그 조회
   async fetchRelatedTags(tag, limit = 10) {
     try {
-      const data = await this.request(`/api/analysis/related-tags/${encodeURIComponent(tag)}?limit=${limit}`);
+      const data = await this.request(`/analysis/related-tags/${encodeURIComponent(tag)}?limit=${limit}`);
       return data.success ? data.data : null;
     } catch (error) {
       console.error('Error fetching related tags:', error);
@@ -106,7 +106,7 @@ class WebtoonAPI {
   // 히트맵 데이터 조회
   async fetchHeatmapData() {
     try {
-      const data = await this.request('/api/analysis/heatmap');
+      const data = await this.request('/analysis/heatmap');
       return data.success ? data.data : [];
     } catch (error) {
       console.error('Error fetching heatmap data:', error);
@@ -117,7 +117,7 @@ class WebtoonAPI {
   // 추천 데이터 조회
   async fetchRecommendations(title, limit = 5) {
     try {
-      const data = await this.request('/api/recommendations', {
+      const data = await this.request('/recommendations', {
         method: 'POST',
         body: JSON.stringify({ title, limit }),
       });
@@ -131,7 +131,7 @@ class WebtoonAPI {
   // 통계 데이터 조회
   async fetchStatistics() {
     try {
-      const data = await this.request('/api/stats');
+      const data = await this.request('/stats');
       return data.success ? data.data : null;
     } catch (error) {
       console.error('Error fetching statistics:', error);
@@ -142,7 +142,7 @@ class WebtoonAPI {
   // 인사이트 데이터 조회 (새로 추가)
   async fetchInsights() {
     try {
-      const data = await this.request('/api/analysis/insights');
+      const data = await this.request('/analysis/insights');
       return data.success ? data.data : null;
     } catch (error) {
       console.error('Error fetching insights:', error);

@@ -1,5 +1,5 @@
 // src/services/enhanced_api.js - TF-IDF 기능이 추가된 API 서비스
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://20.249.154.2/webtoon-api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://20.249.154.2/webtoon-api/api';
 
 class EnhancedWebtoonAPI {
   constructor() {
@@ -31,7 +31,7 @@ class EnhancedWebtoonAPI {
   // 기존 API들
   async fetchWebtoons() {
     try {
-      const data = await this.request('/api/webtoons');
+      const data = await this.request('/webtoons');
       return data.success ? data.data : [];
     } catch (error) {
       console.error('Error fetching webtoons:', error);
@@ -41,7 +41,7 @@ class EnhancedWebtoonAPI {
 
   async fetchTagAnalysis() {
     try {
-      const data = await this.request('/api/analysis/tags');
+      const data = await this.request('/analysis/tags');
       if (data.success) {
         return {
           tag_frequency: data.data.tag_frequency,
@@ -71,7 +71,7 @@ class EnhancedWebtoonAPI {
         params.append('selected_tags', selectedTags.join(','));
       }
 
-      const url = `/api/analysis/network?${params}`;
+      const url = `/analysis/network?${params}`;
       console.log('네트워크 API 요청 URL:', `${this.baseURL}${url}`);
       const data = await this.request(url);
       console.log('네트워크 API 응답:', data);
@@ -92,7 +92,7 @@ class EnhancedWebtoonAPI {
   // 관련 태그 조회
   async fetchRelatedTags(tag, limit = 10) {
     try {
-      const data = await this.request(`/api/analysis/related-tags/${encodeURIComponent(tag)}?limit=${limit}`);
+      const data = await this.request(`/analysis/related-tags/${encodeURIComponent(tag)}?limit=${limit}`);
       return data.success ? data.data : null;
     } catch (error) {
       console.error('Error fetching related tags:', error);
@@ -104,7 +104,7 @@ class EnhancedWebtoonAPI {
   async fetchTFIDFAnalysis() {
     try {
       console.log('🔍 TF-IDF 분석 요청 중...');
-      const data = await this.request('/api/analysis/tfidf');
+      const data = await this.request('/analysis/tfidf');
       console.log('✅ TF-IDF 분석 응답:', data);
       return data.success ? data.data : null;
     } catch (error) {
@@ -116,7 +116,7 @@ class EnhancedWebtoonAPI {
   async extractSummaryKeywords(text, maxKeywords = 10) {
     try {
       console.log('🔍 키워드 추출 요청:', text.substring(0, 50) + '...');
-      const data = await this.request('/api/analysis/summary-keywords', {
+      const data = await this.request('/analysis/summary-keywords', {
         method: 'POST',
         body: JSON.stringify({ 
           text: text, 
@@ -134,7 +134,7 @@ class EnhancedWebtoonAPI {
   async fetchEnhancedRecommendations(title, limit = 5, useTfidf = true, tfidfWeight = 0.4) {
     try {
       console.log(`🎯 향상된 추천 요청: ${title} (TF-IDF: ${useTfidf})`);
-      const data = await this.request('/api/recommendations/enhanced', {
+      const data = await this.request('/recommendations/enhanced', {
         method: 'POST',
         body: JSON.stringify({ 
           title, 
@@ -154,7 +154,7 @@ class EnhancedWebtoonAPI {
   async fetchSimilarityAnalysis(title1, title2) {
     try {
       console.log(`🔗 유사도 분석 요청: ${title1} vs ${title2}`);
-      const data = await this.request(`/api/analysis/similarity/${encodeURIComponent(title1)}/${encodeURIComponent(title2)}`);
+      const data = await this.request(`/analysis/similarity/${encodeURIComponent(title1)}/${encodeURIComponent(title2)}`);
       console.log('✅ 유사도 분석 완료:', data);
       return data.success ? data.data : null;
     } catch (error) {
@@ -165,7 +165,7 @@ class EnhancedWebtoonAPI {
 
   async fetchStatistics() {
     try {
-      const data = await this.request('/api/stats');
+      const data = await this.request('/stats');
       return data.success ? data.data : null;
     } catch (error) {
       console.error('Error fetching statistics:', error);
