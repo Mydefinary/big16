@@ -413,11 +413,11 @@ def _get_memory(session_id: str) -> ConversationBufferMemory:
         )
     return _memory_pool[session_id]
 
-@app.get("/health")
+@app.get("/chatbot/health")
 def health():
     return {"status": "ok", "time": _now_kst_str()}
 
-@app.post("/ask", response_model=AskResponse)
+@app.post("/chatbot/ask", response_model=AskResponse)
 def ask(req: AskRequest):
     q = req.question.strip()
     if not q:
