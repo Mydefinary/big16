@@ -1,5 +1,5 @@
 // src/services/enhanced_api.js - TF-IDF 기능이 추가된 API 서비스
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://20.249.154.2/webtoon-api/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/webtoon-api/api';
 
 class EnhancedWebtoonAPI {
   constructor() {
