@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await axios.get('http://20.249.154.2/api/auths/check', {
+      const response = await axios.get('http://20.249.113.18:9000/api/auths/check', {
         withCredentials: true
       });
       setAuthenticated(response.data.authenticated);
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post('http://20.249.154.2/api/auths/logout', {}, {
+      await axios.post('http://20.249.113.18:9000/api/auths/logout', {}, {
         withCredentials: true
       });
       setAuthenticated(false);

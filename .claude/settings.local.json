@@ -24,7 +24,9 @@
       "Bash(kubectl delete:*)",
       "Bash(kubectl cp:*)",
       "Bash(kubectl rollout undo:*)",
-      "Bash(docker build:*)"
+      "Bash(docker build:*)",
+      "Bash(docker push:*)",
+      "Bash(az acr list:*)"
     ],
     "defaultMode": "acceptEdits"
   }

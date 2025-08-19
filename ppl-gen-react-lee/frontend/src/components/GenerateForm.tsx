@@ -164,8 +164,24 @@ export default function GenerateForm() {
     setOutputUrl("");
 
     try {
-      const response = await axios.post("/api/ppl-gen/generate", formData, {
+      // 쿠키에서 accessToken 추출
+      const getCookie = (name: string) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+        return null;
+      };
+
+      const token = getCookie('accessToken');
+      const headers: any = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await axios.post("http://20.249.113.18:9000/api/ppl-gen/generate", formData, {
         responseType: 'blob',
+        withCredentials: true,
+        headers: headers,
       });
 
       const imageUrl = URL.createObjectURL(response.data);

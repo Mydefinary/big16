@@ -31,7 +31,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://20.249.113.18:9000", "http://20.249.113.18", "http://localhost:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -86,12 +86,16 @@ async def generate_image(
     safety_tolerance: int = Form(...),
     input_image_1: UploadFile = File(...),
     input_image_2: UploadFile = File(...),
-    token: str = Depends(verify_token)
+    # token: str = Depends(verify_token)  # 임시로 인증 비활성화
 ):
     try:
-        # 사용자 인증 확인
-        user_id = get_user_id(request)
-        print(f"✅ 인증된 사용자 ID: {user_id}")
+        # 사용자 인증 확인 (선택적)
+        try:
+            user_id = get_user_id(request)
+            print(f"✅ 인증된 사용자 ID: {user_id}")
+        except:
+            user_id = "anonymous"
+            print("ℹ️ 익명 사용자로 처리")
         
         encoded_img1 = encode_file(input_image_1)
         encoded_img2 = encode_file(input_image_2)

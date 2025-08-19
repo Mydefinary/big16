@@ -145,9 +145,25 @@ export default function GoodsForm() {
     setOutputUrl("");
 
     try {
+      // 쿠키에서 accessToken 추출
+      const getCookie = (name: string) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(';').shift();
+        return null;
+      };
+
+      const token = getCookie('accessToken');
+      const headers: any = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       // ✅ [핵심 수정] 1. 응답 타입을 'blob'으로 지정하여 이미지 데이터를 직접 받습니다.
-      const response = await axios.post("/api/goods-gen/generate", formData, {
+      const response = await axios.post("http://20.249.113.18:9000/api/goods-gen/generate", formData, {
         responseType: 'blob',
+        withCredentials: true,
+        headers: headers,
       });
 
       // ✅ [핵심 수정] 2. 받은 blob 데이터로 브라우저에서 사용할 수 있는 임시 URL을 생성합니다.
