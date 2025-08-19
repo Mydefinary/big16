@@ -16,6 +16,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+
+ARG REACT_APP_HL_API=/api-hl
+ENV REACT_APP_HL_API=$REACT_APP_HL_API
+
 RUN npm run build
 
 # runtime stage
