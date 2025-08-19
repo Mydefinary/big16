@@ -20,7 +20,7 @@ spec:
         agentpool: userpool
       containers:
         - name: webtoon-hl-frontend-container-lee-2
-          image: kt16big.azurecr.io/webtoon-hl-frontend-lee-2:${IMAGE_TAG}
+          image: kt16big.azurecr.io/webtoon-highlight-frontend-lee-2:${IMAGE_TAG}
           ports:
             - containerPort: 80
 ---
@@ -37,5 +37,5 @@ spec:
     app: webtoon-hl-frontend-lee-2
   ports:
     - protocol: TCP
-      port: 3003
+      port: 80
       targetPort: 80
