@@ -4,18 +4,18 @@ on:
   push:
     branches: [ "chatbot" ]
     paths:
-      - "chatbot/frontend/**"
+      - "chatbot/frontend-test/frontend/**"
       - ".github/workflows/chatbot-frontend-cicd.yml"
       - "deployments/chatbot-frontend-deployment.yaml"
   pull_request:
     branches: [ "chatbot" ]
     paths:
-      - "chatbot/frontend/**"
+      - "chatbot/frontend-test/frontend/**"
 
 env:
   ACR_NAME: "kt16big"
   IMAGE_NAME: "chatbot-frontend"
-  WORKING_DIR: "chatbot/frontend"
+  WORKING_DIR: "chatbot/frontend-test/frontend"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
   DEPLOYMENT_FILE: "deployments/chatbot-frontend-deployment.yaml"
