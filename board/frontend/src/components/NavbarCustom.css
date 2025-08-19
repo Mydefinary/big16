@@ -1,0 +1,22 @@
+/* 기본 nav-link 스타일 */
+.navbar .nav-link {
+  color: #333;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+/* ✅ hover-success 링크가 모든 상태에서 밑줄 안 보이고 색상 유지 */
+.hover-success,
+.hover-success:visited,
+.hover-success:active,
+.hover-success:focus {
+  color: #333;
+  text-decoration: none !important;
+}
+
+/* ✅ 마우스 오버 시에만 초록색 */
+.hover-success:hover {
+  color: #09AA5C !important;  /* 초록색 */
+  text-decoration: none !important;
+}
