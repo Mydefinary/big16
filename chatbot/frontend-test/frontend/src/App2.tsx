@@ -130,7 +130,7 @@ function ChatArea({ threadId, onTitle, onDelete }:{ threadId:string; onTitle:(t:
     const q = input.trim(); setInput(""); pushUser(q); setLoading(true);
     try {
       if (USE_NETWORK) {
-        const { data } = await api.post("/chatbot/ask", { question: q, session_id: threadId });
+        const { data } = await api.post("/api/chatbot/ask", { question: q, session_id: threadId });
         const answer = (data && (data.answer ?? data.result ?? data.message)) ?? "서버 응답이 비어있습니다.";
         pushBot(String(answer));
       } else {
