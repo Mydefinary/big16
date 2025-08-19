@@ -4,23 +4,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webtoon-hl-backend-deployment
+  name: webtoon-hl-backend-deployment-lee-2
 spec:
   replicas: 1
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: webtoon-hl-backend
+      app: webtoon-hl-backend-lee-2
   template:
     metadata:
       labels:
-        app: webtoon-hl-backend
+        app: webtoon-hl-backend-lee-2
     spec:
       nodeSelector:
         agentpool: userpool
       containers:
-        - name: webtoon-hl-backend-container
-          image: kt16big.azurecr.io/webtoon-hl-backend:${IMAGE_TAG}
+        - name: webtoon-hl-backend-container-lee-2
+          image: kt16big.azurecr.io/webtoon-hl-backend-lee-2:${IMAGE_TAG}
           ports:
             - containerPort: 8000
           env:
@@ -36,11 +36,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: webtoon-hl-backend-service
+  name: webtoon-hl-backend-service-lee-2
 spec:
   type: ClusterIP
   selector:
-    app: webtoon-hl-backend
+    app: webtoon-hl-backend-lee-2
   ports:
     - protocol: TCP
       port: 8003
