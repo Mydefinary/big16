@@ -4,23 +4,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webtoon-hl-frontend-deployment
+  name: webtoon-hl-frontend-deployment-lee-2
 spec:
   replicas: 1
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: webtoon-hl-frontend
+      app: webtoon-hl-frontend-lee-2
   template:
     metadata:
       labels:
-        app: webtoon-hl-frontend
+        app: webtoon-hl-frontend-lee-2
     spec:
       nodeSelector:
         agentpool: userpool
       containers:
-        - name: webtoon-hl-frontend-container
-          image: kt16big.azurecr.io/webtoon-hl-frontend:${IMAGE_TAG}
+        - name: webtoon-hl-frontend-container-lee-2
+          image: kt16big.azurecr.io/webtoon-highlight-frontend-lee-2:${IMAGE_TAG}
           ports:
             - containerPort: 80
 ---
@@ -30,12 +30,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: webtoon-hl-frontend-service
+  name: webtoon-hl-frontend-service-lee-2
 spec:
   type: ClusterIP
   selector:
-    app: webtoon-hl-frontend
+    app: webtoon-hl-frontend-lee-2
   ports:
     - protocol: TCP
-      port: 3003
+      port: 80
       targetPort: 80
