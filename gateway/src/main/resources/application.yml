@@ -113,7 +113,7 @@ spring:
         # 🆕 PPL 생성기 서비스 추가
 
         - id: ppl-gen-backend
-          uri: http://ppl-gen-backend-service:8000  # docker 환경
+          uri: http://ppl-gen-backend-service-lee-2:8000  # docker 환경
           predicates:
             - Path=/api/ppl-gen/**
           # JWT 필터 필요시 추가:
@@ -121,14 +121,14 @@ spring:
             - name: JwtAuthenticationFilter
 
         - id: ppl-gen-frontend
-          uri: http://ppl-gen-frontend-service:80
+          uri: http://ppl-gen-frontend-service-lee-2:80
           predicates:
             - Path=/ppl-gen/**
           # 정적 파일이므로 JWT 필터 없음
 
         # 🆕 굿즈 생성기 서비스 추가  
         - id: goods-gen-backend
-          uri: http://goods-gen-backend-service:8001  # docker 환경
+          uri: http://goods-gen-backend-service-lee-2:8001  # docker 환경
           predicates:
             - Path=/api/goods-gen/**
           # JWT 필터 필요시 추가:
@@ -136,7 +136,7 @@ spring:
             - name: JwtAuthenticationFilter
 
         - id: goods-gen-frontend
-          uri: http://goods-gen-frontend-service:80
+          uri: http://goods-gen-frontend-service-lee-2:80
           predicates:
             - Path=/goods-gen/**
           # 정적 파일이므로 JWT 필터 없음  
