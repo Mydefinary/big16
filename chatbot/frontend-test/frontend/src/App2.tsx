@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import axios from "axios";
 import './App.css'
 
@@ -106,7 +106,7 @@ function Sidebar({ threads, activeId, onNew, onSelect, onRename, onDelete }:{ th
 }
 
 // -------------------- 채팅 영역 --------------------
-function ChatArea({ threadId, onTitle, onDelete }:{ threadId:string; onTitle:(t:string)=>void; onDelete:()=>void }){
+function ChatArea({ threadId, onTitle }:{ threadId:string; onTitle:(t:string)=>void }){
   const [msgs, setMsgs] = useState<ChatMsg[]>(() => loadMsgs(threadId));
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -256,7 +256,6 @@ function fakeAnswer(q:string){
 
 // --------------------- 헤더 -----------------------
 const Header = () => {
-  const [loading, setLoading] = useState(false);
 
   return (
     <header className="header">
