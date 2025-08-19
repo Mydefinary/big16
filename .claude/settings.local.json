@@ -16,7 +16,9 @@
       "Bash(cat:*)",
       "Bash(find:*)",
       "Bash(rm:*)",
-      "Bash(az acr login:*)"
+      "Bash(az acr login:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)"
     ],
     "deny": [],
     "ask": []
