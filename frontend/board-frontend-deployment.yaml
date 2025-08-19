@@ -1,0 +1,43 @@
+# ===================================================
+# 28. 게시판(Board) - 프론트엔드(React) 배포 for Lee Namespace
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: board-frontend-deployment-lee
+  namespace: lee
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: board-frontend-lee
+  template:
+    metadata:
+      labels:
+        app: board-frontend-lee
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: board-frontend-container
+          image: kt16big.azurecr.io/board-frontend-lee:20250820-no-navbar
+          ports:
+            - containerPort: 80
+---
+# ===================================================
+# 29. 게시판(Board) - 프론트엔드 서비스 for Lee Namespace
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: board-frontend-service-lee
+  namespace: lee
+spec:
+  type: ClusterIP
+  selector:
+    app: board-frontend-lee
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

@@ -1,0 +1,59 @@
+# ===================================================
+# 26. 게시판(Board) - 백엔드(Spring Boot) 배포 for Lee Namespace
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: board-backend-deployment-lee
+  namespace: lee
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: board-backend-lee
+  template:
+    metadata:
+      labels:
+        app: board-backend-lee
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: board-backend-container
+          image: kt16big.azurecr.io/board-backend-lee:20250820-dockerfile-context
+          ports:
+            - containerPort: 8082
+          env:
+            - name: spring.datasource.url
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: DB_URL
+            - name: spring.datasource.username
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: DB_USER
+            - name: spring.datasource.password
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: DB_PASSWORD
+---
+# ===================================================
+# 27. 게시판(Board) - 백엔드 서비스 for Lee Namespace
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: board-backend-service-lee
+  namespace: lee
+spec:
+  type: ClusterIP
+  selector:
+    app: board-backend-lee
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
