@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import WebtoonAPI from './services/api';
 
 const KoreanKeywordNetworkChart = () => {
   const [networkData, setNetworkData] = useState(null);
@@ -8,6 +9,9 @@ const KoreanKeywordNetworkChart = () => {
   const [loading, setLoading] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [analysisStats, setAnalysisStats] = useState(null);
+  
+  // API 인스턴스 생성
+  const api = new WebtoonAPI();
   const svgRef = useRef(null);
   const simulationRef = useRef(null);
 
@@ -96,9 +100,12 @@ const KoreanKeywordNetworkChart = () => {
   const fetchNetworkData = async (tags = []) => {
     setLoading(true);
     try {
-      // 실제 API 호출
-      const response = await fetch(`/api/analysis/network?selected_tags=${tags.join(',')}&min_correlation=0.2&max_nodes=30`);
-      const data = await response.json();
+      // API 서비스를 통한 네트워크 분석 호출
+      const data = await api.fetchNetworkAnalysis({
+        selectedTags: tags,
+        minCorrelation: 0.2,
+        maxNodes: 30
+      });
       
       if (data.success) {
         setNetworkData(data.data);
