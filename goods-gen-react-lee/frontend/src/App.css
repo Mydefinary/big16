@@ -1,0 +1,229 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+body, html, #root {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* Header Styles */
+.header {
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 64px;
+}
+
+/* 로고 */
+.header-logo .logo-link {
+  font-size: 20px;
+  font-weight: 700;
+  color: #22c55e;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.header-logo .logo-link:hover {
+  color: #16a34a;
+}
+
+/* 네비게이션 */
+.header-nav {
+  flex: 1;
+  margin: 0 40px;
+}
+
+.nav-list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 32px;
+  justify-content: center;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-link {
+  color: #374151;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 0;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-link:hover {
+  color: #22c55e;
+}
+
+.nav-link.active {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #22c55e;
+  border-radius: 1px;
+}
+
+/* 네비게이션 버튼 스타일 (링크와 동일하게) */
+.nav-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 0;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+/* 우측 액션 버튼들 */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-btn {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.signup-btn {
+  color: #22c55e;
+  border: 1px solid #22c55e;
+  background: white;
+}
+
+.signup-btn:hover {
+  background: #22c55e;
+  color: white;
+}
+
+.signin-btn {
+  background: #22c55e;
+  color: white;
+  border: 1px solid #22c55e;
+}
+
+.signin-btn:hover {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.faq-btn {
+  color: #6b7280;
+  background: transparent;
+  border: none;
+}
+
+.faq-btn:hover {
+  color: #374151;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .header-container {
+    padding: 0 16px;
+    height: 56px;
+  }
+  
+  .header-nav {
+    display: none; /* 모바일에서는 네비게이션 숨김 */
+  }
+  
+  .header-actions {
+    gap: 12px;
+  }
+  
+  .header-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .header-logo .logo-link {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-container {
+    padding: 0 12px;
+  }
+  
+  .header-actions {
+    gap: 8px;
+  }
+  
+  .header-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
