@@ -1,5 +1,5 @@
 # ===================================================
-# 18. 웹툰 대시보드 - 백엔드(FastAPI) 배포
+# 웹툰 대시보드 - 백엔드(FastAPI) 배포 (LEE Namespace 가이드라인 준수)
 # ===================================================
 apiVersion: apps/v1
 kind: Deployment
@@ -20,9 +20,9 @@ spec:
         agentpool: userpool
       containers:
         - name: webtoon-dashboard-backend-container
-          image: kt16big.azurecr.io/webtoon-dashboard-backend:${IMAGE_TAG}
+          image: kt16big.azurecr.io/webtoon-dashboard-backend-lee:20250820-gateway-fix
           ports:
-            - containerPort: 8002
+            - containerPort: 8000
           workingDir: /app
           env:
             - name: ENVIRONMENT
@@ -51,7 +51,7 @@ spec:
   ports:
     - protocol: TCP
       port: 8002
-      targetPort: 8002
+      targetPort: 8000
 ---
 # ===================================================
 # Gateway 라우팅을 위한 설정 주석

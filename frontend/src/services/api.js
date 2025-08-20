@@ -1,5 +1,5 @@
 // src/services/api.js
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/webtoon-api/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://20.249.113.18:9000/webtoon-api/api';
 
 class WebtoonAPI {
   constructor() {

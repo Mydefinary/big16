@@ -451,7 +451,7 @@ def calculate_enhanced_similarity(webtoon1_idx, webtoon2_idx, webtoons_data, tfi
 
 # API 엔드포인트들
 
-@app.get("/webtoon-api/")
+@app.get("/webtoon-api/api/")
 async def read_root():
     return {
         "message": "TF-IDF 기반 웹툰 분석 API 서버가 정상 작동 중입니다",
@@ -531,7 +531,7 @@ async def get_tfidf_analysis():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"TF-IDF 분석 실패: {str(e)}")
 
-@app.post("/webtoon-api/api/analysis/summary-keywords")
+@app.post("/webtoon-api/api/api/analysis/summary-keywords")
 async def extract_summary_keywords(request: SummaryAnalysisRequest):
     """줄거리 텍스트에서 키워드 추출"""
     try:
@@ -566,7 +566,7 @@ async def extract_summary_keywords(request: SummaryAnalysisRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"키워드 추출 실패: {str(e)}")
 
-@app.post("/webtoon-api/api/recommendations/enhanced") 
+@app.post("/webtoon-api/api/api/recommendations/enhanced") 
 async def get_enhanced_recommendations(request: EnhancedRecommendationRequest):
     """TF-IDF 기반 향상된 웹툰 추천"""
     try:
@@ -645,7 +645,7 @@ async def get_enhanced_recommendations(request: EnhancedRecommendationRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"향상된 추천 생성 실패: {str(e)}")
 
-@app.get("/webtoon-api/api/analysis/similarity/{title1}/{title2}")
+@app.get("/webtoon-api/api/api/analysis/similarity/{title1}/{title2}")
 async def get_similarity_analysis(title1: str, title2: str):
     """두 웹툰 간 상세 유사도 분석"""
     try:
@@ -695,7 +695,7 @@ async def get_similarity_analysis(title1: str, title2: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"유사도 분석 실패: {str(e)}")
 
-@app.get("/webtoon-api/api/analysis/tags")
+@app.get("/webtoon-api/api/api/analysis/tags")
 async def get_tag_analysis():
     """태그 분석 데이터 반환 (한국어 기반)"""
     try:
@@ -720,7 +720,7 @@ async def get_tag_analysis():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"태그 분석 실패: {str(e)}")
 
-@app.get("/webtoon-api/api/analysis/network")
+@app.get("/webtoon-api/api/api/analysis/network")
 async def get_network_analysis(
     selected_tags: Optional[str] = Query(None, description="쉼표로 구분된 선택된 태그들"),
     min_correlation: Optional[float] = Query(0.2, description="최소 상관계수"),
@@ -747,7 +747,7 @@ async def get_network_analysis(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"네트워크 분석 실패: {str(e)}")
 
-@app.get("/webtoon-api/api/analysis/related-tags/{tag}")
+@app.get("/webtoon-api/api/api/analysis/related-tags/{tag}")
 async def get_related_tags_analysis(tag: str, limit: Optional[int] = Query(10)):
     """특정 태그와 관련된 태그들 반환 (고급 분석)"""
     try:
@@ -770,7 +770,7 @@ async def get_related_tags_analysis(tag: str, limit: Optional[int] = Query(10)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"관련 태그 분석 실패: {str(e)}")
 
-@app.get("/webtoon-api/api/stats")
+@app.get("/webtoon-api/api/api/stats")
 async def get_statistics():
     """전체 통계 반환"""
     try:
@@ -831,7 +831,7 @@ def generate_heatmap_data(webtoons_data):
     
     return heatmap_data
 
-@app.get("/webtoon-api/api/analysis/heatmap")
+@app.get("/webtoon-api/api/api/analysis/heatmap")
 async def get_heatmap_analysis():
     """히트맵 분석 데이터 반환 (한국어 개선)"""
     try:
@@ -1066,7 +1066,7 @@ def get_related_tags_advanced(target_tag, webtoons_data, limit=10):
         'category': get_korean_tag_category(tag)
     } for tag, score in sorted_related[:limit]]
 
-@app.get("/webtoon-api/api/analysis/network")
+@app.get("/webtoon-api/api/api/analysis/network")
 async def get_network_analysis(
     selected_tags: Optional[str] = Query(None, description="쉼표로 구분된 선택된 태그들"),
     min_correlation: Optional[float] = Query(0.2, description="최소 상관계수"),
@@ -1143,7 +1143,7 @@ def analyze_tag_connectivity(webtoons_data, min_correlation=0.15):
     
     return sorted_connectivity
 
-@app.get("/webtoon-api/api/analysis/tag-connectivity")
+@app.get("/webtoon-api/api/api/analysis/tag-connectivity")
 async def get_tag_connectivity(
     min_correlation: Optional[float] = Query(0.15, description="최소 상관계수"),
     top_n: Optional[int] = Query(15, description="상위 N개 태그")
@@ -1182,7 +1182,7 @@ async def get_tag_connectivity(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"태그 연결성 분석 실패: {str(e)}")
 
-@app.get("/webtoon-api/api/analysis/insights")
+@app.get("/webtoon-api/api/api/analysis/insights")
 async def get_insights():
     """데이터 기반 인사이트 제공"""
     try:
@@ -1238,7 +1238,7 @@ async def get_insights():
         raise HTTPException(status_code=500, detail=f"인사이트 분석 실패: {str(e)}")
 
 
-@app.get("/webtoon-api/health")
+@app.get("/webtoon-api/api/health")
 async def health_check():
     """헬스 체크 엔드포인트"""
     return {
@@ -1257,5 +1257,5 @@ async def health_check():
     }
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8002))
+    port = int(os.environ.get("PORT", 8000))
     uvicorn.run("enhanced_main:app", host="0.0.0.0", port=port, reload=False)

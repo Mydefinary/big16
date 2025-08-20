@@ -20,7 +20,7 @@ spec:
         agentpool: userpool
       containers:
         - name: webtoon-dashboard-frontend-container
-          image: kt16big.azurecr.io/webtoon-dashboard-frontend:${IMAGE_TAG}
+          image: kt16big.azurecr.io/webtoon-dashboard-frontend-lee:20250820-gateway-fix
           ports:
             - containerPort: 80
           workingDir: /usr/share/nginx/html
