@@ -1,13 +1,17 @@
-name: CI/CD for Webtoon Highlight Backend
+name: "CI/CD for Webtoon Highlight Backend"
 
 on:
   push:
-    branches: [ webtoon-highlight ]     # 원하는 브랜치로 변경 가능
+    branches: ["**"]
     paths:
       - "backend/**"
       - "deployments/webtoon-highlight-backend-deployment.yaml"
       - ".github/workflows/webtoon-hl-be-cicd.yml"
-  workflow_dispatch: {}                  # 수동 실행 버튼
+  pull_request:
+    branches: ["**"]
+    paths:
+      - "backend/**"
+      - "deployments/webtoon-highlight-backend-deployment.yaml"
 
 concurrency:
   group: webtoon-hl-be-${{ github.ref }}
@@ -21,14 +25,11 @@ env:
   AKS_RESOURCE_GROUP: "kt16big"
   DEPLOYMENT_NAME: "webtoon-hl-backend-deployment"
   CONTAINER_NAME: "webtoon-hl-backend-container"
-  K8S_NAMESPACE: "default"              # 네임스페이스 다르면 바꾸기
+  K8S_NAMESPACE: "default"
 
 jobs:
   build-and-push-to-acr:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write                   # azure/login OIDC 필요
     steps:
       - uses: actions/checkout@v4
 
@@ -41,7 +42,11 @@ jobs:
         run: az acr login --name ${{ env.ACR_NAME }}
 
       - name: Set up Docker Buildx
+        id: buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
+          buildkitd-flags: --debug
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -54,13 +59,11 @@ jobs:
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          builder: ${{ steps.buildx.outputs.name }}
 
   deploy-to-aks:
     runs-on: ubuntu-latest
     needs: build-and-push-to-acr
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -77,12 +80,12 @@ jobs:
 
       - name: Apply manifest if deployment not found
         run: |
-          if ! kubectl -n $K8S_NAMESPACE get deploy $DEPLOYMENT_NAME >/dev/null 2>&1; then
+          if ! kubectl -n $K8S_NAMESPACE get deploy ${{ env.DEPLOYMENT_NAME }} >/dev/null 2>&1; then
             kubectl -n $K8S_NAMESPACE apply -f deployments/webtoon-highlight-backend-deployment.yaml
           fi
 
       - name: Rollout by updating image
         run: |
-          kubectl -n $K8S_NAMESPACE set image deployment/$DEPLOYMENT_NAME \
-            $CONTAINER_NAME=$ACR_NAME.azurecr.io/$IMAGE_NAME:${{ github.sha }}
-          kubectl -n $K8S_NAMESPACE rollout status deployment/$DEPLOYMENT_NAME --timeout=180s
+          kubectl -n $K8S_NAMESPACE set image deployment/${{ env.DEPLOYMENT_NAME }} \
+            ${{ env.CONTAINER_NAME }}=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          kubectl -n $K8S_NAMESPACE rollout status deployment/${{ env.DEPLOYMENT_NAME }} --timeout=180s
