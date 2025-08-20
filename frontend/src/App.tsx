@@ -74,25 +74,6 @@ export default function App() {
 
   return (
     <div className="page">
-      {/* Header */}
-      <header className="header">
-        <div className="header__inner">
-          <div className="brand">Service Name</div>
-          <nav className="nav">
-            <a className="nav__link" href="#">작품 질의하기</a>
-            <a className="nav__link" href="#">하이라이트 제작</a>
-            <a className="nav__link" href="#">웹툰 상세 분석</a>
-            <a className="nav__link" href="#">광고 초안 생성</a>
-            <a className="nav__link nav__link--strong" href="#">광고 파트너십 문의</a>
-          </nav>
-          <nav className="nav nav--right">
-            <a className="nav__link" href="#">LogOut</a>
-            <a className="nav__link" href="#">MyPage</a>
-            <a className="nav__link" href="#">FAQ</a>
-          </nav>
-        </div>
-      </header>
-
       {/* Hero */}
       <main className="hero">
         <h1 className="hero__title">웹툰 통합 챗봇 (법률 + 정보 + 현황 + 추천)</h1>
