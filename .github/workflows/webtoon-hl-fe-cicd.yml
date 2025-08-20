@@ -21,7 +21,7 @@ env:
   AKS_RESOURCE_GROUP: "kt16big"
   DEPLOYMENT_NAME: "webtoon-hl-frontend-deployment"
   CONTAINER_NAME: "webtoon-hl-frontend-container"
-  K8S_NAMESPACE: "webtoon-hl"                     # ← 네임스페이스 맞춰주세요 (다르면 변경)
+  K8S_NAMESPACE: "default"                     # ← 네임스페이스 맞춰주세요 (다르면 변경)
 
 jobs:
   build-and-push-to-acr:
