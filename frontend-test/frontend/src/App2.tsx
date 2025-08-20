@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import type { AskResponse } from './types';
 import axios from "axios";
 import './App.css'
 
@@ -150,7 +149,7 @@ function ChatArea({ threadId, onTitle }:{ threadId:string; onTitle:(t:string)=>v
   useEffect(() => { saveMsgs(threadId, msgs); if(msgs.length===1 && msgs[0].role==='bot'){ onTitle("새 대화"); } else { const t = summarizeTitle(msgs); if(t) onTitle(t); }}, [msgs, threadId]);
   useEffect(() => { const el = listRef.current; if(!el) return; el.scrollTo({ top: el.scrollHeight, behavior: "smooth" }); }, [msgs.length, loading]);
 
-  const api = useMemo(() => axios.create({ baseURL: "/question-api", timeout: 20000, headers: { "Content-Type": "application/json" } }), []);
+  const api = useMemo(() => axios.create({ baseURL: "/api", timeout: 20000, headers: { "Content-Type": "application/json" } }), []);
 
   const canSend = input.trim().length > 0 && !loading;
   const push = (m: ChatMsg) => setMsgs(prev => [...prev, m]);
@@ -161,7 +160,7 @@ function ChatArea({ threadId, onTitle }:{ threadId:string; onTitle:(t:string)=>v
     if(!canSend) return;
     const q = input.trim(); setInput(""); pushUser(q); setLoading(true);
     try {
-      const { data } = await api.post("/ask", { question: q, session_id: threadId });
+      const { data } = await api.post("/question-api/ask", { question: q, session_id: threadId });
       const answer = (data && (data.answer ?? data.result ?? data.message)) ?? "서버 응답이 비어있습니다.";
       pushBot(String(answer));
 
