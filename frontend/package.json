@@ -2,6 +2,7 @@
   "name": "webtoon-chatbot-frontend",
   "version": "1.0.0",
   "private": true,
+  "homepage": "/question",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

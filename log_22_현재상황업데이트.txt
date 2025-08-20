@@ -1,0 +1,35 @@
+22 현재 상황 업데이트
+
+# Frontend 배포 완료 상태
+
+## ✅ 성공한 부분
+1. Frontend 코드 수정 완료
+   - base: '/question/' 설정
+   - API 경로들 확인 완료
+   - 인증 리다이렉트 수정
+
+2. Frontend 재빌드 및 배포 완료
+   - 새로운 이미지: kt16big.azurecr.io/question-frontend-lee-2:20250820-question-fix
+   - Deployment 업데이트 완료
+   - HTML에 새로운 JS 파일명 반영됨 (index-BIk5BTiZ.js)
+
+## ❌ 남은 문제
+1. 정적 자원 404 에러
+   - HTML: http://20.249.113.18:9000/question (200 OK) ✅
+   - JS/CSS: http://20.249.113.18:9000/question/assets/* (404 Not Found) ❌
+
+## 문제 원인 분석
+nginx 설정에서 정적 자원 경로가 올바르게 처리되지 않고 있음
+현재 nginx.conf의 location 블록들이 충돌하거나 우선순위 문제일 가능성
+
+## 해결 방안
+nginx.conf의 location 블록 순서와 설정을 재검토하여
+/question/assets/* 경로가 정확히 처리되도록 수정
+
+## Backend 상태
+- Docker 빌드: 완료
+- Push: 진행 중
+- 배포: 대기 중
+
+---
+업데이트: 2025-08-20 14:05 KST

@@ -1,0 +1,31 @@
+01 환경 이해 완료
+
+# 프로젝트 환경 정리
+
+* Azure AKS 배포
+* 2개 namespace: 
+  - default (http://20.249.154.2)
+  - lee (http://20.249.113.18:9000/) - 다른 개발자 담당, kubectl 수정 금지
+* 현재 폴더(chatbot-lee)는 lee namespace의 webtoon-hl 서비스 담당
+* lee namespace는 ingress 미사용, gateway 서비스로 external IP 라우팅
+
+## 서비스 구성
+- gateway (라우팅)
+- user-backend (회원가입, Azure DB)
+- auth-backend (JWT 인증)
+- auth-frontend (메인/로그인/회원가입 화면)
+- board-backend/frontend (게시판)
+- chatbot (질의응답)
+- goods-gen-backend/frontend (굿즈 이미지 생성)
+- ppl-gen-backend/frontend (PPL 이미지 생성)
+- webtoon-dashboard-backend/frontend (웹툰 현황)
+- webtoon-hl-backend/frontend (웹툰 하이라이트)
+- zookeeper (kafka 통신)
+
+## 작업 규칙
+- 한국어 응답
+- 로그 번호 + 핵심주제 형식
+- txt 파일 저장
+- # 대제목만, 구분은 - * 사용
+- lee namespace kubectl 수정 금지
+- C:\Users\hoa\vscode_project\chatbot-lee 코드 수정으로 서비스 개선

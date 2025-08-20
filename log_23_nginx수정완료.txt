@@ -1,0 +1,49 @@
+23. nginx 수정 완료 및 Frontend 문제 해결
+
+# ✅ Frontend 완전 해결
+1. 다른 서비스들의 nginx 설정 패턴 분석
+   - ppl-gen과 board 서비스의 nginx.conf 확인
+   - 중첩된 location 블록 패턴 발견
+
+2. nginx.conf 수정 완료
+   - 기존: 별도 location 블록들로 분리
+   - 수정: /question 내부에 중첩된 location 블록으로 통합
+   ```nginx
+   location /question {
+     alias /usr/share/nginx/html;
+     
+     # 정적 파일 캐시 (중첩 location)
+     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+       expires 1y;
+       add_header Cache-Control "public, immutable";
+       try_files $uri =404;
+     }
+     
+     # SPA fallback
+     try_files $uri /question/index.html;
+   }
+   ```
+
+3. Frontend 재빌드 및 배포 완료
+   - 새 이미지: kt16big.azurecr.io/question-frontend-lee-2:20250820-nginx-fix
+   - 배포 성공적으로 롤아웃
+
+4. 정적 자원 로딩 테스트 결과
+   - ✅ HTML: http://20.249.113.18:9000/question (200 OK)
+   - ✅ JS: http://20.249.113.18:9000/question/assets/index-BIk5BTiZ.js (200 OK)  
+   - ✅ CSS: http://20.249.113.18:9000/question/assets/index-Wg56RAcR.css (200 OK)
+
+# 🔄 Backend 상태
+1. Docker 이미지 빌드 완료: kt16big.azurecr.io/question-backend-lee-2:20250820-chatbot-fix-v2
+2. 올바른 태그로 다시 태깅: 20250820-latest
+3. Push 진행 중 (백그라운드)
+4. ImagePullBackOff 해결 후 배포 예정
+
+# 📋 남은 작업
+1. Backend push 완료 대기
+2. Backend 배포 업데이트
+3. 전체 시스템 테스트 (Frontend + Backend)
+
+---
+업데이트: 2025-08-20 14:16 KST
+Frontend 정적 자원 404 문제 완전 해결!

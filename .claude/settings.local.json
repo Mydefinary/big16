@@ -21,12 +21,15 @@
       "Bash(kubectl rollout restart:*)",
       "Bash(az acr login:*)",
       "Bash(kubectl set image:*)",
-      "Bash(kubectl rollout status:*)"
+      "Bash(kubectl rollout status:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install)"
     ],
     "deny": [],
     "ask": [],
     "additionalDirectories": [
-      "C:\\c\\Users\\hoa\\vscode_project\\chatbot-lee"
+      "C:\\c\\Users\\hoa\\vscode_project\\chatbot-lee",
+      "C:\\mnt\\c\\Users\\hoa\\vscode_project\\chatbot-lee"
     ]
   }
 }

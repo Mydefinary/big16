@@ -1,0 +1,70 @@
+13 Gateway 설정 분석 결과
+
+# Gateway 라우팅 vs 실제 서비스 매핑 문제
+
+## Gateway 설정 (제공받은 정보)
+```yaml
+- id: question-backend
+  uri: http://question-backend-service-lee-2:8083  # -lee-2 서비스 지정
+  predicates:
+    - Path=/question-api/**
+
+- id: question-frontend  
+  uri: http://question-backend-service-lee-2:80   # -lee-2 서비스 지정
+  predicates:
+    - Path=/question/**
+```
+
+## 실제 Kubernetes 서비스 상태
+
+### Services
+* question-backend-service-lee: 정상 동작 (정상 backend와 연결)
+* question-backend-service-lee-2: CrashLoopBackOff backend와 연결
+* question-frontend-service-lee: 정상 동작 (기존 frontend)  
+* question-frontend-service-lee-2: 정상 동작 (새로 배포한 chatbot frontend)
+
+### Deployments
+* question-backend-deployment-lee: 1/1 Running (정상)
+* question-backend-deployment-lee-2: 0/1 CrashLoopBackOff (문제)
+* question-frontend-deployment-lee: 1/1 Running (정상)
+* question-frontend-deployment-lee-2: 1/1 Running (정상 - 우리가 배포함)
+
+## 문제 진단
+
+### 원인
+1. Gateway가 `-lee-2` 서비스들을 가리킴
+2. `question-backend-service-lee-2`의 backend pod가 계속 crash
+3. 정상 동작하는 `-lee` 서비스들은 Gateway에서 사용되지 않음
+
+### 영향
+- `/question` 경로: frontend는 로드되지만 API 호출 시 실패 가능성
+- `/question-api/**` 경로: backend API 호출 실패
+
+## 해결 방안
+
+### 방안 1: Backend 문제 수정 (진행 중)
+- chatbot backend를 question-backend-service-lee-2에 재배포
+- 환경변수 및 설정 문제 해결
+- CrashLoopBackOff 문제 해결
+
+### 방안 2: Gateway 설정 변경 (운영팀 협조 필요)
+Gateway에서 정상 동작하는 서비스들을 가리키도록 변경:
+```yaml
+- id: question-backend
+  uri: http://question-backend-service-lee:8083    # -lee로 변경
+  predicates:
+    - Path=/question-api/**
+
+- id: question-frontend  
+  uri: http://question-frontend-service-lee:80     # -lee로 변경
+  predicates:
+    - Path=/question/**
+```
+
+## 현재 진행 작업
+- Backend Docker 이미지 빌드 중
+- question-backend-deployment-lee-2에 새로운 chatbot backend 배포 예정
+- 배포 후 전체 서비스 테스트 예정
+
+---
+분석 시간: 2025-08-20 13:35 KST

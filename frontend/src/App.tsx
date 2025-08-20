@@ -28,7 +28,7 @@ export default function App() {
       } catch (error) {
         setIsAuthenticated(false)
         // 인증 실패시 로그인 페이지로 리다이렉트
-        window.location.href = '/auths/login'
+        window.location.href = '/'
       } finally {
         setIsAuthLoading(false)
       }
