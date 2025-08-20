@@ -27,7 +27,9 @@
       "Bash(kubectl rollback:*)",
       "Bash(kubectl rollout undo:*)",
       "Bash(kubectl patch:*)",
-      "Bash(docker images:*)"
+      "Bash(docker images:*)",
+      "Bash(cp:*)",
+      "Bash(sed:*)"
     ],
     "deny": [],
     "ask": [],

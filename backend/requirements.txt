@@ -1,21 +1,14 @@
-# Core FastAPI
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-python-dotenv==1.0.0
-pydantic==2.5.0
-
-# Data processing
-pandas==2.1.4
-regex==2023.10.3
-
-# LangChain - only specific modules
-langchain-core==0.1.52
-langchain-openai==0.0.8
-langchain-community==0.0.38
-
-# Vector stores
-chromadb==0.4.18
-faiss-cpu==1.7.4
-
-# Embeddings - lightweight model
-sentence-transformers==2.2.2
+fastapi
+uvicorn[standard]
+python-dotenv
+pandas
+pydantic
+langchain
+langchain-openai
+langchain-community
+chromadb
+faiss-cpu
+huggingface-hub
+transformers
+sentence-transformers
+regex

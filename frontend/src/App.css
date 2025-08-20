@@ -1,155 +1,65 @@
 :root{
-  --brand: #16a34a;        /* 메인 그린 */
-  --brand-ink: #0b7b36;    /* 진한 그린 */
-  --text: #0f172a;         /* 제목/기본 텍스트 */
-  --muted: #6b7280;        /* 보조 텍스트 */
-  --line: #e5e7eb;         /* 구분선 */
-  --bg: #ffffff;
+    --bg:#f6f7f9; --panel:#ffffff; --border:#e5e7eb; --text:#0b0c10; --muted:#6b7280;
+    --brand:#10b981; --brand-ink:#053b2f; --radius:14px;
 }
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{margin:0; background:var(--bg); color:var(--text);
+    font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,
+    "Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic","맑은 고딕",sans-serif;}
 
-*{ box-sizing: border-box; }
+.layout{display:grid; grid-template-columns:260px 1fr; height:100vh}
 
-html, body, #root {
-  height: 100%;
-}
+/* 사이드바 */
+.sidebar{border-right:1px solid var(--border); background:#fbfbfc; display:flex; flex-direction:column}
+.sidebar .top{padding:16px; border-bottom:1px solid var(--border); display:flex; gap:8px}
+.sidebar .new{flex:1; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:var(--panel); cursor:pointer}
+.sidebar .list{flex:1; overflow:auto; padding:8px}
+.sidebar .item{position:relative; padding:10px 12px; border-radius:10px; cursor:pointer; border:1px solid transparent}
+.sidebar .item:hover{background:#f2f3f5}
+.sidebar .item.active{background:#ecfdf5; border-color:#bbf7d0}
+.sidebar .row{display:flex; align-items:center; gap:8px}
+.sidebar .title{flex:1; font-weight:600; font-size:14px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.sidebar .kebab{opacity:0; transition:opacity .15s ease; border:1px solid var(--border); background:#fff; padding:4px 6px; border-radius:8px; font-size:14px; line-height:1; cursor:pointer}
+.sidebar .item:hover .kebab{opacity:1}
+.sidebar .menu{position:absolute; right:8px; top:38px; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.08); padding:6px; z-index:20; min-width:140px}
+.sidebar .menu button{width:100%; text-align:left; padding:8px 10px; border:none; background:#fff; border-radius:8px; cursor:pointer}
+.sidebar .menu button:hover{background:#f3f4f6}
+.sidebar .title-input{width:100%; border:none; background:transparent; font-weight:600; font-size:14px;}
+.sidebar .title-input:focus{outline:none; background:#fff8; border-radius:6px;}
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Apple SD Gothic Neo, '나눔고딕', '맑은 고딕', Arial, sans-serif;
-}
+/* 메인(채팅) */
+.main{display:flex; flex-direction:column; height:100vh}
+.chat-wrap{flex:1; display:flex; justify-content:center; overflow:auto}
+.chat{width:min(900px, 100%); padding:24px 16px 40px;}
 
-/* Page layout */
-.page{
-  min-height: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-}
+.msg-row{display:flex; gap:12px; margin:16px 0}
+.avatar{width:28px; height:28px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-weight:700}
+.avatar.bot{background:#111827; color:#fff}
+.avatar.me{background:#10b981; color:#052e25}
 
-/* Header */
-.header{
-  border-bottom: 1px solid var(--line);
-  background: #fff;
-}
-.header__inner{
-  height: 64px;
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 0 16px;
-  display: grid;
-  grid-template-columns: 180px 1fr auto;
-  align-items: center;
-  gap: 16px;
-}
-.brand{
-  font-weight: 800;
-  font-size: 22px;
-}
-.nav{
-  display: none;
-  gap: 16px;
-}
-.nav--right{
-  display: flex;
-}
-.nav__link{
-  text-decoration: none;
-  color: var(--text);
-  font-size: 14px;
-  opacity: 0.85;
-}
-.nav__link:hover{ opacity: 1; }
-.nav__link--strong{
-  color: var(--brand);
-  font-weight: 700;
-}
+.bubble{flex:1; background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; white-space:pre-wrap; line-height:1.6}
+.row-meta{margin-top:6px; font-size:12px; color:var(--muted)}
 
-/* 큰 화면에서 중앙 네비 보이기 */
-@media (min-width: 1024px){
-  .nav{ display: flex; }
-}
+.tools{display:flex; gap:8px; margin-top:8px}
+.tool-btn{font-size:12px; padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:#fff; cursor:pointer}
 
-/* Hero */
-.hero{
-  max-width: 960px;
-  margin: 8vh auto 0;
-  padding: 0 16px 10vh;
-  text-align: center;
-}
-.hero__title{
-  font-size: clamp(36px, 6vw, 64px);
-  line-height: 1.1;
-  margin: 24px 0 12px;
-  color: var(--brand);
-  font-weight: 800;
-  letter-spacing: 0.2px;
-}
-.hero__subtitle{
-  color: var(--muted);
-  font-size: clamp(14px, 2vw, 18px);
-  margin: 0 auto 28px;
-  max-width: 720px;
-}
+/* 입력부: sticky 하단 */
+.composer{position:sticky; bottom:0; background:linear-gradient(180deg, rgba(246,247,249,0), rgba(246,247,249,1) 40%);} 
+.composer .inner{max-width:900px; margin:0 auto; padding:12px 16px 20px;}
+.input-row{display:flex; gap:10px; align-items:flex-end}
+.field{flex:1; min-height:44px; max-height:200px; resize:vertical; padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:#fff; font-size:14px}
+.send{padding:12px 14px; border-radius:12px; border:none; background:var(--brand); color:#052e25; font-weight:700; cursor:pointer}
+.send:disabled{opacity:.6; cursor:default}
+.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; padding:2px 6px; border-radius:6px; border:1px solid var(--border); background:#fff; color:#6b7280; font-size:12px}
 
-/* Form */
-.hero__form{
-  display: grid;
-  gap: 20px;
-  justify-items: center;
-}
+.typing{display:inline-flex; gap:6px}
+.dot{width:6px; height:6px; background:#9ca3af; border-radius:999px; animation:blink 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}
+.dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%{opacity:.2} 20%{opacity:1} 100%{opacity:.2}}
 
-.inputPill{
-  width: min(720px, 92%);
-  border: 2px solid #d1fae5;     /* 연한 그린 라인 */
-  border-radius: 999px;
-  padding: 14px 18px;
-  transition: box-shadow .15s ease, border-color .15s ease;
-}
-.inputPill:focus-within{
-  border-color: var(--brand);
-  box-shadow: 0 0 0 6px rgba(22, 163, 74, .12);
-}
-.inputPill__input{
-  width: 100%;
-  border: none;
-  outline: none;
-  font-size: 16px;
-  background: transparent;
-  color: var(--text);
-}
-.inputPill__input::placeholder{
-  color: #059669; /* 브랜드 톤 힌트 */
-  opacity: .65;
-}
-
-/* CTA */
-.cta{
-  width: min(720px, 92%);
-  height: 56px;
-  border-radius: 999px;
-  border: 0;
-  background: var(--brand);
-  color: #fff;
-  font-weight: 700;
-  font-size: 16px;
-  cursor: pointer;
-  transition: transform .02s ease, background .15s ease, box-shadow .15s ease;
-  box-shadow: 0 8px 24px rgba(22, 163, 74, .25);
-}
-.cta:hover{ background: var(--brand-ink); }
-.cta:active{ transform: translateY(1px); }
-
-/* Footer */
-.footer{
-  border-top: 1px solid var(--line);
-  background: #fff;
-}
-.footer__right{
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 14px 16px;
-  text-align: right;
-  color: var(--muted);
-  font-size: 12px;
+@media (max-width: 920px){
+    .layout{grid-template-columns:1fr}
+    .sidebar{display:none}
 }
