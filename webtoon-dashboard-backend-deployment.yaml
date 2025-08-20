@@ -1,0 +1,60 @@
+# ===================================================
+# 18. 웹툰 대시보드 - 백엔드(FastAPI) 배포
+# ===================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoon-dashboard-backend-deployment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: webtoon-dashboard-backend
+  template:
+    metadata:
+      labels:
+        app: webtoon-dashboard-backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: webtoon-dashboard-backend-container
+          image: kt16big.azurecr.io/webtoon-dashboard-backend:${IMAGE_TAG}
+          ports:
+            - containerPort: 8002
+          workingDir: /app
+          env:
+            - name: ENVIRONMENT
+              value: "production"
+            - name: CORS_ORIGINS
+              value: "*"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+# ===================================================
+# 19. 웹툰 대시보드 - 백엔드 서비스 (ClusterIP)
+# ===================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoon-dashboard-backend-service
+spec:
+  type: ClusterIP
+  selector:
+    app: webtoon-dashboard-backend
+  ports:
+    - protocol: TCP
+      port: 8002
+      targetPort: 8002
+---
+# ===================================================
+# Gateway 라우팅을 위한 설정 주석
+# lee namespace에서는 gateway-lee-service를 통해 라우팅됩니다
+# 따라서 별도의 ingress 설정이 불필요합니다
+# ===================================================
