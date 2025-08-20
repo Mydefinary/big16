@@ -81,7 +81,8 @@ def build_or_load_vectorstores():
         df = df.rename(columns={"조회수": "구독자수"})
 
     Path(CHROMA_DIR).mkdir(parents=True, exist_ok=True)
-    embeddings_hf = HuggingFaceEmbeddings(model_name="intfloat/multilingual-e5-base")
+    # 경량화된 모델 사용 (420MB -> 80MB)
+    embeddings_hf = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
     vectordb = Chroma(persist_directory=CHROMA_DIR, embedding_function=embeddings_hf)
     retriever_law = vectordb.as_retriever(search_kwargs={"k": 5})
     rag_chain = RetrievalQAWithSourcesChain.from_chain_type(llm=llm, retriever=retriever_law)

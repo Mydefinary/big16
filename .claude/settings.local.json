@@ -23,7 +23,11 @@
       "Bash(kubectl set image:*)",
       "Bash(kubectl rollout status:*)",
       "Bash(npm run build:*)",
-      "Bash(npm install)"
+      "Bash(npm install)",
+      "Bash(kubectl rollback:*)",
+      "Bash(kubectl rollout undo:*)",
+      "Bash(kubectl patch:*)",
+      "Bash(docker images:*)"
     ],
     "deny": [],
     "ask": [],

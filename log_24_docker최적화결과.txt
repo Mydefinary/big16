@@ -1,0 +1,46 @@
+24. Docker 이미지 최적화 진행 상황
+
+## 시도한 최적화 방법들
+
+### 1단계: Requirements 최적화
+- 기존 requirements.txt를 버전 고정으로 변경
+- 불필요한 패키지 제거 시도 (하지만 실제로는 대부분 사용 중)
+- langchain 대신 개별 모듈 사용
+
+### 2단계: 경량 모델 적용
+- HuggingFace 모델 변경: intfloat/multilingual-e5-base → sentence-transformers/all-MiniLM-L6-v2
+- 예상 크기 감소: 420MB → 80MB
+
+### 3단계: Multi-stage 빌드
+- dependencies stage와 runtime stage 분리
+- 빌드 도구는 최종 이미지에서 제외
+- 사용자 레벨 패키지 설치
+
+## 결과
+- 기존 크기: 12.4GB
+- 최적화 후: 12.3GB
+- 개선도: 거의 없음 (0.8% 감소)
+
+## 문제 분석
+1. sentence-transformers 패키지 자체가 여러 대용량 의존성을 가져옴
+2. 실제 모델 파일들이 런타임에 다운로드되어 이미지 크기에 직접 영향 없음
+3. PyTorch, transformers 등 ML 라이브러리들의 크기가 여전히 큼
+
+## 추가 최적화 방안 (더 공격적)
+
+### A. 최소한의 패키지만 사용
+- sentence-transformers 완전 제거
+- OpenAI embeddings만 사용 (API 호출)
+- langchain-community 최소화
+
+### B. Alpine Linux 사용
+- python:3.11-alpine 기반
+- 시스템 패키지 크기 대폭 감소
+
+### C. 외부 모델 의존성 제거
+- HuggingFace 모델 대신 OpenAI API만 사용
+- 벡터 저장소 외부화 (Redis/PostgreSQL)
+
+---
+업데이트: 2025-08-20 15:35 KST
+현재 방법으로는 큰 효과 없음, 더 근본적인 접근 필요
