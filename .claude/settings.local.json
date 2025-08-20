@@ -16,7 +16,8 @@
       "Bash(kubectl rollout status:*)",
       "Bash(kubectl delete pod:*)",
       "Bash(kubectl set image:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []
