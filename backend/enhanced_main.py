@@ -725,7 +725,7 @@ async def get_tag_analysis():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"태그 분석 실패: {str(e)}")
 
-@app.get("/webtoon-api/api/api/analysis/network")
+@app.get("/webtoon-api/api/analysis/network")
 async def get_network_analysis(
     selected_tags: Optional[str] = Query(None, description="쉼표로 구분된 선택된 태그들"),
     min_correlation: Optional[float] = Query(0.2, description="최소 상관계수"),

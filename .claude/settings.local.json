@@ -13,7 +13,10 @@
       "Bash(docker build:*)",
       "Bash(az acr login:*)",
       "Bash(docker push:*)",
-      "Bash(kubectl rollout status:*)"
+      "Bash(kubectl rollout status:*)",
+      "Bash(kubectl delete pod:*)",
+      "Bash(kubectl set image:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
