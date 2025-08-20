@@ -12,7 +12,8 @@
       "Bash(curl:*)",
       "Bash(docker build:*)",
       "Bash(az acr login:*)",
-      "Bash(docker push:*)"
+      "Bash(docker push:*)",
+      "Bash(kubectl rollout status:*)"
     ],
     "deny": [],
     "ask": []
