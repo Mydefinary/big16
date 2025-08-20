@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/UploadPage.css";
 
-// 실제 Gateway 라우팅: /api/* 패턴
+// 실제 Gateway 라우팅: /api/* 패턴 (2025-08-20 캐시 문제 해결)
 const API_BASE = (process.env.REACT_APP_HL_API ?? "/api").replace(/\/+$/, "");
 const MAX_FILES = 20;
 
@@ -47,7 +47,7 @@ const UploadPage: React.FC = () => {
     try {
       setLoading(true);
 
-      // 절대경로: /api-hl/highlight  → 브라우저가 현재 오리진을 자동 부착
+      // Gateway 라우팅: /api/highlight
       const res = await axios.post(`${API_BASE}/highlight`, formData, {
         // FormData는 boundary 자동 설정이 더 안전 → Content-Type 헤더 지정 생략
         timeout: 600000, // (선택) 오래 걸릴 수 있으므로 여유 있게

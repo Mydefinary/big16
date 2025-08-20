@@ -10,7 +10,9 @@
       "Bash(docker push:*)",
       "Bash(kubectl set image:*)",
       "Bash(kubectl rollout status:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(grep:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

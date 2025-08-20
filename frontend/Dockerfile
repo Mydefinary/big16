@@ -5,8 +5,8 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 
-# API는 상대경로(/api) 사용 → 기본값 유지
-ARG REACT_APP_HL_API=/api/webtoon-hl
+# 실제 Gateway 라우팅 패턴에 맞춤 (/api/* 패턴)
+ARG REACT_APP_HL_API=/api
 ENV REACT_APP_HL_API=$REACT_APP_HL_API
 
 # 서브패스 배포(/webtoon-hl) — CRA면 PUBLIC_URL 사용
