@@ -1,0 +1,62 @@
+# =========================
+# 백엔드 (FastAPI)
+# =========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoon-hl-backend-deployment
+  namespace: webtoon-hl
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: webtoon-hl-backend
+  template:
+    metadata:
+      labels:
+        app: webtoon-hl-backend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: webtoon-hl-backend-container
+          image: kt16big.azurecr.io/webtoon-hl-backend:${IMAGE_TAG}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys-secret
+                  key: OPENAI_API_KEY
+          # app이 src/ 아래일 때 uvicorn을 0.0.0.0:8000으로 기동
+          command: ["python"]
+          args: ["-m","uvicorn","app.main:app","--host","0.0.0.0","--port","8000","--app-dir","src"]
+          readinessProbe:
+            httpGet: { path: "/", port: 8000 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: "/", port: 8000 }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests: { cpu: "100m", memory: "256Mi" }
+            limits:   { cpu: "1",    memory: "1Gi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoon-hl-backend-service
+  namespace: webtoon-hl
+spec:
+  type: ClusterIP
+  selector:
+    app: webtoon-hl-backend
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8003        # 게이트웨이/인그레스가 붙는 포트
+      targetPort: 8000  # 컨테이너(Uvicorn) 포트

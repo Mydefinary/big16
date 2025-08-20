@@ -1,0 +1,28 @@
+.result-container {
+  border: 1px solid #09AA5C;
+  margin: 6rem auto;
+  padding: 2rem;
+  text-align: center;
+  border-radius: 10px;
+  max-width: 1100px;
+  font-family: sans-serif;
+}
+.result-image {
+  max-height: 500px;
+  margin-bottom: 2rem;
+}
+.result-buttons button {
+  margin: 0 1rem;
+  padding: 0.5rem 1.5rem;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+.save-btn {
+  background-color: #09AA5C;
+  color: white;
+}
+.close-btn {
+  background-color: #5B5B5B;
+  color: white;
+}

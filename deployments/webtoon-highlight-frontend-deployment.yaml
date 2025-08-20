@@ -1,0 +1,99 @@
+# =========================
+# 프런트 Nginx 설정 (ConfigMap)
+#  - /api 프록시 없음 (게이트웨이/인그레스가 라우팅)
+#  - /webtoon-hl 서브패스 SPA
+# =========================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webtoon-hl-frontend-nginx
+  namespace: webtoon-hl
+data:
+  default.conf: |
+    server {
+      listen 80;
+
+      # 정적 자산 캐시
+      location ~* ^/webtoon-hl/.*\.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        alias /usr/share/nginx/html/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+      }
+
+      # SPA fallback
+      location /webtoon-hl/ {
+        alias /usr/share/nginx/html/;
+        index index.html index.htm;
+        try_files $uri $uri/ /webtoon-hl/index.html;
+      }
+
+      # 루트 → 서브패스로 리다이렉트
+      location = / { return 301 /webtoon-hl/; }
+
+      # 그 외는 404
+      location / { return 404; }
+    }
+
+---
+# =========================
+# 프런트 (React + Nginx)
+# =========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webtoon-hl-frontend-deployment
+  namespace: webtoon-hl
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: webtoon-hl-frontend
+  template:
+    metadata:
+      labels:
+        app: webtoon-hl-frontend
+    spec:
+      nodeSelector:
+        agentpool: userpool
+      containers:
+        - name: webtoon-hl-frontend-container
+          image: kt16big.azurecr.io/webtoon-hl-frontend:${IMAGE_TAG}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+          readinessProbe:
+            httpGet: { path: /webtoon-hl/, port: 80 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /webtoon-hl/, port: 80 }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits:   { cpu: "500m", memory: "512Mi" }
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: webtoon-hl-frontend-nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webtoon-hl-frontend-service
+  namespace: webtoon-hl
+spec:
+  type: ClusterIP
+  selector:
+    app: webtoon-hl-frontend
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3003       # 게이트웨이/인그레스가 붙는 포트
+      targetPort: 80   # 컨테이너(Nginx) 포트
