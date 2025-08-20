@@ -149,7 +149,7 @@ function ChatArea({ threadId, onTitle }:{ threadId:string; onTitle:(t:string)=>v
   useEffect(() => { saveMsgs(threadId, msgs); if(msgs.length===1 && msgs[0].role==='bot'){ onTitle("새 대화"); } else { const t = summarizeTitle(msgs); if(t) onTitle(t); }}, [msgs, threadId]);
   useEffect(() => { const el = listRef.current; if(!el) return; el.scrollTo({ top: el.scrollHeight, behavior: "smooth" }); }, [msgs.length, loading]);
 
-  const api = useMemo(() => axios.create({ baseURL: "/api", timeout: 20000, headers: { "Content-Type": "application/json" } }), []);
+  const api = useMemo(() => axios.create({ baseURL: "", timeout: 20000, headers: { "Content-Type": "application/json" } }), []);
 
   const canSend = input.trim().length > 0 && !loading;
   const push = (m: ChatMsg) => setMsgs(prev => [...prev, m]);

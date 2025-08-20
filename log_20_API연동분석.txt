@@ -1,0 +1,35 @@
+20 API 연동 분석 및 해결방안
+
+# 현재 상황 분석
+
+## Pod 및 서비스 상태
+- question-backend-deployment-lee-2: 1/1 Running (정상 동작)
+- question-frontend-deployment-lee-2: 1/1 Running (정상 동작) 
+- question-backend-service-lee-2: ClusterIP 10.0.214.86:8083 (활성화)
+- question-frontend-service-lee-2: ClusterIP 10.0.15.148:80 (활성화)
+
+## Gateway 라우팅 설정 (기존 분석 결과)
+- /question/** → question-frontend-service-lee-2:80
+- /question-api/** → question-backend-service-lee-2:8083
+
+## Backend 로그 분석
+Backend가 정상 실행되고 있으며 FastAPI 서버가 8083 포트에서 동작 중:
+- "POST /question-api/ask HTTP/1.1" 404 Not Found 
+- "GET /question-api/health HTTP/1.1" 404 Not Found
+
+## 문제점 식별
+Backend 로그에서 404 에러가 발생하는 것으로 보아, Backend 서비스는 `/question-api/` prefix 없이 엔드포인트가 구성되어 있음:
+- Gateway: /question-api/** → Backend
+- Backend 실제: /ask, /health (prefix 없음)
+- 요청 경로: /question-api/ask → Backend에서 404
+
+## 해결 방안
+1. Frontend API 요청을 /question-api/ask 대신 /question-api/로 변경 (완료)
+2. 이렇게 하면 Gateway가 /question-api/를 제거하고 Backend의 /ask로 라우팅
+
+## 다음 단계
+- Frontend 재배포 후 API 연동 테스트
+- Backend 엔드포인트 구조 확인
+
+---
+분석 시간: 2025-08-20 17:58 KST

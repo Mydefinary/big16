@@ -1,0 +1,27 @@
+21 Backend 엔드포인트 분석 결과
+
+# Backend 코드 vs 실제 배포 버전 불일치
+
+## 소스코드 분석 (main.py)
+- Line 417: @app.get("/question-api/health")
+- Line 421: @app.post("/question-api/ask", response_model=AskResponse)
+
+## 실제 배포된 Backend 로그
+- "POST /question-api/ask HTTP/1.1" 404 Not Found
+- "GET /question-api/health HTTP/1.1" 404 Not Found
+
+## 문제 진단
+현재 question-backend-deployment-lee-2에 배포된 이미지는 소스코드와 다른 버전임:
+- 소스코드: /question-api/ask, /question-api/health 엔드포인트 있음
+- 배포된 이미지: 해당 엔드포인트 없음 (아마 /ask, /health만 있을 것)
+
+## 해결방안 
+1. 현재 소스코드로 Backend Docker 이미지 재빌드
+2. question-backend-deployment-lee-2에 새로운 이미지 배포
+3. 또는 Frontend에서 /question-api/ (trailing slash)로 요청하여 Gateway가 /ask로 라우팅하도록 함
+
+## 다음 작업
+Backend 재빌드 및 배포 필요
+
+---
+분석 시간: 2025-08-20 18:01 KST

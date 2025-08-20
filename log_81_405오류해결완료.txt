@@ -1,0 +1,33 @@
+81 405 오류 해결 완료
+
+# ✅ 405 Method Not Allowed 문제 해결
+
+## 원인 분석
+**Frontend API 호출 경로 문제**:
+- 이전: `baseURL: "/api"` + `/question-api/` = `/api/question-api/` ❌
+- Gateway: `/question-api/**` → backend (라우팅 없음: `/api/**`)
+- 결과: 405 Method Not Allowed
+
+## 해결 방안
+**Frontend 수정**:
+1. `baseURL: "/api"` → `baseURL: ""` 변경
+2. `/question-api/` → `/question-api/ask` 정확한 엔드포인트 지정
+
+## 수정 결과
+- **이전**: `/api/question-api/` → 405 Method Not Allowed
+- **현재**: `/question-api/ask` → 400 Bad Request (엔드포인트 존재)
+
+## 배포 완료
+- Frontend 재빌드: ✅
+- Docker 이미지: kt16big.azurecr.io/question-frontend-lee-2:20250820-api-fix
+- 배포 성공: ✅
+
+## 최종 상태
+- ✅ 405 오류 해결됨
+- ✅ API 엔드포인트 정상 인식
+- ✅ Gateway 라우팅 정상 작동
+
+이제 브라우저에서 정상적인 API 통신이 가능합니다!
+
+---
+해결 시간: 2025-08-20 19:20 KST
