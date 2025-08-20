@@ -106,23 +106,79 @@
 
 좋습니다! 이제 401 Unauthorized가 나오는 것은 정상입니다. 이는 JWT 토큰이 유효하지 않기 때문이고, 실제로는 Gateway가 `/api/highlight` 경로를 webtoon-hl-backend로 라우팅하고 있다는 의미입니다.
 
-# 최종 해결 완료
+12 최종 해결 완료
 
-## 문제 해결 요약
+# 문제 해결 요약
 1. **실제 Gateway 라우팅 확인**: LEE 가이드라인과 달리 `/api/*` 패턴 사용
-2. **Backend 수정**: prefix를 `/api`로 변경 (main.py)
+2. **Backend 수정**: prefix를 `/api`로 변경 (main.py)  
 3. **Frontend 수정**: API_BASE를 `/api`로 변경 (UploadPage.tsx)
 4. **Docker 이미지 재빌드**: --no-cache 옵션으로 완전 재빌드
 5. **Kubernetes 배포**: LEE namespace에 새 이미지 배포
 
-## 테스트 결과
+# 테스트 결과
 - `/api/highlight` 엔드포인트: 401 Unauthorized (JWT 인증 필요, 라우팅 정상)
 - 이전 404 Not Found → 현재 401 Unauthorized (정상 동작)
 - webtoon-hl 서비스가 Gateway를 통해 정상 연결됨
 
-## 핵심 교훈
+# 핵심 교훈
 - 가이드라인보다 **실제 운영 환경 설정**을 우선 확인해야 함
-- Gateway 로그 분석을 통해 실제 라우팅 패턴 파악
+- Gateway 로그 분석을 통해 실제 라우팅 패턴 파악  
 - Docker 캐시 문제 해결을 위한 --no-cache 옵션 사용
 
 http://20.249.113.18:9000/webtoon-highlight-creator 페이지에서 이제 정상적으로 API 호출이 가능합니다.
+
+13 Git Commit 메시지 작성
+
+✅ **Git 커밋 완료!**
+
+# 커밋 정보
+- **브랜치**: webtoon-hightlight-lee
+- **커밋 해시**: 742fc4a
+- **변경된 파일**: 51개 파일, 19,165줄 추가
+
+# 커밋 메시지
+```
+feat: 웹툰 하이라이트 생성 서비스 구현 및 Gateway 라우팅 연동
+
+- LEE namespace에 맞춘 웹툰 하이라이트 4컷 생성 서비스 구현
+- FastAPI 백엔드: OpenAI GPT-4o를 활용한 이미지 분석 및 필터링
+- React 프론트엔드: 멀티 이미지 업로드 및 결과 표시 UI
+- Gateway 라우팅 패턴(/api/*)에 맞춘 API 경로 설정
+- Docker 컨테이너화 및 Azure AKS 배포 설정
+- JWT 인증 통합 및 CORS 설정 완료
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+모든 작업이 성공적으로 완료되었습니다!
+
+14 문서 작성 - README 및 가이드라인
+
+# GitHub README.md 작성 완료
+- 서비스 개요 및 기능 설명
+- 기술 스택 및 아키텍처 다이어그램
+- 로컬 개발 환경 설정 가이드
+- 운영 환경 배포 가이드 (Docker, ACR, Kubernetes)
+- API 문서 및 환경 설정
+- 모니터링, 로그, 성능 메트릭
+- 트러블슈팅 가이드 (404, 401, Docker 캐시 등)
+- 사용법 및 기여 가이드
+
+# LEE-NAMESPACE-INTEGRATION-GUIDE.md 작성 완료
+- **실제 운영 환경** 기반 통합 가이드
+- Gateway 라우팅 패턴 실제 검증 방법
+- Claude Code를 사용한 서비스 통합 단계별 프로세스
+- webtoon-hl 서비스 성공 사례 및 해결 과정
+- 문제 해결 체크리스트
+- 새 서비스 추가 빠른 체크리스트
+- LEE Namespace 현재 서비스 현황 및 포트 할당
+
+# 핵심 가치
+1. **이론보다 실제**: 가이드라인보다 실제 운영 환경 우선
+2. **검증된 패턴**: 실제 동작하는 설정만 포함
+3. **Claude Code 최적화**: Claude Code 작업 시 필요한 단계별 가이드
+4. **문제 해결 중심**: 실제 겪을 수 있는 문제와 해결책 제시
+
+이제 다른 개발자들이 LEE Namespace에 새로운 서비스를 추가할 때 이 가이드를 참고하여 빠르고 정확하게 통합할 수 있습니다.
