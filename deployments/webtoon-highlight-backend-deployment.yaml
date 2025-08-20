@@ -1,37 +1,28 @@
-# ===================================================
-# 백엔드(FastAPI)
-# ===================================================
+# =========================
+# 백엔드 (FastAPI)
+# =========================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-<<<<<<< HEAD
-  name: webtoon-hl-backend-deployment-lee-2
-=======
   name: webtoon-hl-backend-deployment
   namespace: webtoon-hl
->>>>>>> 09c0de12 (plz...)
 spec:
   replicas: 1
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: webtoon-hl-backend-lee-2
+      app: webtoon-hl-backend
   template:
     metadata:
       labels:
-        app: webtoon-hl-backend-lee-2
+        app: webtoon-hl-backend
     spec:
       nodeSelector:
         agentpool: userpool
       containers:
-<<<<<<< HEAD
-        - name: webtoon-hl-backend-container-lee-2
-          image: kt16big.azurecr.io/webtoon-highlight-backend-lee-2:${IMAGE_TAG}
-=======
         - name: webtoon-hl-backend-container
           image: kt16big.azurecr.io/webtoon-hl-backend:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
->>>>>>> 09c0de12 (plz...)
           ports:
             - containerPort: 8000
           env:
@@ -40,7 +31,7 @@ spec:
                 secretKeyRef:
                   name: api-keys-secret
                   key: OPENAI_API_KEY
-          # app이 src/ 아래일 때 uvicorn 확실히 0.0.0.0:8000로 기동
+          # app이 src/ 아래일 때 uvicorn을 0.0.0.0:8000으로 기동
           command: ["python"]
           args: ["-m","uvicorn","app.main:app","--host","0.0.0.0","--port","8000","--app-dir","src"]
           readinessProbe:
@@ -58,16 +49,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-<<<<<<< HEAD
-  name: webtoon-hl-backend-service-lee-2
-=======
   name: webtoon-hl-backend-service
   namespace: webtoon-hl
->>>>>>> 09c0de12 (plz...)
 spec:
   type: ClusterIP
   selector:
-    app: webtoon-hl-backend-lee-2
+    app: webtoon-hl-backend
   ports:
     - name: http
       protocol: TCP

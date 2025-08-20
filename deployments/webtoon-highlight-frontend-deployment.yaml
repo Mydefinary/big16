@@ -1,10 +1,8 @@
-# ===================================================
-# 프론트엔드(React + Nginx)
-#  - /webtoon-hl 서브패스로 서비스
-#  - /api 프록시 없음(게이트웨이/인그레스가 라우팅)
-# ===================================================
-
-# 프런트 Nginx 설정(ConfigMap)
+# =========================
+# 프런트 Nginx 설정 (ConfigMap)
+#  - /api 프록시 없음 (게이트웨이/인그레스가 라우팅)
+#  - /webtoon-hl 서브패스 SPA
+# =========================
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -38,37 +36,31 @@ data:
     }
 
 ---
+# =========================
+# 프런트 (React + Nginx)
+# =========================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-<<<<<<< HEAD
-  name: webtoon-hl-frontend-deployment-lee-2
-=======
   name: webtoon-hl-frontend-deployment
   namespace: webtoon-hl
->>>>>>> 09c0de12 (plz...)
 spec:
   replicas: 1
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: webtoon-hl-frontend-lee-2
+      app: webtoon-hl-frontend
   template:
     metadata:
       labels:
-        app: webtoon-hl-frontend-lee-2
+        app: webtoon-hl-frontend
     spec:
       nodeSelector:
         agentpool: userpool
       containers:
-<<<<<<< HEAD
-        - name: webtoon-hl-frontend-container-lee-2
-          image: kt16big.azurecr.io/webtoon-highlight-frontend-lee-2:${IMAGE_TAG}
-=======
         - name: webtoon-hl-frontend-container
           image: kt16big.azurecr.io/webtoon-hl-frontend:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
->>>>>>> 09c0de12 (plz...)
           ports:
             - containerPort: 80
           volumeMounts:
@@ -90,29 +82,18 @@ spec:
         - name: nginx-conf
           configMap:
             name: webtoon-hl-frontend-nginx
-
 ---
 apiVersion: v1
 kind: Service
 metadata:
-<<<<<<< HEAD
-  name: webtoon-hl-frontend-service-lee-2
-=======
   name: webtoon-hl-frontend-service
   namespace: webtoon-hl
->>>>>>> 09c0de12 (plz...)
 spec:
   type: ClusterIP
   selector:
-    app: webtoon-hl-frontend-lee-2
+    app: webtoon-hl-frontend
   ports:
-<<<<<<< HEAD
-    - protocol: TCP
-      port: 80
-      targetPort: 80
-=======
     - name: http
       protocol: TCP
       port: 3003       # 게이트웨이/인그레스가 붙는 포트
       targetPort: 80   # 컨테이너(Nginx) 포트
->>>>>>> 09c0de12 (plz...)
