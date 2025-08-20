@@ -70,7 +70,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /api
+          - path: /webtoon-api
             pathType: Prefix
             backend:
               service:
