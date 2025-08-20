@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import type { AskResponse } from './types';
 import axios from "axios";
 import './App.css'
 
@@ -32,6 +33,41 @@ const newId = () => (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now(
 function ChatLayout(){
   const [threads, setThreads] = useState<ThreadSummary[]>(() => loadThreads());
   const [activeId, setActiveId] = useState<string>(() => threads[0]?.id ?? createNewThread(setThreads));
+  // ----------------------- 인증 -----------------------
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isAuthLoading, setIsAuthLoading] = useState(true)
+
+  useEffect(() => {
+    const verifyAuth = async () => {
+      try {
+        await checkAuth()
+        setIsAuthenticated(true)
+      } catch (error) {
+        setIsAuthenticated(false)
+        // 인증 실패시 로그인 페이지로 리다이렉트
+        window.location.href = '/auths/login'
+      } finally {
+        setIsAuthLoading(false)
+      }
+    }
+    verifyAuth()
+  }, [])
+
+  if (isAuthLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div>인증 확인 중...</div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div>로그인이 필요합니다. 잠시 후 로그인 페이지로 이동합니다...</div>
+      </div>
+    )
+  }
 
   function handleDeleteThread(id:string){
     deleteThread(id, setThreads);
@@ -42,25 +78,22 @@ function ChatLayout(){
   }
   
   return (
-    <main className="main-content">
-        <Header></Header>
-        <div className="layout">
-            <Sidebar
-              threads={threads}
-              activeId={activeId}
-              onNew={() => setActiveId(createNewThread(setThreads))}
-              onSelect={(id) => setActiveId(id)}
-              onRename={(id, title) => renameThread(id, title, setThreads)}
-              onDelete={handleDeleteThread}
+    <div className="layout">
+        <Sidebar
+          threads={threads}
+          activeId={activeId}
+          onNew={() => setActiveId(createNewThread(setThreads))}
+          onSelect={(id) => setActiveId(id)}
+          onRename={(id, title) => renameThread(id, title, setThreads)}
+          onDelete={handleDeleteThread}
+        />
+        <div className="main">
+            <ChatArea
+            threadId={activeId}
+            onTitle={(title) => renameThread(activeId, title, setThreads)}
             />
-            <div className="main">
-                <ChatArea
-                threadId={activeId}
-                onTitle={(title) => renameThread(activeId, title, setThreads)}
-                />
-            </div>
         </div>
-    </main>
+    </div>
   );
 }
 
@@ -117,8 +150,7 @@ function ChatArea({ threadId, onTitle }:{ threadId:string; onTitle:(t:string)=>v
   useEffect(() => { saveMsgs(threadId, msgs); if(msgs.length===1 && msgs[0].role==='bot'){ onTitle("새 대화"); } else { const t = summarizeTitle(msgs); if(t) onTitle(t); }}, [msgs, threadId]);
   useEffect(() => { const el = listRef.current; if(!el) return; el.scrollTo({ top: el.scrollHeight, behavior: "smooth" }); }, [msgs.length, loading]);
 
-  const api = useMemo(() => axios.create({ baseURL: "/api", timeout: 20000, headers: { "Content-Type": "application/json" } }), []);
-  const USE_NETWORK = true; // 서버 준비되면 true
+  const api = useMemo(() => axios.create({ baseURL: "/question-api", timeout: 20000, headers: { "Content-Type": "application/json" } }), []);
 
   const canSend = input.trim().length > 0 && !loading;
   const push = (m: ChatMsg) => setMsgs(prev => [...prev, m]);
@@ -129,14 +161,10 @@ function ChatArea({ threadId, onTitle }:{ threadId:string; onTitle:(t:string)=>v
     if(!canSend) return;
     const q = input.trim(); setInput(""); pushUser(q); setLoading(true);
     try {
-      if (USE_NETWORK) {
-        const { data } = await api.post("/api/chatbot/ask", { question: q, session_id: threadId });
-        const answer = (data && (data.answer ?? data.result ?? data.message)) ?? "서버 응답이 비어있습니다.";
-        pushBot(String(answer));
-      } else {
-        await new Promise(r => setTimeout(r, 300));
-        pushBot(fakeAnswer(q));
-      }
+      const { data } = await api.post("/ask", { question: q, session_id: threadId });
+      const answer = (data && (data.answer ?? data.result ?? data.message)) ?? "서버 응답이 비어있습니다.";
+      pushBot(String(answer));
+
     } catch (err:any) {
       const msg = err?.response?.data?.detail || err?.message || "요청 중 오류가 발생했습니다.";
       pushBot(`요청 실패: ${msg}`);
@@ -249,85 +277,17 @@ function summarizeTitle(msgs:ChatMsg[]){
   return firstUser.length>18? firstUser.slice(0,18)+"…" : firstUser;
 }
 
-// -------------------- 스텁 응답 --------------------
-function fakeAnswer(q:string){
-  return `질문: ${q}\n\n여기는 스텁 응답입니다. 서버 연동 후에는 실제 답변이 표시됩니다.`;
+// JWT 인증 확인 함수
+export async function checkAuth(): Promise<void> {
+  try {
+    const response = await axios.get('/auths/me', {
+      withCredentials: true // 쿠키 포함
+    });
+    
+    if (response.status !== 200) {
+      throw new Error('Authentication failed');
+    }
+  } catch (error: any) {
+    throw new Error('Authentication failed: ' + (error.response?.statusText || error.message));
+  }
 }
-
-// --------------------- 헤더 -----------------------
-const Header = () => {
-
-  return (
-    <header className="header">
-      <div className="header-container">
-        {/* 로고/서비스명 */}
-        <div className="header-logo">
-          <Link to="/" className="logo-link">
-            ToonConnect
-          </Link>
-        </div>
-
-        {/* 네비게이션 메뉴 */}
-        <nav className="header-nav">
-          <ul className="nav-list">
-            <li className="nav-item">
-              <Link
-                to="/question"
-                className={`nav-link`}
-              >
-                작품 질의하기
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                to="/characters"
-                className={`nav-link`}
-              >
-                하이라이트 제작
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                to="/gallery"
-                className={`nav-link`}
-              >
-                웹툰 상세 분석
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                to="/community"
-                className={`nav-link`}
-              >
-                광고 초안 생성
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                to="/board"
-                className={`nav-link`}
-              >
-                광고 파트너십 문의
-              </Link>
-            </li>
-          </ul>
-        </nav>
-
-        {/* 우측 버튼들 */}
-        <div className="header-actions">
-            <>
-              <Link to="/register" className="header-btn signup-btn">
-                Sign Up
-              </Link>
-              <Link to="/login" className="header-btn signin-btn">
-                Sign In
-              </Link>
-              <Link to="/faq" className="header-btn faq-btn">
-                FAQ
-              </Link>
-            </>
-        </div>
-      </div>
-    </header>
-  );
-};
