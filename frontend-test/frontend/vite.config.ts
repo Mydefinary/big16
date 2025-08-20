@@ -1,19 +1,39 @@
+// import { defineConfig } from 'vite'
+// import react from '@vitejs/plugin-react'
+
+// export default defineConfig({
+//   plugins: [react()],
+//     server: {
+//     host: true, // optional: allows external access
+//     port: 3000,
+//     allowedHosts: ['all', "3000-realuew-kt16big-vw58tccrfn7.ws-us121.gitpod.io"],
+//     proxy: {
+//       "/api": {
+//         target: "http://127.0.0.1:8083",
+//         changeOrigin: true,
+//         // ★ /api 접두사를 제거해서 FastAPI의 /ask 로 전달되게 만듭니다.
+//         rewrite: (path) => path.replace(/^\/api/, ""),
+//       },
+//     },
+//   },
+// })
+// vite.config.mts
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-    server: {
+  base: '/question/',
+  server: {
     host: true, // optional: allows external access
     port: 3000,
-    allowedHosts: ['all', "3000-realuew-kt16big-vw58tccrfn7.ws-us121.gitpod.io"],
-    proxy: {
-      "/api": {
-        target: "http://127.0.0.1:8083",
-        changeOrigin: true,
-        // ★ /api 접두사를 제거해서 FastAPI의 /ask 로 전달되게 만듭니다.
-        rewrite: (path) => path.replace(/^\/api/, ""),
-      },
-    },
+    allowedHosts: ['all'],
+    // proxy: {
+    //   '/api': {
+    //     target: import.meta.env.VITE_API_BASE_URL,
+    //     changeOrigin: true,
+    //     secure: false,
+    //   },
+    // },
   },
 })
