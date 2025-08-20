@@ -6,7 +6,7 @@ RUN npm ci
 COPY . .
 
 # API는 상대경로(/api) 사용 → 기본값 유지
-ARG REACT_APP_HL_API=/api
+ARG REACT_APP_HL_API=/api/webtoon-hl
 ENV REACT_APP_HL_API=$REACT_APP_HL_API
 
 # 서브패스 배포(/webtoon-hl) — CRA면 PUBLIC_URL 사용

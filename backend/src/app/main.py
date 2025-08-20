@@ -16,4 +16,5 @@ app.add_middleware(
 def root():
     return {"message": "Webtoon Highlight API is running!"}
 
-app.include_router(highlight.router)
+# 게이트웨이 경로에 맞춰서 prefix를 "/api/webtoon-hl" 로 변경
+app.include_router(highlight.router, prefix="/api/webtoon-hl")
