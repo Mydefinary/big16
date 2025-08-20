@@ -1,3 +1,7 @@
 src/App.tsx
 types.ts
 .gitignore
+node_modules
+dist
+.vite
+.DS_Store
