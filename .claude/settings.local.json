@@ -24,7 +24,8 @@
       "Bash(npm run build:*)",
       "Bash(npm install)",
       "Bash(kubectl cp:*)",
-      "Bash(kubectl port-forward:*)"
+      "Bash(kubectl port-forward:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
