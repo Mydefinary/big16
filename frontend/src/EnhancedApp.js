@@ -86,7 +86,7 @@ const EnhancedWebtoonAnalyticsDashboard = () => {
     { id: 'overview', name: '전체 개요', icon: '📊', color: 'bg-green-600' },
     { id: 'tfidf', name: 'TF-IDF 분석', icon: '🔍', color: 'bg-purple-600', badge: isTfidfReady ? 'AI' : 'NEW' },
     { id: 'network', name: '태그 네트워크', icon: '🕸️', color: 'bg-green-600' },
-    { id: 'recommend', name: 'AI 추천', icon: '🎯', color: 'bg-blue-600', badge: isTfidfReady ? 'Enhanced' : null },
+    { id: 'recommend', name: 'AI 추천', icon: '🎯', color: 'bg-blue-600', badge: isTfidfReady ? 'Enhanced' : 'NEW' },
     { id: 'heatmap', name: '히트맵 분석', icon: '🔥', color: 'bg-orange-600' }
   ];
 
@@ -167,6 +167,10 @@ const EnhancedWebtoonAnalyticsDashboard = () => {
                 🇰🇷 한국어 NLP 지원
               </div>
             )}
+            {/* 디버깅 정보 */}
+            <div className="bg-gray-100 text-gray-600 rounded-full px-4 py-2 text-xs font-medium">
+              Debug: TF-IDF Ready = {String(isTfidfReady)}
+            </div>
           </div>
 
           <div className="flex justify-center space-x-6">
