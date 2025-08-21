@@ -23,7 +23,8 @@
       "Bash(kubectl delete:*)",
       "Bash(npm run build:*)",
       "Bash(npm install)",
-      "Bash(kubectl cp:*)"
+      "Bash(kubectl cp:*)",
+      "Bash(kubectl port-forward:*)"
     ],
     "deny": [],
     "ask": []

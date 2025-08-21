@@ -1,0 +1,28 @@
+01 프로젝트 환경 이해
+
+안녕하세요! Azure AKS 환경에서 lee namespace의 webtoon-dashboard 서비스를 담당하고 계시는군요.
+
+현재 상황을 정리하면:
+
+- Default namespace: http://20.249.154.2 (본인 관리)
+- Lee namespace: http://20.249.113.18:9000/ (다른 개발자 관리, kubectl 수정 금지)  
+- 현재 작업 폴더: webtoon-dashboard-lee (lee namespace의 webtoon-dashboard 서비스)
+
+Lee namespace 서비스 구성:
+- gateway (라우팅, External IP)
+- user-backend (회원가입, Azure DB)
+- auth-backend (JWT 인증)
+- auth-frontend (메인/로그인/회원가입 화면)
+- board-backend/frontend (게시판)
+- chatbot (질의응답)
+- goods-gen-backend/frontend (굿즈 이미지 생성)
+- ppl-gen-backend/frontend (PPL 이미지 생성)
+- webtoon-dashboard-backend/frontend (웹툰 현황)
+- webtoon-hl-backend/frontend (웹툰 하이라이트)
+- zookeeper (Kafka 통신)
+
+주요 특징:
+- Ingress 미사용, Gateway 서비스로 External IP 라우팅
+- Secret으로 API 키 및 Azure DB 연결 정보 관리
+
+어떤 작업을 도와드릴까요?
