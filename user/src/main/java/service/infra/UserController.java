@@ -43,6 +43,7 @@ public class UserController {
         user.setEmail(request.getEmail());
         user.setNickname(request.getNickname());
         user.setStatus("TRY_TO_REGISTERED"); // 가입 후 이메일 인증 대기 상태
+        user.setRole("user");
         user.setCreatedAt(new Date());
         userRepository.save(user);
 

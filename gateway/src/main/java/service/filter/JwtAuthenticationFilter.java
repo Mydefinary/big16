@@ -22,6 +22,15 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
         super(Config.class);
     }
 
+    private boolean isProtectedServicePath(String path) {
+        // 🔒 보호해야 하는 서브 프론트엔드 서비스들
+        return path.startsWith("/webtoon/") ||          // 웹툰 대시보드
+               path.startsWith("/webtoon-hl/") ||       // 하이라이트 제작
+               path.startsWith("/goods-gen/") ||        // 굿즈 생성기
+               path.startsWith("/ppl-gen/") ||          // 광고(PPL) 생성기
+               path.startsWith("/question/");           // AI 챗봇
+    }
+
     private boolean isPublicPath(String path) {
         // 루트 경로
         if (path.equals("/") || path.isEmpty()) {
@@ -40,26 +49,40 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             return true;
         }
         
-        // Vite 개발 서버 전용 경로들 🎯
-        if (path.startsWith("/@") ||                    // /@react-refresh, /@vite/client
-            path.startsWith("/src/") ||                 // /src/main.jsx 등 소스 파일
-            path.startsWith("/node_modules/") ||        // node_modules 파일들
-            path.contains("vite")) {                   // vite 관련 모든 파일
+        // 🆕 자유게시판은 공개
+        if (path.startsWith("/board/")) {
             return true;
         }
         
-        // 정적 파일 (확장자 기반)
+        // Vite 개발 서버 전용 경로들
+        if (path.startsWith("/@") ||
+            path.startsWith("/src/") ||
+            path.startsWith("/node_modules/") ||
+            path.contains("vite")) {
+            return true;
+        }
+        
+        // 🎯 중요한 수정: 보호된 서비스의 정적 파일도 인증 체크
+        if (isProtectedServicePath(path)) {
+            System.out.println("🔒 Protected service path detected: " + path + " - JWT required");
+            return false; // 인증 필요
+        }
+        
+        // 메인 프론트엔드의 정적 파일만 공개 (확장자 기반)
         if (path.contains(".")) {
+            System.out.println("📁 Static file in main frontend: " + path + " - public access");
             return true;
         }
         
-        // React 라우트
+        // React 라우트 (메인 프론트엔드)
         if (path.equals("/login") ||
             path.equals("/register") ||
             path.equals("/email-verification") ||
             path.equals("/find-id") ||
             path.equals("/find-password") ||
-            path.equals("/main")) {
+            path.equals("/main") ||
+            path.equals("/notice-board") ||  // 공지사항
+            path.equals("/faq")) {           // FAQ
             return true;
         }
         
@@ -85,7 +108,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         
         // JSON 응답으로 에러 메시지 제공
-        String body = "{\"error\":\"Unauthorized\",\"message\":\"유효하지 않은 토큰입니다.\"}";
+        String body = "{\"error\":\"Unauthorized\",\"message\":\"로그인이 필요한 서비스입니다.\"}";
         DataBuffer buffer = response.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
         response.getHeaders().add("Content-Type", "application/json");
         
@@ -108,6 +131,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             System.out.println("📍 Request Path: " + path);
             System.out.println("🔧 Request Method: " + method);
             System.out.println("🔍 Is Public Path: " + isPublicPath(path));
+            System.out.println("🔒 Is Protected Service: " + isProtectedServicePath(path));
             
             if (isPublicPath(path)) {
                 System.out.println("✅ Public path - bypassing JWT filter");

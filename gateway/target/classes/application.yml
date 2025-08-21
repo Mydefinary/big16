@@ -136,6 +136,8 @@ spring:
           predicates:
             - Path=/webtoon/**
           # 정적 파일이므로 JWT 필터 없음
+          filters:
+            - name: JwtAuthenticationFilter
 
         # 🆕 웹툰 하이라이트 제작 서비스 추가 (Docker 환경)
         - id: webtoon-hl-backend
@@ -151,6 +153,8 @@ spring:
           predicates:
             - Path=/webtoon-hl/**
           # 정적 파일이므로 JWT 필터 없음
+          filters:
+            - name: JwtAuthenticationFilter
 
         # 🆕 PPL 생성기 서비스 추가
         - id: ppl-gen-backend
@@ -166,6 +170,8 @@ spring:
           predicates:
             - Path=/ppl-gen/**
           # 정적 파일이므로 JWT 필터 없음
+          filters:
+            - name: JwtAuthenticationFilter
 
         # 🆕 굿즈 생성기 서비스 추가  
         - id: goods-gen-backend
@@ -181,25 +187,29 @@ spring:
           predicates:
             - Path=/goods-gen/**
           # 정적 파일이므로 JWT 필터 없음
+          filters:
+            - name: JwtAuthenticationFilter
 
         # 🆕 챗봇(질문) 서비스 추가 (Docker/Kubernetes 환경)        
         - id: question-backend
           uri: http://question-backend-service-lee-2:8083  # -lee-2 추가
           predicates:
             - Path=/question-api/**
-      
+          filters:
+            - name: JwtAuthenticationFilter
+
         - id: question-frontend
           uri: http://question-frontend-service-lee-2:80   # -lee-2 추가
           predicates:
             - Path=/question/**
+          filters:
+          - name: JwtAuthenticationFilter
 
           # 🆕 게시판 서비스 추가 (Docker/Kubernetes 환경)
         - id: board-backend
           uri: http://board-backend-service-lee:8082
           predicates:
             - Path=/board/api/**
-          filters:
-            - name: JwtAuthenticationFilter
 
         - id: board-frontend
           uri: http://board-frontend-service-lee:80
