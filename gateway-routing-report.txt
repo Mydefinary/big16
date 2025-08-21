@@ -1,0 +1,26 @@
+06 Gateway 라우팅 설정 확인 결과
+
+## 현재 상황 분석
+1. Gateway 로그에서 `/webtoon-api` 경로로 들어오는 요청을 JWT 검증 처리하고 있음
+2. 하지만 실제 webtoon-dashboard-backend-service로 프록시되지 않아 404 에러 발생
+3. 다른 서비스들과 비교:
+   - ppl-gen: 8000 포트
+   - goods-gen: 8001 포트  
+   - webtoon-dashboard: 8002 포트 (서비스) -> 8000 포트 (컨테이너)
+   - board: 8082 포트
+   - webtoon-hl: 8003 포트
+
+## 수정 완료된 사항
+1. ✅ 백엔드 containerPort: 8000 (실제 uvicorn이 실행되는 포트에 맞춤)
+2. ✅ 서비스 targetPort: 8000 (컨테이너 포트에 맞춤)
+3. ✅ 프론트엔드 API URL: Gateway를 통하도록 수정
+
+## 남은 문제
+❌ Gateway에 webtoon-dashboard 라우팅 설정이 누락됨
+
+Gateway 설정에 다음 라우팅이 필요:
+- Frontend: `/webtoon-dashboard/**` -> webtoon-dashboard-frontend-service:80
+- Backend: `/webtoon-api/**` -> webtoon-dashboard-backend-service:8002
+
+## 요청사항
+Gateway 개발자에게 webtoon-dashboard 라우팅 추가 요청 필요

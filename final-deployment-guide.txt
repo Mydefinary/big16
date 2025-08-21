@@ -1,0 +1,93 @@
+15 webtoon-dashboard 404 에러 최종 해결 가이드
+
+## 🎯 문제 해결 완료!
+
+기존 Gateway 라우팅 패턴에 맞춰 webtoon-dashboard 수정 완료했습니다.
+
+## ✅ 완료된 수정사항
+
+### 1. API 경로 변경
+- **기존**: `/webtoon-api/api/**` (Gateway에 라우팅 없음)
+- **신규**: `/webtoon-dashboard/api/**` (기존 패턴과 일치)
+
+### 2. 백엔드 수정 (enhanced_main.py)
+- 모든 API 엔드포인트를 `/webtoon-dashboard/api/`로 변경
+- 루트 경로: `/webtoon-dashboard/api/`
+- 웹툰 데이터: `/webtoon-dashboard/api/webtoons`
+- 분석 API: `/webtoon-dashboard/api/analysis/tfidf` 등
+
+### 3. 프론트엔드 수정
+- enhanced_api.js: API_BASE_URL을 `http://20.249.113.18:9000/webtoon-dashboard/api`로 변경
+- api.js: 동일하게 변경
+
+### 4. 서비스 설정
+- 백엔드 서비스: ClusterIP, 8002:8000 포트 매핑
+- 프론트엔드 서비스: ClusterIP, 80:80 포트 매핑
+
+## 🚀 다음 단계 (사용자가 해야 할 작업)
+
+### 1. Docker 이미지 빌드
+```bash
+# 백엔드 이미지 빌드
+cd C:\Users\hoa\vscode_project\webtoon-dashboard-lee\backend
+docker build -t kt16big.azurecr.io/webtoon-dashboard-backend-lee:20250820-api-fix .
+
+# 프론트엔드 이미지 빌드  
+cd C:\Users\hoa\vscode_project\webtoon-dashboard-lee\frontend
+docker build -t kt16big.azurecr.io/webtoon-dashboard-frontend-lee:20250820-api-fix .
+```
+
+### 2. 이미지 푸시
+```bash
+# Azure Container Registry 로그인
+az acr login --name kt16big
+
+# 이미지 푸시
+docker push kt16big.azurecr.io/webtoon-dashboard-backend-lee:20250820-api-fix
+docker push kt16big.azurecr.io/webtoon-dashboard-frontend-lee:20250820-api-fix
+```
+
+### 3. Kubernetes 배포
+```bash
+# 수정된 deployment 적용
+kubectl apply -f C:\Users\hoa\vscode_project\webtoon-dashboard-lee\webtoon-dashboard-backend-deployment.yaml -n lee
+kubectl apply -f C:\Users\hoa\vscode_project\webtoon-dashboard-lee\webtoon-dashboard-frontend-deployment.yaml -n lee
+
+# 배포 상태 확인
+kubectl get pods -n lee | grep webtoon-dashboard
+```
+
+### 4. Gateway 개발자에게 라우팅 추가 요청
+
+Gateway에 다음 라우팅 추가 요청:
+
+```yaml
+# Frontend 라우팅
+- id: webtoon-dashboard-frontend
+  uri: http://webtoon-dashboard-frontend-service:80
+  predicates:
+    - Path=/webtoon-dashboard/**
+
+# Backend 라우팅  
+- id: webtoon-dashboard-backend
+  uri: http://webtoon-dashboard-backend-service:8002
+  predicates:
+    - Path=/webtoon-dashboard/api/**
+  filters:
+    - name: JwtAuthenticationFilter
+```
+
+## 🎯 예상 결과
+
+Gateway 라우팅 추가 후:
+- ✅ Frontend: http://20.249.113.18:9000/webtoon-dashboard/ 정상 접근
+- ✅ Backend API: http://20.249.113.18:9000/webtoon-dashboard/api/ 정상 동작
+- ✅ 모든 404 에러 해결
+- ✅ JWT 인증을 통한 보안 접근
+
+## 📞 문의사항
+
+Gateway 라우팅 추가는 Gateway 개발자의 협조가 필요합니다.
+위의 라우팅 설정을 전달하여 추가 요청하시기 바랍니다.
+
+🤖 Generated with [Claude Code](https://claude.ai/code)

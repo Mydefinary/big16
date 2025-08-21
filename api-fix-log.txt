@@ -1,0 +1,41 @@
+04 백엔드 API 경로 오류 수정 완료
+
+## 🔍 문제 발견
+- 백엔드 로그에서 `/webtoon-api/api/webtoons`는 200 OK
+- 다른 모든 API는 404 오류 발생
+- 원인: API 경로에 `/api`가 중복으로 포함됨
+
+## ✅ 수정된 API 엔드포인트들
+
+### GET 엔드포인트 수정
+- `/webtoon-api/api/api/analysis/tags` → `/webtoon-api/api/analysis/tags`
+- `/webtoon-api/api/api/stats` → `/webtoon-api/api/stats`
+- `/webtoon-api/api/api/analysis/heatmap` → `/webtoon-api/api/analysis/heatmap`
+- `/webtoon-api/api/api/analysis/network` → `/webtoon-api/api/analysis/network`
+- `/webtoon-api/api/api/analysis/similarity/{title1}/{title2}` → `/webtoon-api/api/analysis/similarity/{title1}/{title2}`
+- `/webtoon-api/api/api/analysis/related-tags/{tag}` → `/webtoon-api/api/analysis/related-tags/{tag}`
+- `/webtoon-api/api/api/analysis/tag-connectivity` → `/webtoon-api/api/analysis/tag-connectivity`
+- `/webtoon-api/api/api/analysis/insights` → `/webtoon-api/api/analysis/insights`
+
+### POST 엔드포인트 수정
+- `/webtoon-api/api/api/analysis/summary-keywords` → `/webtoon-api/api/analysis/summary-keywords`
+- `/webtoon-api/api/api/recommendations/enhanced` → `/webtoon-api/api/recommendations/enhanced`
+- 추가: `/webtoon-api/api/recommendations` (기본 추천 API)
+
+### 중복 엔드포인트 제거
+- 두 번째 네트워크 분석 엔드포인트 제거
+
+## 🚀 배포 완료
+- **새 이미지**: `kt16big.azurecr.io/webtoon-dashboard-backend-lee:20250820-api-fix`
+- **배포 상태**: Successfully rolled out
+- **새 Pod**: webtoon-dashboard-backend-deployment-8f9d499fc-pgbhq
+
+## 📋 테스트 필요
+브라우저에서 http://20.249.113.18:9000/webtoon/ 접속 후:
+1. 로그인 (test19 / !q2w3e4r)
+2. 콘솔 로그 확인
+3. 모든 API 호출이 200 OK 응답하는지 확인
+
+예상 결과: 모든 404 오류 해결!
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
