@@ -74,7 +74,7 @@ class WebtoonAPI {
         params.append('selected_tags', selectedTags.join(','));
       }
 
-      const url = `/analysis/network?${params}`;
+      const url = `/analysis/tag-connectivity`;
       console.log('네트워크 API 요청 URL:', `${this.baseURL}${url}`);
       const data = await this.request(url);
       console.log('네트워크 API 응답:', data);

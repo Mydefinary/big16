@@ -1,0 +1,14 @@
+# 프론트엔드 전용 Dockerfile
+FROM nginx:alpine
+
+# 빌드된 React 앱을 nginx html 디렉토리로 복사
+COPY frontend/build /usr/share/nginx/html
+
+# nginx 설정 파일 복사 (React Router 지원)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# 포트 80 노출
+EXPOSE 80
+
+# nginx 실행
+CMD ["nginx", "-g", "daemon off;"]

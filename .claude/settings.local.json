@@ -20,7 +20,10 @@
       "Bash(mkdir:*)",
       "Bash(kubectl top:*)",
       "Bash(time curl:*)",
-      "Bash(kubectl delete:*)"
+      "Bash(kubectl delete:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install)",
+      "Bash(kubectl cp:*)"
     ],
     "deny": [],
     "ask": []

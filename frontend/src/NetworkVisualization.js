@@ -122,6 +122,56 @@ const NetworkVisualization = ({
       };
     }
     
+    // tag-connectivity API 형식 처리
+    if (analysis && analysis.data && analysis.data.top_connected_tags) {
+      console.log('NetworkVisualization - tag-connectivity 형식 데이터 사용');
+      const topTags = analysis.data.top_connected_tags.slice(0, 10); // 상위 10개 태그만 사용
+      
+      // 노드 생성
+      const allTags = new Set();
+      topTags.forEach(tagData => {
+        allTags.add(tagData.tag);
+        tagData.connected_tags.slice(0, 5).forEach(conn => { // 각 태그당 상위 5개 연결만
+          allTags.add(conn.connected_tag);
+        });
+      });
+      
+      const nodes = Array.from(allTags).map(tag => ({
+        id: tag,
+        count: topTags.find(t => t.tag === tag)?.connection_count || 10,
+        size: Math.min(Math.max((topTags.find(t => t.tag === tag)?.connection_count || 10) / 10, 15), 35),
+        category: getKoreanTagCategory(tag),
+        selected: selectedTags.includes(tag)
+      }));
+      
+      // 링크 생성
+      const links = [];
+      topTags.forEach(tagData => {
+        tagData.connected_tags.slice(0, 5).forEach(conn => {
+          if (allTags.has(conn.connected_tag) && conn.correlation > 0.3) { // 최소 상관관계 0.3 이상
+            links.push({
+              source: tagData.tag,
+              target: conn.connected_tag,
+              value: conn.correlation,
+              weight: Math.max(1, conn.correlation * 3)
+            });
+          }
+        });
+      });
+      
+      return {
+        nodes: nodes,
+        links: links,
+        summary: {
+          total_nodes: nodes.length,
+          total_links: links.length,
+          selected_tags: selectedTags,
+          max_correlation: Math.max(...links.map(l => l.value), 0),
+          avg_correlation: links.length > 0 ? links.reduce((sum, l) => sum + l.value, 0) / links.length : 0
+        }
+      };
+    }
+    
     console.log('NetworkVisualization - 유효한 데이터가 없음');
     return null;
   };

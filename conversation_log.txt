@@ -198,3 +198,74 @@ HPA (Horizontal Pod Autoscaler) 구현:
 - ResourceQuota는 namespace 전체에 영향을 미침
 - webtoon-dashboard만을 위한 제한이 다른 서비스까지 제약
 - HPA만으로도 충분한 확장성 제공 가능
+
+10 웹툰 대시보드 404 에러 문제 분석 완료
+
+# 문제 확인
+- 프론트엔드에서 /api/analysis/network 엔드포인트 호출
+- 백엔드에서 해당 엔드포인트 미구현 (404 Not Found)
+- 태그 연관성 네트워크 비주얼라이제이션 실패
+
+# 원인 분석
+- API 문서에는 network_analysis 엔드포인트 명시
+- 실제 백엔드 구현에서는 해당 경로 누락
+- 대신 /api/analysis/tag-connectivity 엔드포인트는 정상 작동
+
+# 해결 방안
+1. 프론트엔드 수정: /api/analysis/tag-connectivity 사용 (권장)
+2. 백엔드 수정: /api/analysis/network 엔드포인트 신규 구현
+
+# 현재 대안 확인
+- tag-connectivity API는 정상 작동
+- 이미 네트워크 형태의 노드/링크 데이터 제공
+- 프론트엔드 API 호출 경로만 변경하면 즉시 해결 가능
+
+11 프론트엔드 API 수정 및 배포 완료
+
+# 수행 작업
+1. 프론트엔드 소스코드에서 API 호출 경로 찾기
+   - frontend/src/services/api.js (라인 77)
+   - frontend/src/services/enhanced_api.js (라인 74)
+
+2. API 엔드포인트 변경
+   - 기존: /api/analysis/network?${params}
+   - 변경: /api/analysis/tag-connectivity
+
+3. Docker 이미지 빌드 및 배포
+   - 새 이미지: kt16big.azurecr.io/webtoon-dashboard-frontend-lee:20250821-api-fix
+   - Azure Container Registry 푸시 완료
+   - Kubernetes deployment 업데이트 및 배포 완료
+
+# 배포 결과
+✅ 새로운 프론트엔드 팟 정상 실행 중
+✅ Nginx 웹서버 정상 시작
+✅ 404 에러 해결로 태그 연관성 네트워크 비주얼라이제이션 정상화 예상
+
+# 접속 정보
+URL: http://20.249.113.18:9000/webtoon/
+네트워크 분석 기능이 이제 정상 작동해야 함
+
+12 tag-connectivity 데이터 매핑 로직 수정 완료
+
+# 근본 문제 파악
+- NetworkVisualization이 data.nodes/links 구조 기대
+- tag-connectivity API는 data.top_connected_tags 구조 반환
+- 데이터 구조 불일치로 "유효한 데이터가 없음" 발생
+
+# 해결 방안 구현
+NetworkVisualization.js에 tag-connectivity 데이터 처리 로직 추가:
+
+1. tag-connectivity 형식 감지 및 처리
+2. 상위 10개 태그 + 각 태그당 상위 5개 연결 사용
+3. 노드 생성: 태그별 connection_count 기반 크기 설정
+4. 링크 생성: correlation 0.3 이상만 표시
+5. D3.js 호환 nodes/links 구조로 변환
+
+# 최종 배포
+- 이미지: kt16big.azurecr.io/webtoon-dashboard-frontend-lee:20250821-connectivity-fix
+- 새로운 프론트엔드 팟 정상 실행 중
+
+# 예상 결과
+✅ 태그 연관성 네트워크 비주얼라이제이션 정상 작동
+✅ "현대", "시대물" 등 주요 태그들의 연결 관계 표시
+✅ 상관관계 기반 링크 강도 및 노드 크기 조정
