@@ -12,6 +12,7 @@ import GoodsGeneratorEmbed from './components/GoodsGeneratorEmbed';
 import WebtoonHighlightCreator from './components/WebtoonHighlightCreator';
 import ChatbotPage from './components/ChatbotPage';
 import Board from './components/Board';
+import ScrollToTop from './components/ScrollToTop'; // ScrollToTop 컴포넌트 추가
 import Main from './pages/Main';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -28,6 +29,7 @@ function App() {
     <AuthProvider>
       <Router>
         <div className="App">
+          <ScrollToTop /> {/* Router 안에 ScrollToTop 컴포넌트 추가 */}
           <Header />
           <main className="main-content">
             <Routes>

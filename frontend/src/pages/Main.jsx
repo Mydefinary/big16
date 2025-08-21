@@ -16,7 +16,6 @@ const Main = () => {
     heroContent: {
       textAlign: 'center',
       zIndex: 1,
-      maxWidth: '800px',
       padding: '0 20px',
       animation: 'fadeInUp 1s ease-out'
     },
