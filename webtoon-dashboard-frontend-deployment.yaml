@@ -20,7 +20,7 @@ spec:
         agentpool: userpool
       containers:
         - name: webtoon-dashboard-frontend-container
-          image: kt16big.azurecr.io/webtoon-dashboard-frontend-lee:20250821-stability-fix
+          image: kt16big.azurecr.io/webtoon-dashboard-frontend-lee:20250821-click-debug
           imagePullPolicy: Always
           ports:
             - containerPort: 80

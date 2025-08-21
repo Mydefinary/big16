@@ -213,7 +213,11 @@ const NetworkVisualization = ({
   }, [analysisData, selectedTags]);
 
   const handleTagSelect = useCallback((tag) => {
-    console.log('NetworkVisualization - 태그 클릭됨:', tag);
+    console.log('NetworkVisualization - 태그 클릭됨!', {
+      clickedTag: tag,
+      currentSelectedTags: selectedTags,
+      onTagSelectExists: !!onTagSelect
+    });
     const newSelectedTags = selectedTags.includes(tag)
       ? selectedTags.filter(t => t !== tag)
       : [...selectedTags, tag];
@@ -226,7 +230,7 @@ const NetworkVisualization = ({
       console.log('NetworkVisualization - onTagSelect 콜백 호출');
       onTagSelect(tag, newSelectedTags);
     } else {
-      console.log('NetworkVisualization - onTagSelect 콜백이 없음');
+      console.warn('NetworkVisualization - onTagSelect 콜백이 없음! 노드 클릭이 작동하지 않습니다.');
     }
   }, [selectedTags, setSelectedTags, onTagSelect]);
 
@@ -320,6 +324,7 @@ const NetworkVisualization = ({
       .enter().append("g")
       .attr("class", "node-group")
       .style("cursor", "pointer")
+      .style("pointer-events", "all")  // 이벤트 수신 확실히 보장
       .call(d3.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
@@ -343,7 +348,12 @@ const NetworkVisualization = ({
       .attr("stroke-width", d => selectedTags.includes(d.id) ? 4 : 2)
       .on("click", (event, d) => {
         event.stopPropagation();
-        console.log('NetworkVisualization - d3 노드 클릭 이벤트:', d.id);
+        console.log('NetworkVisualization - d3 노드 클릭 이벤트 발생!', {
+          nodeId: d.id,
+          nodeData: d,
+          event: event,
+          currentSelectedTags: selectedTags
+        });
         handleTagSelect(d.id);
       })
       .on("mouseover", function(event, d) {

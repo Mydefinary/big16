@@ -13,6 +13,7 @@ class WebtoonAPI {
         'Content-Type': 'application/json',
         ...options.headers,
       },
+      credentials: 'include', // 쿠키 포함하여 요청
       ...options,
     };
 
