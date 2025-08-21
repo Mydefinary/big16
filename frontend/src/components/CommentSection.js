@@ -12,6 +12,15 @@ function CommentSection({ postId }) {
   const [content, setContent] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editContent, setEditContent] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+      useEffect(() => {
+        axios.get("http://20.249.113.18:9000/auths/me", { withCredentials: true })
+          .then(res => setCurrentUser(res.data))
+          .catch(err => console.error("사용자 정보 불러오기 실패:", err));
+      }, []);
+const canEdit = (c) => currentUser && (currentUser.userId === c.author);
+
+  
 
   useEffect(() => {
     commentApi.get(`/comments/${postId}`)
@@ -21,7 +30,7 @@ function CommentSection({ postId }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    commentApi.post(`/comments/${postId}`, { author, content })
+    commentApi.post(`/comments/${postId}`, {  author: currentUser.userId.toString(), content })
       .then(res => {
         setComments(prev => [...prev, res.data]);
         setAuthor('');
@@ -79,10 +88,11 @@ function CommentSection({ postId }) {
             ) : (
               <>
                 <p className="mb-2">{c.content}</p>
+                {canEdit(c) && (
                 <div className="text-end">
                   <button className="btn btn-sm btn-outline-primary me-2" onClick={() => handleEdit(c.id, c.content)}>수정</button>
                   <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(c.id)}>삭제</button>
-                </div>
+                </div>)}
               </>
             )}
           </div>
@@ -90,16 +100,6 @@ function CommentSection({ postId }) {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="mb-2">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="작성자 이름"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            required
-          />
-        </div>
         <div className="mb-2">
           <textarea
             className="form-control"

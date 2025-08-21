@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { fetchPost, deletePost, downloadAttachment } from '../api';
 import CommentSection from './CommentSection';
+import axios from 'axios';
 
 export default function PostDetail() {
   const { id } = useParams();
@@ -9,6 +10,14 @@ export default function PostDetail() {
   const [post, setPost] = useState(null);
   const [error, setError] = useState(null);
   const [downloading, setDownloading] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+    useEffect(() => {
+      axios.get("http://20.249.113.18:9000/auths/me", { withCredentials: true })
+        .then(res => setCurrentUser(res.data))
+        .catch(err => console.error("사용자 정보 불러오기 실패:", err));
+    }, []);
+
+const canEdit = currentUser && post && (currentUser.userId === post.author);
 
   useEffect(() => {
     fetchPost(id)
@@ -73,8 +82,13 @@ export default function PostDetail() {
         )}
 
         <div className="d-flex justify-content-end gap-2">
+
+          {canEdit && (
+          <>
           <Link to={`/posts/${id}/edit`} className="btn btn-outline-secondary">✏️ 수정</Link>
-          <button className="btn btn-outline-danger" onClick={handleDelete}>🗑️ 삭제</button>
+          <button className="btn btn-outline-danger" onClick={handleDelete}>🗑️ 삭제</button> 
+          </>
+          )}
           <Link to={`/partnership`} className="btn btn-outline-secondary">⬅️ 목록</Link>
           {/* <button className="btn btn-light" onClick={() => navigate(-1)}>⬅️ 뒤로</button> */}
         </div>
@@ -83,7 +97,7 @@ export default function PostDetail() {
 
 
       </div>
-      <CommentSection postId={post.id} />
+      <CommentSection postId={post.id} currentUser={currentUser} />
       
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchPost, createPost, updatePost } from '../api';
+import axios from 'axios';
 
 export default function PostForm({ isEdit }) {
   const { id } = useParams();
@@ -12,6 +13,13 @@ export default function PostForm({ isEdit }) {
   const [removeAttachment, setRemoveAttachment] = useState(false);
   const [existingAttachmentName, setExistingAttachmentName] = useState('');
   const [error, setError] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    axios.get("http://20.249.113.18:9000/auths/me", { withCredentials: true })
+      .then(res => setCurrentUser(res.data))
+      .catch(err => console.error("사용자 정보 불러오기 실패:", err));
+  }, []);
 
   useEffect(() => {
     if (isEdit) {
@@ -31,13 +39,13 @@ export default function PostForm({ isEdit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title.trim() || !author.trim() || !content.trim()) {
-      alert('제목, 작성자, 내용을 모두 입력하세요.');
+    if (!title.trim() || !content.trim()) {
+      alert('제목, 내용을 모두 입력하세요.');
       return;
     }
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('author', author);
+    formData.append('author', currentUser.userId.toString());
     formData.append('content', content);
     if (file) formData.append('file', file);
     if (isEdit) formData.append('removeAttachment', removeAttachment);
@@ -102,7 +110,7 @@ export default function PostForm({ isEdit }) {
             />
           </div>
 
-          <div className="mb-3">
+          {/* <div className="mb-3">
             <label className="form-label fw-semibold">작성자</label>
             <input
               type="text"
@@ -112,7 +120,7 @@ export default function PostForm({ isEdit }) {
               placeholder="이름을 입력하세요"
               required
             />
-          </div>
+          </div> */}
 
           <div className="mb-3">
             <label className="form-label fw-semibold">내용</label>
