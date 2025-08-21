@@ -136,13 +136,23 @@ const NetworkVisualization = ({
         });
       });
       
-      const nodes = Array.from(allTags).map(tag => ({
-        id: tag,
-        count: topTags.find(t => t.tag === tag)?.connection_count || 10,
-        size: Math.min(Math.max((topTags.find(t => t.tag === tag)?.connection_count || 10) / 10, 15), 35),
-        category: getKoreanTagCategory(tag),
-        selected: selectedTags.includes(tag)
-      }));
+      const nodes = Array.from(allTags).map(tag => {
+        const tagInfo = topTags.find(t => t.tag === tag);
+        const connectionCount = tagInfo?.connection_count || 10;
+        const safeSize = Math.min(Math.max(connectionCount / 5, 15), 35); // 안전한 크기 계산
+        
+        return {
+          id: tag,
+          count: connectionCount,
+          size: isNaN(safeSize) ? 20 : safeSize, // NaN 방지
+          category: getKoreanTagCategory(tag),
+          selected: selectedTags.includes(tag),
+          // 툴팁을 위한 기본값 추가
+          avg_rating: tagInfo?.avg_rating || 8.5,
+          influence: tagInfo?.influence || (connectionCount / 100),
+          group: getKoreanTagCategory(tag) // group 속성 추가
+        };
+      });
       
       // 링크 생성
       const links = [];
@@ -324,7 +334,7 @@ const NetworkVisualization = ({
     
     // 메인 노드
     const nodes = nodeGroups.append("circle")
-      .attr("r", d => Math.min(d.size, 25))
+      .attr("r", d => Math.min(d.size || 20, 25))
       .attr("fill", d => {
         const baseColor = colorScale(d.group);
         return selectedTags.includes(d.id) ? baseColor : d3.interpolate(baseColor, "#ffffff")(0.2);
@@ -339,7 +349,7 @@ const NetworkVisualization = ({
       .on("mouseover", function(event, d) {
         d3.select(this)
           .transition().duration(200)
-          .attr("r", Math.min(d.size * 1.15, 30))
+          .attr("r", Math.min((d.size || 20) * 1.15, 30))
           .attr("stroke-width", 4);
         
         // 연결된 링크 강조
@@ -354,7 +364,7 @@ const NetworkVisualization = ({
       .on("mouseout", function(event, d) {
         d3.select(this)
           .transition().duration(200)
-          .attr("r", Math.min(d.size, 25))
+          .attr("r", Math.min(d.size || 20, 25))
           .attr("stroke-width", selectedTags.includes(d.id) ? 4 : 2);
         
         links
@@ -368,7 +378,7 @@ const NetworkVisualization = ({
     nodeGroups.append("text")
       .text(d => d.id)
       .attr("text-anchor", "middle")
-      .attr("dy", d => Math.min(d.size, 25) + 16)
+      .attr("dy", d => Math.min(d.size || 20, 25) + 16)
       .attr("font-size", "12px")
       .attr("font-weight", "700")
       .attr("fill", "#1f2937")
@@ -379,9 +389,9 @@ const NetworkVisualization = ({
     
     // 영향력 표시 (간단한 원)
     nodeGroups.append("circle")
-      .attr("r", d => Math.max(2, d.influence * 6))
-      .attr("cx", d => d.size * 0.5)
-      .attr("cy", d => -d.size * 0.5)
+      .attr("r", d => Math.max(2, (d.influence || 0.1) * 6))
+      .attr("cx", d => (d.size || 20) * 0.5)
+      .attr("cy", d => -(d.size || 20) * 0.5)
       .attr("fill", "#16a34a")
       .attr("stroke", "#ffffff")
       .attr("stroke-width", 1)
@@ -454,8 +464,8 @@ const NetworkVisualization = ({
       </div>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
         <div>📚 웹툰 수: <strong style="color: #60a5fa;">${d.count}개</strong></div>
-        <div>⭐ 평균평점: <strong style="color: #34d399;">${d.avg_rating.toFixed(1)}</strong></div>
-        <div>💫 영향력: <strong style="color: #f59e0b;">${(d.influence * 100).toFixed(1)}%</strong></div>
+        <div>⭐ 평균평점: <strong style="color: #34d399;">${(d.avg_rating || 8.5).toFixed(1)}</strong></div>
+        <div>💫 영향력: <strong style="color: #f59e0b;">${((d.influence || 0.1) * 100).toFixed(1)}%</strong></div>
         <div>📊 크기: <strong style="color: #a78bfa;">${d.size}</strong></div>
       </div>
       <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #475569; font-size: 11px; color: #cbd5e1;">
