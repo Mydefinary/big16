@@ -6,7 +6,7 @@ kind: Deployment
 metadata:
   name: webtoon-dashboard-backend-deployment
 spec:
-  replicas: 1
+  replicas: 3
   revisionHistoryLimit: 2
   selector:
     matchLabels:
@@ -31,11 +31,11 @@ spec:
               value: "*"
           resources:
             requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 500m
+              cpu: 400m
               memory: 512Mi
+            limits:
+              cpu: 700m
+              memory: 1200Mi
 ---
 # ===================================================
 # 19. 웹툰 대시보드 - 백엔드 서비스 (ClusterIP)

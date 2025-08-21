@@ -1,0 +1,58 @@
+# ===================================================
+# 웹툰 대시보드 - Horizontal Pod Autoscaler (HPA)
+# 대량 접속 시 자동 스케일링
+# ===================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: webtoon-dashboard-backend-hpa
+  namespace: lee
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: webtoon-dashboard-backend-deployment
+  minReplicas: 3
+  maxReplicas: 8
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+---
+# ===================================================
+# Resource Quota - 리소스 사용량 제한
+# ===================================================
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: webtoon-dashboard-quota
+  namespace: lee
+spec:
+  hard:
+    requests.cpu: "10"
+    requests.memory: 8Gi
+    limits.cpu: "15"
+    limits.memory: 12Gi
+    pods: "20"

@@ -17,7 +17,10 @@
       "Bash(kubectl delete pod:*)",
       "Bash(kubectl set image:*)",
       "Bash(git add:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(kubectl top:*)",
+      "Bash(time curl:*)",
+      "Bash(kubectl delete:*)"
     ],
     "deny": [],
     "ask": []
