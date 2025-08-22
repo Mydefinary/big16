@@ -1,8 +1,8 @@
-/* Dashboard Main Styles - App.css에 추가해주세요 */
+/* Dashboard Main Styles - Complete Version */
 
 .dashboard-main-container {
   min-height: calc(100vh - 64px);
-  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  background: #ffffff;
   padding: 40px 20px;
   display: flex;
   flex-direction: column;
@@ -11,7 +11,7 @@
   margin: 0 auto;
 }
 
-/* Welcome Section */
+/* User Welcome Section */
 .welcome-section {
   text-align: center;
   animation: slideInDown 0.8s ease-out;
@@ -74,6 +74,67 @@
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   font-weight: 600;
+}
+
+/* Admin Welcome Section */
+.admin-welcome-section {
+  text-align: center;
+  animation: slideInDown 0.8s ease-out;
+}
+
+.admin-welcome-content {
+  background: linear-gradient(135deg, #1f2937, #374151);
+  color: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(31, 41, 55, 0.3);
+  position: relative;
+  overflow: hidden;
+  border: 2px solid #22c55e;
+}
+
+.admin-welcome-content::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
+  animation: float 6s ease-in-out infinite;
+}
+
+.admin-welcome-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  animation: bounce 2s infinite;
+}
+
+.admin-welcome-title {
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  color: #22c55e;
+}
+
+.admin-welcome-message {
+  font-size: 20px;
+  margin-bottom: 24px;
+  opacity: 0.95;
+}
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(34, 197, 94, 0.2);
+  padding: 12px 24px;
+  border-radius: 25px;
+  backdrop-filter: blur(10px);
+  border: 1px solid #22c55e;
+  font-weight: 600;
+  color: #22c55e;
 }
 
 .badge-icon {
@@ -182,12 +243,175 @@
   border: 1px solid #f59e0b;
 }
 
-/* Quick Actions Section */
-.quick-actions-section {
+/* Admin Tools Section */
+.admin-tools-section {
+  animation: slideInUp 0.8s ease-out 0.2s both;
+}
+
+.admin-tools-title {
+  text-align: center;
+  font-size: 32px;
+  color: #15803d;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.admin-tools-subtitle {
+  text-align: center;
+  font-size: 18px;
+  color: #6b7280;
+  margin-bottom: 40px;
+}
+
+.admin-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.admin-tool-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px 24px;
+  border: 2px solid #dcfce7;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.08);
+}
+
+.admin-tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.admin-tool-card:hover::before {
+  left: 100%;
+}
+
+.admin-tool-card:hover {
+  border-color: #22c55e;
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(34, 197, 94, 0.2);
+}
+
+.admin-tool-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  animation: pulse 2s infinite;
+}
+
+.admin-tool-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #15803d;
+  margin-bottom: 12px;
+}
+
+.admin-tool-description {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.admin-tool-status {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  color: #15803d;
+  border: 1px solid #22c55e;
+}
+
+/* System Status Section */
+.system-status-section {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  border: 2px solid #dcfce7;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.08);
   animation: slideInUp 0.8s ease-out 0.4s both;
 }
 
-.quick-actions-title {
+.system-status-title {
+  font-size: 20px;
+  color: #15803d;
+  margin-bottom: 24px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.active {
+  background: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+.status-indicator.warning {
+  background: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.status-indicator.error {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.status-label {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+  flex: 1;
+}
+
+.status-value {
+  font-size: 14px;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* Quick Actions Section */
+.quick-actions-section, .admin-quick-actions-section {
+  animation: slideInUp 0.8s ease-out 0.4s both;
+}
+
+.quick-actions-title, .admin-quick-actions-title {
   text-align: center;
   font-size: 24px;
   color: #15803d;
@@ -195,14 +419,14 @@
   font-weight: 600;
 }
 
-.quick-actions-grid {
+.quick-actions-grid, .admin-quick-actions-grid {
   display: flex;
   justify-content: center;
   gap: 20px;
   flex-wrap: wrap;
 }
 
-.quick-action-btn {
+.quick-action-btn, .admin-quick-action-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -219,7 +443,7 @@
   box-shadow: 0 2px 8px rgba(34, 197, 94, 0.06);
 }
 
-.quick-action-btn:hover {
+.quick-action-btn:hover, .admin-quick-action-btn:hover {
   border-color: #22c55e;
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(34, 197, 94, 0.15);
@@ -243,16 +467,34 @@
   background: linear-gradient(135deg, #fef3c7, #fde68a);
 }
 
-.quick-action-btn.logout {
+.quick-action-btn.logout, .admin-quick-action-btn.logout {
   color: #ef4444;
 }
 
-.quick-action-btn.logout:hover {
+.quick-action-btn.logout:hover, .admin-quick-action-btn.logout:hover {
   border-color: #ef4444;
   background: linear-gradient(135deg, #fef2f2, #fee2e2);
 }
 
-.quick-action-btn:disabled {
+.admin-quick-action-btn.backup {
+  color: #22c55e;
+}
+
+.admin-quick-action-btn.backup:hover {
+  border-color: #22c55e;
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+}
+
+.admin-quick-action-btn.logs {
+  color: #6366f1;
+}
+
+.admin-quick-action-btn.logs:hover {
+  border-color: #6366f1;
+  background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+}
+
+.quick-action-btn:disabled, .admin-quick-action-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
@@ -263,7 +505,7 @@
 }
 
 /* User Info Section */
-.user-info-section {
+.user-info-section, .admin-info-section {
   background: white;
   border-radius: 16px;
   padding: 32px;
@@ -272,7 +514,7 @@
   animation: slideInUp 0.8s ease-out 0.6s both;
 }
 
-.user-info-section h3 {
+.user-info-section h3, .admin-info-section h3 {
   font-size: 20px;
   color: #15803d;
   margin-bottom: 24px;
@@ -280,7 +522,7 @@
   font-weight: 600;
 }
 
-.user-info-grid {
+.user-info-grid, .admin-info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
@@ -366,7 +608,7 @@
 
 /* 반응형 디자인 */
 @media (max-width: 1024px) {
-  .services-grid {
+  .services-grid, .admin-tools-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
   }
@@ -379,50 +621,50 @@
     min-height: calc(100vh - 56px);
   }
 
-  .welcome-content {
+  .welcome-content, .admin-welcome-content {
     padding: 32px 24px;
   }
 
-  .welcome-title {
+  .welcome-title, .admin-welcome-title {
     font-size: 32px;
   }
 
-  .welcome-message {
+  .welcome-message, .admin-welcome-message {
     font-size: 18px;
   }
 
-  .welcome-icon {
+  .welcome-icon, .admin-welcome-icon {
     font-size: 48px;
   }
 
-  .services-title {
+  .services-title, .admin-tools-title {
     font-size: 28px;
   }
 
-  .services-subtitle {
+  .services-subtitle, .admin-tools-subtitle {
     font-size: 16px;
   }
 
-  .services-grid {
+  .services-grid, .admin-tools-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  .service-card {
+  .service-card, .admin-tool-card {
     padding: 24px 20px;
   }
 
-  .service-icon {
+  .service-icon, .admin-tool-icon {
     font-size: 40px;
   }
 
-  .quick-actions-grid {
+  .quick-actions-grid, .admin-quick-actions-grid {
     flex-direction: column;
     align-items: center;
     gap: 12px;
   }
 
-  .quick-action-btn {
+  .quick-action-btn, .admin-quick-action-btn {
     width: 100%;
     max-width: 200px;
     flex-direction: row;
@@ -430,11 +672,11 @@
     padding: 16px 20px;
   }
 
-  .user-info-section {
+  .user-info-section, .admin-info-section, .system-status-section {
     padding: 24px 20px;
   }
 
-  .user-info-grid {
+  .user-info-grid, .admin-info-grid, .status-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
@@ -446,31 +688,31 @@
     gap: 24px;
   }
 
-  .welcome-content {
+  .welcome-content, .admin-welcome-content {
     padding: 24px 16px;
   }
 
-  .welcome-title {
+  .welcome-title, .admin-welcome-title {
     font-size: 24px;
   }
 
-  .welcome-message {
+  .welcome-message, .admin-welcome-message {
     font-size: 16px;
   }
 
-  .services-title {
+  .services-title, .admin-tools-title {
     font-size: 24px;
   }
 
-  .service-card {
+  .service-card, .admin-tool-card {
     padding: 20px 16px;
   }
 
-  .user-info-section {
+  .user-info-section, .admin-info-section, .system-status-section {
     padding: 20px 16px;
   }
 
-  .info-item {
+  .info-item, .status-item {
     padding: 16px;
   }
 }
@@ -478,46 +720,55 @@
 /* 다크모드 호환성 */
 @media (prefers-color-scheme: dark) {
   .dashboard-main-container {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    background: #0f172a;
   }
 
-  .service-card,
-  .user-info-section,
-  .quick-action-btn {
+  .service-card, .admin-tool-card,
+  .user-info-section, .admin-info-section, .system-status-section,
+  .quick-action-btn, .admin-quick-action-btn {
     background: #1e293b;
     border-color: #334155;
     color: #f1f5f9;
   }
 
-  .service-title {
+  .service-title, .admin-tool-title {
     color: #22c55e;
   }
 
-  .service-description {
+  .service-description, .admin-tool-description {
     color: #cbd5e1;
   }
 
-  .info-item {
+  .info-item, .status-item {
     background: #0f172a;
     border-color: #334155;
   }
 
-  .info-label {
+  .info-label, .status-label {
     color: #94a3b8;
   }
 
-  .info-value {
+  .info-value, .status-value {
     color: #f1f5f9;
   }
 }
 
 /* 추가적인 호버 효과 */
-.service-card:active {
+.service-card:active, .admin-tool-card:active {
   transform: translateY(-4px) scale(0.98);
 }
 
-.quick-action-btn:active {
+.quick-action-btn:active, .admin-quick-action-btn:active {
   transform: translateY(-2px) scale(0.98);
+}
+
+/* 포커스 스타일 접근성 */
+.service-card:focus,
+.admin-tool-card:focus,
+.quick-action-btn:focus,
+.admin-quick-action-btn:focus {
+  outline: 2px solid #22c55e;
+  outline-offset: 2px;
 }
 
 /* 로딩 상태 스타일 */
@@ -526,7 +777,7 @@
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 64px);
-  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  background: #ffffff;
 }
 
 .loading-spinner {
@@ -552,4 +803,18 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* 접근성 개선 - 모션 줄이기 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .welcome-content::before,
+  .admin-welcome-content::before {
+    animation: none;
+  }
 }

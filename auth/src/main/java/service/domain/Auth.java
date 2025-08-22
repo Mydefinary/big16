@@ -48,6 +48,8 @@ public class Auth {
 
     private String nickname;
 
+    private String role;
+
     // 토큰 관리 필드들
     private String accessToken;       
     private String refreshToken;      
@@ -100,6 +102,7 @@ public class Auth {
         auth.setEmail(userSaved.getEmail());
         auth.setCreatedAt(userSaved.getCreatedAt());
         auth.setNickname(userSaved.getNickname());
+        auth.setRole(userSaved.getRole());
 
         repository().save(auth);
 
