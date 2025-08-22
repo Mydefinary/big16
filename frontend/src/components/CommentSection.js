@@ -69,7 +69,7 @@ const canEdit = (c) => currentUser && (currentUser.nickName === c.author || curr
         {comments.map((c) => (
           <div key={c.id} className="p-3 mb-3 border rounded bg-white">
             <div className="d-flex justify-content-between mb-1">
-              <strong className="text-dark">{c.author}</strong>
+              <strong className="text-dark">{c.author.length > 1 ? c.author[0] + '*' + c.author.slice(2) : c.author}</strong>
 
 
 <small className="text-muted">{new Date(c.createdAt).toLocaleString()}</small>

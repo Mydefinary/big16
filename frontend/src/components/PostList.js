@@ -73,7 +73,7 @@ export default function PostList() {
                 {post.title}
               </Link>
             </td>
-            <td>{post.author}</td>
+            <td>{post.author.length > 1 ? post.author[0] + '*' + post.author.slice(2) : post.author}</td>
             <td>{new Date(post.createdAt).toLocaleDateString()}</td>
           </tr>
         ))
