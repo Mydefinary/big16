@@ -13,15 +13,23 @@ export default function PostDetail() {
   const [currentUser, setCurrentUser] = useState(null);
     useEffect(() => {
       axios.get("http://20.249.113.18:9000/auths/me", { withCredentials: true })
-        .then(res => setCurrentUser(res.data))
+        .then(res => {
+      setCurrentUser(res.data);
+      console.log("currentUser 데이터:", res.data); // ← 여기에 찍기
+      console.log("currentUser.nickName:", res.data.nickName); // ← 닉네임만 확인
+    })
         .catch(err => console.error("사용자 정보 불러오기 실패:", err));
     }, []);
 
-const canEdit = currentUser && post && (currentUser.userId === post.author);
+const canEdit = currentUser && post && (currentUser.nickName === post.author);
 
   useEffect(() => {
     fetchPost(id)
-      .then(res => setPost(res.data))
+      .then(res =>{
+      console.log("DB에서 불러온 게시글 데이터:", res.data); // ← 여기에 넣기
+      console.log("게시글 작성자(author):", res.data.author); // ← 작성자 확인
+      setPost(res.data);
+    })
       .catch(err => setError(err.response?.data || err.message));
   }, [id]);
 

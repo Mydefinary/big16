@@ -18,7 +18,7 @@ function CommentSection({ postId }) {
           .then(res => setCurrentUser(res.data))
           .catch(err => console.error("사용자 정보 불러오기 실패:", err));
       }, []);
-const canEdit = (c) => currentUser && (currentUser.userId === c.author);
+const canEdit = (c) => currentUser && (currentUser.nickName === c.author);
 
   
 
@@ -30,7 +30,7 @@ const canEdit = (c) => currentUser && (currentUser.userId === c.author);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    commentApi.post(`/comments/${postId}`, {  author: currentUser.userId.toString(), content })
+    commentApi.post(`/comments/${postId}`, {  author: currentUser.nickName, content })
       .then(res => {
         setComments(prev => [...prev, res.data]);
         setAuthor('');

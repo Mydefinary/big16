@@ -45,7 +45,7 @@ export default function PostForm({ isEdit }) {
     }
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('author', currentUser.userId.toString());
+    formData.append('author', currentUser.nickName);
     formData.append('content', content);
     if (file) formData.append('file', file);
     if (isEdit) formData.append('removeAttachment', removeAttachment);

@@ -21,7 +21,7 @@ spec:
         agentpool: userpool
       containers:
         - name: board-frontend-container
-          image: kt16big.azurecr.io/board-frontend-lee:20250821
+          image: kt16big.azurecr.io/board-frontend-lee:20250822
           ports:
             - containerPort: 80
 ---
