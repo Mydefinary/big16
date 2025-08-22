@@ -46,6 +46,8 @@ public class Auth {
 
     private Date createdAt;
 
+    private String nickname;
+
     // 토큰 관리 필드들
     private String accessToken;       
     private String refreshToken;      
@@ -97,6 +99,7 @@ public class Auth {
         auth.setPasswordHash(userSaved.getPassword());  // 이미 암호화된 비밀번호가 이벤트에 담겨 있다고 가정
         auth.setEmail(userSaved.getEmail());
         auth.setCreatedAt(userSaved.getCreatedAt());
+        auth.setNickname(userSaved.getNickname());
 
         repository().save(auth);
 

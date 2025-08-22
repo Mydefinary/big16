@@ -16,6 +16,7 @@ public class UserSaved extends AbstractEvent {
     private String password;
     private String email;
     private Date createdAt;
+    private String nickname;
     
     public UserSaved(User aggregate) {
         super(aggregate);

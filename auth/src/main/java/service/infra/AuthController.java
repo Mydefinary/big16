@@ -369,6 +369,7 @@ public class AuthController {
                 userInfo.put("userId", userId);
                 userInfo.put("email", auth.getEmail());
                 userInfo.put("createdAt", auth.getCreatedAt());
+                userInfo.put("nickName", auth.getNickname());
                 
                 return ResponseEntity.ok(userInfo);
             }catch (IllegalArgumentException e){

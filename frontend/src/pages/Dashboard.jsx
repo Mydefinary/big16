@@ -99,11 +99,11 @@ const Dashboard = () => {
           <div className="welcome-icon">🎉</div>
           <h1 className="welcome-title">환영합니다!</h1>
           <p className="welcome-message">
-            <span className="username">{userInfo.username}</span>님, ToonConnect에 오신 것을 환영합니다!
+            <span className="username">{userInfo.nickName}</span>님, ToonConnect에 오신 것을 환영합니다!
           </p>
           <div className="user-badge">
             <span className="badge-icon">👤</span>
-            <span className="badge-text">{userInfo.userId}</span>
+            <span className="badge-text">유저번호 : {userInfo.userId}</span>
           </div>
         </div>
       </div>
