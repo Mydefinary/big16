@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }) => {
       // 서버의 /auths/me API 호출 (쿠키의 accessToken으로 인증)
       const response = await authAPI.me();
       
-      console.log('✅ 인증 확인 성공:', response.data);
       setIsLoggedIn(true);
       setUserInfo(response.data);
       

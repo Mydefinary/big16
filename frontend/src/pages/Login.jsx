@@ -1,10 +1,11 @@
 // /src/pages/Login.jsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useSecurity } from '../components/SecurityProvider';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -12,13 +13,61 @@ const Login = () => {
     password: ''
   });
   const [loading, setLoading] = useState(false);
+  const [loginBlocked, setLoginBlocked] = useState(false);
+  const [blockTimeLeft, setBlockTimeLeft] = useState(0);
   
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { recordLoginAttempt, securityState } = useSecurity();
 
   // 로그인 후 리다이렉트할 경로 결정
   const from = location.state?.from?.pathname || '/dashboard';
+
+  // 로그인 차단 체크
+  useEffect(() => {
+    if (securityState.loginAttempts >= 3) {
+      const blockStartTime = localStorage.getItem('loginBlockStartTime');
+      const now = Date.now();
+      
+      if (!blockStartTime) {
+        // 새로운 차단 시작
+        localStorage.setItem('loginBlockStartTime', now.toString());
+        setLoginBlocked(true);
+        setBlockTimeLeft(30);
+      } else {
+        // 기존 차단 시간 계산
+        const elapsed = Math.floor((now - parseInt(blockStartTime)) / 1000);
+        const remaining = Math.max(0, 30 - elapsed);
+        
+        if (remaining > 0) {
+          setLoginBlocked(true);
+          setBlockTimeLeft(remaining);
+        } else {
+          // 차단 해제
+          localStorage.removeItem('loginBlockStartTime');
+          recordLoginAttempt(true); // 카운트 리셋
+          setLoginBlocked(false);
+          return;
+        }
+      }
+      
+      const timer = setInterval(() => {
+        setBlockTimeLeft(prev => {
+          if (prev <= 1) {
+            setLoginBlocked(false);
+            localStorage.removeItem('loginBlockStartTime');
+            recordLoginAttempt(true); // 카운트 리셋
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [securityState.loginAttempts]);
 
   const handleChange = (e) => {
     setFormData({
@@ -29,6 +78,11 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (loginBlocked) {
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -38,6 +92,7 @@ const Login = () => {
       await login(formData);
       
       console.log('✅ 로그인 성공 - 리다이렉트:', from);
+      recordLoginAttempt(true);
       
       toast.success('로그인에 성공했습니다!', {
         position: "top-right",
@@ -51,6 +106,10 @@ const Login = () => {
       
     } catch (err) {
       console.error('❌ 로그인 실패:', err);
+      
+      recordLoginAttempt(false);
+      const attempts = securityState.loginAttempts + 1;
+      console.log(`로그인 실패 (${attempts}/3)`);
       
       // 에러 메시지 처리
       let message = '로그인에 실패했습니다.';
@@ -76,6 +135,9 @@ const Login = () => {
     }
   };
 
+  // 버튼 비활성화 조건
+  const isButtonDisabled = loading || loginBlocked;
+
   return (
     <div className="auth-container">
       <div className="auth-form">
@@ -92,7 +154,7 @@ const Login = () => {
               onChange={handleChange}
               required
               placeholder="아이디를 입력하세요"
-              disabled={loading}
+              disabled={loading || loginBlocked}
             />
           </div>
 
@@ -106,16 +168,19 @@ const Login = () => {
               onChange={handleChange}
               required
               placeholder="비밀번호를 입력하세요"
-              disabled={loading}
+              disabled={loading || loginBlocked}
             />
           </div>
 
           <button 
             type="submit" 
             className="auth-button primary"
-            disabled={loading}
+            disabled={isButtonDisabled}
           >
-            {loading ? '로그인 중...' : '로그인'}
+            {loginBlocked 
+              ? `로그인 차단 (${blockTimeLeft}초)` 
+              : loading ? '로그인 중...' : '로그인'
+            }
           </button>
         </form>
 
@@ -124,6 +189,27 @@ const Login = () => {
           <Link to="/find-password" className="link">비밀번호 찾기</Link>
           <Link to="/register" className="link">회원가입</Link>
         </div>
+
+        {/* 로그인 시도 횟수 표시 */}
+        {securityState.loginAttempts > 0 && (
+          <div style={{ 
+            marginTop: '15px', 
+            padding: '10px', 
+            backgroundColor: '#fff3cd', 
+            border: '1px solid #ffeaa7',
+            borderRadius: '4px',
+            fontSize: '14px',
+            color: '#856404',
+            textAlign: 'center'
+          }}>
+            로그인 실패 횟수: {securityState.loginAttempts}/3
+            {securityState.loginAttempts >= 3 && (
+              <div style={{ marginTop: '5px', color: '#dc3545', fontWeight: 'bold' }}>
+                3번 실패로 30초간 로그인이 차단됩니다.
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 리다이렉트 정보 표시 (개발 중에만) */}
         {process.env.NODE_ENV === 'development' && from !== '/dashboard' && (

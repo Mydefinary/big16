@@ -28,6 +28,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                path.startsWith("/webtoon-hl/") ||
                path.startsWith("/goods-gen/") ||
                path.startsWith("/ppl-gen/") ||
+               path.startsWith("/ppl-gen") ||
                path.startsWith("/question/");
     }
 

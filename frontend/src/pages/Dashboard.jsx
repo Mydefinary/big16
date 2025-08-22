@@ -6,19 +6,47 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './Dashboard.css';
 
+// 마스킹 함수들을 컴포넌트 외부에 정의
+const maskEmail = (email) => {
+  if (!email) return '';
+  const [localPart, domain] = email.split('@');
+  if (localPart.length <= 2) {
+    return `${localPart[0]}***@${domain}`;
+  }
+  return `${localPart[0]}${'*'.repeat(localPart.length - 2)}${localPart[localPart.length - 1]}@${domain}`;
+};
+
+const maskName = (name) => {
+  if (!name) return '';
+  if (name.length <= 1) return name;
+  if (name.length === 2) {
+    return name[0] + '*';
+  }
+  return name[0] + '*'.repeat(name.length - 2) + name[name.length - 1];
+};
+
+const maskUserId = (userId) => {
+  if (!userId) return '';
+  const userIdStr = userId.toString();
+  if (userIdStr.length <= 3) {
+    return '*'.repeat(userIdStr.length);
+  }
+  return userIdStr.substring(0, 2) + '*'.repeat(userIdStr.length - 2);
+};
+
 const Dashboard = () => {
   const { logout } = useAuth();
   const [userInfo, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showFullInfo, setShowFullInfo] = useState(false);
   const navigate = useNavigate();
 
   // 로그인한 유저 정보 불러오기
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const res = await authAPI.me(); // 서버에서 쿠키 인증 후 유저 정보 반환
+        const res = await authAPI.me();
         setUserInfo(res.data);
-        console.log(res.data);
       } catch (error) {
         console.error('사용자 정보 불러오기 실패:', error);
         toast.error('세션이 만료되었습니다. 다시 로그인해주세요.', {
@@ -35,7 +63,7 @@ const Dashboard = () => {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      await authAPI.logout(); // 서버에서 쿠키 삭제
+      await authAPI.logout();
       toast.success('로그아웃이 완료되었습니다.', {
         position: "top-right",
         autoClose: 3000,
@@ -51,6 +79,14 @@ const Dashboard = () => {
       navigate('/login');
       setLoading(false);
     }
+  };
+
+  const toggleInfoVisibility = () => {
+    setShowFullInfo(!showFullInfo);
+    toast.info(showFullInfo ? '정보가 마스킹되었습니다' : '정보가 표시되었습니다', {
+      position: "top-right",
+      autoClose: 2000,
+    });
   };
 
   // 일반 사용자 서비스 이동 함수들
@@ -123,7 +159,9 @@ const Dashboard = () => {
             <div className="admin-welcome-icon">👨‍💼</div>
             <h1 className="admin-welcome-title">관리자 대시보드</h1>
             <p className="admin-welcome-message">
-              <span className="username">{userInfo.nickName}</span> 관리자님, ToonConnect 관리 시스템에 오신 것을 환영합니다!
+              <span className="username">
+                {showFullInfo ? userInfo.nickName : maskName(userInfo.nickName)}
+              </span> 관리자님, ToonConnect 관리 시스템에 오신 것을 환영합니다!
             </p>
             <div className="admin-badge">
               <span className="badge-icon">🔐</span>
@@ -226,6 +264,13 @@ const Dashboard = () => {
               <span>시스템 로그</span>
             </button>
             <button 
+              className="admin-quick-action-btn privacy"
+              onClick={toggleInfoVisibility}
+            >
+              <span className="quick-icon">{showFullInfo ? '🙈' : '👁️'}</span>
+              <span>{showFullInfo ? '정보 숨기기' : '정보 보기'}</span>
+            </button>
+            <button 
               className="admin-quick-action-btn logout"
               onClick={handleLogout}
               disabled={loading}
@@ -242,11 +287,15 @@ const Dashboard = () => {
           <div className="admin-info-grid">
             <div className="info-item">
               <span className="info-label">관리자 ID</span>
-              <span className="info-value">{userInfo.userId}</span>
+              <span className="info-value">
+                {showFullInfo ? userInfo.userId : maskUserId(userInfo.userId)}
+              </span>
             </div>
             <div className="info-item">
               <span className="info-label">이메일</span>
-              <span className="info-value">{userInfo.email}</span>
+              <span className="info-value">
+                {showFullInfo ? userInfo.email : maskEmail(userInfo.email)}
+              </span>
             </div>
             <div className="info-item">
               <span className="info-label">권한 레벨</span>
@@ -275,11 +324,15 @@ const Dashboard = () => {
           <div className="welcome-icon">🎉</div>
           <h1 className="welcome-title">환영합니다!</h1>
           <p className="welcome-message">
-            <span className="username">{userInfo.nickName}</span>님, ToonConnect에 오신 것을 환영합니다!
+            <span className="username">
+              {showFullInfo ? userInfo.nickName : maskName(userInfo.nickName)}
+            </span>님, ToonConnect에 오신 것을 환영합니다!
           </p>
           <div className="user-badge">
             <span className="badge-icon">👤</span>
-            <span className="badge-text">유저번호 : {userInfo.userId}</span>
+            <span className="badge-text">
+              유저번호 : {showFullInfo ? userInfo.userId : maskUserId(userInfo.userId)}
+            </span>
           </div>
         </div>
       </div>
@@ -371,6 +424,13 @@ const Dashboard = () => {
             <span>FAQ</span>
           </button>
           <button 
+            className="quick-action-btn privacy"
+            onClick={toggleInfoVisibility}
+          >
+            <span className="quick-icon">{showFullInfo ? '🙈' : '👁️'}</span>
+            <span>{showFullInfo ? '정보 숨기기' : '정보 보기'}</span>
+          </button>
+          <button 
             className="quick-action-btn logout"
             onClick={handleLogout}
             disabled={loading}
@@ -387,7 +447,9 @@ const Dashboard = () => {
         <div className="user-info-grid">
           <div className="info-item">
             <span className="info-label">이메일</span>
-            <span className="info-value">{userInfo.email}</span>
+            <span className="info-value">
+              {showFullInfo ? userInfo.email : maskEmail(userInfo.email)}
+            </span>
           </div>
           <div className="info-item">
             <span className="info-label">가입일</span>
