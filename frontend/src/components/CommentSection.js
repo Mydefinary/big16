@@ -18,9 +18,8 @@ function CommentSection({ postId }) {
           .then(res => setCurrentUser(res.data))
           .catch(err => console.error("사용자 정보 불러오기 실패:", err));
       }, []);
-const canEdit = (c) => currentUser && (currentUser.nickName === c.author);
 
-  
+const canEdit = (c) => currentUser && (currentUser.nickName === c.author || currentUser.role === 'admin');
 
   useEffect(() => {
     commentApi.get(`/comments/${postId}`)
@@ -71,7 +70,7 @@ const canEdit = (c) => currentUser && (currentUser.nickName === c.author);
           <div key={c.id} className="p-3 mb-3 border rounded bg-white">
             <div className="d-flex justify-content-between mb-1">
               <strong className="text-dark">{c.author}</strong>
-              <small className="text-muted">{new Date(c.createdAt).toLocaleString()}</small>
+              <small className="text-muted">{new Date(c.createdAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}</small>
             </div>
             {editingId === c.id ? (
               <>

@@ -15,19 +15,15 @@ export default function PostDetail() {
       axios.get("http://20.249.113.18:9000/auths/me", { withCredentials: true })
         .then(res => {
       setCurrentUser(res.data);
-      console.log("currentUser 데이터:", res.data); // ← 여기에 찍기
-      console.log("currentUser.nickName:", res.data.nickName); // ← 닉네임만 확인
     })
         .catch(err => console.error("사용자 정보 불러오기 실패:", err));
     }, []);
 
-const canEdit = currentUser && post && (currentUser.nickName === post.author);
+const canEdit = currentUser && post && (currentUser.nickName === post.author || currentUser.role === 'admin');
 
   useEffect(() => {
     fetchPost(id)
       .then(res =>{
-      console.log("DB에서 불러온 게시글 데이터:", res.data); // ← 여기에 넣기
-      console.log("게시글 작성자(author):", res.data.author); // ← 작성자 확인
       setPost(res.data);
     })
       .catch(err => setError(err.response?.data || err.message));
@@ -73,8 +69,8 @@ const canEdit = currentUser && post && (currentUser.nickName === post.author);
 
         <ul className="list-unstyled small text-muted mb-4">
           <li><strong>작성자:</strong> {post.author}</li>
-          <li><strong>작성일:</strong> {new Date(post.createdAt).toLocaleString()}</li>
-          <li><strong>수정일:</strong> {new Date(post.updatedAt).toLocaleString()}</li>
+          <li><strong>작성일:</strong> {new Date(post.createdAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}</li>
+          <li><strong>수정일:</strong> {new Date(post.updatedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}</li>
         </ul>
 
         <hr />
@@ -105,7 +101,9 @@ const canEdit = currentUser && post && (currentUser.nickName === post.author);
 
 
       </div>
-      <CommentSection postId={post.id} currentUser={currentUser} />
+      <CommentSection postId={post.id}  />
+
+      {/* currentUser={currentUser} */}
       
     </div>
   );
