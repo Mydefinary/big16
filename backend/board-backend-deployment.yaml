@@ -21,7 +21,7 @@ spec:
         agentpool: userpool
       containers:
         - name: board-backend-container
-          image: kt16big.azurecr.io/board-backend-lee:20250820-dockerfile-context
+          image: kt16big.azurecr.io/board-backend-lee:20250822-dockerfile-context
           ports:
             - containerPort: 8082
           env:
