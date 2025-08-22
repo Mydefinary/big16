@@ -70,7 +70,11 @@ const canEdit = (c) => currentUser && (currentUser.nickName === c.author || curr
           <div key={c.id} className="p-3 mb-3 border rounded bg-white">
             <div className="d-flex justify-content-between mb-1">
               <strong className="text-dark">{c.author}</strong>
-              <small className="text-muted">{new Date(c.createdAt).toLocaleString('ko-KR')}</small>
+
+              <small className="text-muted">
+  {new Date(new Date(c.createdAt).getTime() + 9 * 60 * 60 * 1000).toLocaleString('ko-KR')}
+</small>
+
             </div>
             {editingId === c.id ? (
               <>
