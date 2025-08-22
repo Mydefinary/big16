@@ -69,8 +69,8 @@ const canEdit = currentUser && post && (currentUser.nickName === post.author || 
 
         <ul className="list-unstyled small text-muted mb-4">
           <li><strong>작성자:</strong> {post.author}</li>
-          <li><strong>작성일:</strong> {new Date(post.createdAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}</li>
-          <li><strong>수정일:</strong> {new Date(post.updatedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}</li>
+          <li><strong>작성일:</strong> {new Date(post.createdAt).toLocaleString('ko-KR')}</li>
+          <li><strong>수정일:</strong> {new Date(post.updatedAt).toLocaleString('ko-KR')}</li>
         </ul>
 
         <hr />

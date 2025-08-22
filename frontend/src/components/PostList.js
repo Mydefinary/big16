@@ -74,7 +74,7 @@ export default function PostList() {
               </Link>
             </td>
             <td>{post.author}</td>
-            <td>{new Date(post.createdAt).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}</td>
+            <td>{new Date(post.createdAt).toLocaleDateString()}</td>
           </tr>
         ))
       ) : (
