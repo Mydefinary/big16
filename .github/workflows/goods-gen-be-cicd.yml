@@ -74,6 +74,6 @@ jobs:
       # 3. kubectl을 사용하여 배포된 이미지 업데이트
       - name: Deploy to AKS
         run: |
-          kubectl set image deployment/goods-gen-backend-deployment \
+          kubectl set image deployment/goods-gen-backend-deployment-2 \
             goods-gen-backend-container=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest \
             --namespace lee
