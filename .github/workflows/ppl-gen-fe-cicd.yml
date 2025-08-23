@@ -85,5 +85,5 @@ jobs:
       - name: Deploy to AKS
         run: |
           kubectl set image deployment/ppl-gen-frontend-deployment-lee-2 \
-            ppl-gen-frontend-container=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest \
+            ppl-gen-frontend-container-lee-2=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest \
             --namespace lee
