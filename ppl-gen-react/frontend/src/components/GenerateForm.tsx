@@ -163,15 +163,36 @@ export default function GenerateForm() {
     setOutputUrl("");
 
     try {
+      // 타임아웃을 3분으로 설정 (백엔드 2분 + 여유시간)
       const response = await axios.post("/api/ppl-gen/generate", formData, {
         responseType: 'blob',
+        timeout: 180000, // 3분 = 180초
       });
 
       const imageUrl = URL.createObjectURL(response.data);
       setOutputUrl(imageUrl);
 
-    } catch (error) {
-      alert("이미지 생성에 실패했습니다. 입력 값이나 모델 상태를 확인해 주세요.");
+    } catch (error: any) {
+      let errorMessage = "이미지 생성에 실패했습니다.";
+      
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        errorMessage = "이미지 생성 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.";
+      } else if (error.response?.data) {
+        // 백엔드에서 보낸 에러 메시지 처리
+        if (error.response.data instanceof Blob) {
+          try {
+            const text = await error.response.data.text();
+            const errorData = JSON.parse(text);
+            errorMessage = errorData.error || errorMessage;
+          } catch {
+            errorMessage = "서버에서 오류가 발생했습니다.";
+          }
+        } else {
+          errorMessage = error.response.data.error || errorMessage;
+        }
+      }
+      
+      alert(errorMessage);
       console.error(error);
     } finally {
       setLoading(false);

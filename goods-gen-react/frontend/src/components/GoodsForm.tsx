@@ -145,8 +145,10 @@ export default function GoodsForm() {
 
     try {
       // ✅ [핵심 수정] 1. 응답 타입을 'blob'으로 지정하여 이미지 데이터를 직접 받습니다.
+      // 타임아웃을 3분으로 설정 (백엔드 2분 + 여유시간)
       const response = await axios.post("/api/goods-gen/generate", formData, {
         responseType: 'blob',
+        timeout: 180000, // 3분 = 180초
       });
 
       // ✅ [핵심 수정] 2. 받은 blob 데이터로 브라우저에서 사용할 수 있는 임시 URL을 생성합니다.
@@ -154,7 +156,25 @@ export default function GoodsForm() {
       setOutputUrl(imageUrl);
 
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || "이미지 생성에 실패했습니다.";
+      let errorMessage = "이미지 생성에 실패했습니다.";
+      
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        errorMessage = "이미지 생성 시간이 초과되었습니다. 잠시 후 다시 시도해주세요.";
+      } else if (error.response?.data) {
+        // 백엔드에서 보낸 에러 메시지 처리
+        if (error.response.data instanceof Blob) {
+          try {
+            const text = await error.response.data.text();
+            const errorData = JSON.parse(text);
+            errorMessage = errorData.error || errorMessage;
+          } catch {
+            errorMessage = "서버에서 오류가 발생했습니다.";
+          }
+        } else {
+          errorMessage = error.response.data.error || errorMessage;
+        }
+      }
+      
       alert(errorMessage);
       console.error(error);
     } finally {

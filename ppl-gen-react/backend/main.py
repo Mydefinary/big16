@@ -82,11 +82,19 @@ async def generate_image(
 
         print("✅ Replicate에 전송할 payload:", inputs.keys())
 
-        output = await run_in_threadpool(
-            replicate.run,
-            "flux-kontext-apps/multi-image-kontext-max",
-            input=inputs
-        )
+        # 타임아웃 설정 (2분)
+        import asyncio
+        try:
+            output = await asyncio.wait_for(
+                run_in_threadpool(
+                    replicate.run,
+                    "flux-kontext-apps/multi-image-kontext-max",
+                    input=inputs
+                ),
+                timeout=120  # 2분 타임아웃
+            )
+        except asyncio.TimeoutError:
+            raise RuntimeError("이미지 생성이 2분 내에 완료되지 않았습니다. 잠시 후 다시 시도해주세요.")
 
         print(f"✅ Replicate 응답 받음 (타입: {type(output)})")
 

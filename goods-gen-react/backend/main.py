@@ -81,8 +81,13 @@ async def generate_goods(
         print(f"✅ 작업 시작됨. Request ID: {request_id}. Polling 시작...")
 
         external_image_url = None
-        while True:
+        max_polls = 120  # 최대 2분 대기 (1초 * 120회)
+        poll_count = 0
+        
+        while poll_count < max_polls:
             time.sleep(1)
+            poll_count += 1
+            
             poll_response = requests.get(
                 polling_url,
                 headers={'accept': 'application/json', 'x-key': BFL_API_KEY},
@@ -99,7 +104,11 @@ async def generate_goods(
             elif status in ['Error', 'Failed']:
                 raise RuntimeError(f"BFL.ai 모델 생성 실패. 상태: {status}")
             
-            print(f" - Polling 중... (상태: {status})")
+            print(f" - Polling 중... (상태: {status}) [{poll_count}/{max_polls}]")
+        
+        # 타임아웃 체크
+        if poll_count >= max_polls and not external_image_url:
+            raise RuntimeError("이미지 생성이 2분 내에 완료되지 않았습니다. 잠시 후 다시 시도해주세요.")
             
         if not external_image_url:
             raise ValueError("최종 이미지 URL을 얻는 데 실패했습니다.")
