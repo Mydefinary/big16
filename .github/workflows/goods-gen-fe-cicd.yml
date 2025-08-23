@@ -57,6 +57,6 @@ jobs:
           cluster-name: ${{ env.AKS_CLUSTER_NAME }}
       - name: Deploy to AKS
         run: |
-          kubectl set image deployment/goods-gen-frontend-deployment-2 \
+          kubectl set image deployment/goods-gen-frontend-deployment-lee-2 \
             goods-gen-frontend-container=${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest \
             --namespace lee
