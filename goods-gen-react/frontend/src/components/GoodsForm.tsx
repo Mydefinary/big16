@@ -177,7 +177,7 @@ export default function GoodsForm() {
     <div style={containerStyle}>
       <div style={mainContentStyle}>
         <div style={formColumnStyle}>
-          <h2 style={{ marginBottom: "30px" }}>웹툰 캐릭터 굿즈 초안 생성</h2>
+          <h2 style={{ marginBottom: "30px" }}>웹툰 캐릭터 굿즈 시안 생성</h2>
           <form onSubmit={handleSubmit}>
             <label htmlFor="prompt" style={{ fontWeight: "bold", display: 'block', marginBottom: '6px' }}>
               프롬프트를 영어로 입력하세요
