@@ -37,7 +37,10 @@ from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema import Document
-
+try:
+    from langchain_huggingface import HuggingFaceEmbeddings  # >=0.1
+except Exception:
+    from langchain_community.embeddings import HuggingFaceEmbeddings  # fallback
 
 CANDIDATE_CONTENT_COLUMNS = [
     "storyline",
@@ -54,7 +57,7 @@ CANDIDATE_CONTENT_COLUMNS = [
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-DEFAULT_EMBEDDING_MODEL = "text-embedding-3-large"
+DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small"
 
 
 def normalize_whitespace(text: str) -> str:
