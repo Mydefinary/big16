@@ -380,6 +380,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 # ---------------- FastAPI ----------------
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI(title="Webtoon Chatbot API", version="1.0.0")

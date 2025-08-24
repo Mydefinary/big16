@@ -25,11 +25,11 @@ from chromadb.errors import InvalidArgumentError  # 차원 불일치 캐치
 DEFAULT_CHROMA_DIR = os.getenv("CHROMA_DIR", "./chroma_db5")
 DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
 # 기존 인덱스가 768차원일 가능성이 높아 mpnet 기본
-DEFAULT_EMB_MODEL = os.getenv("LEGAL_EMB_MODEL", "distilbert-base-nli-stsb-mean-tokens")  # 768-d
+DEFAULT_EMB_MODEL = os.getenv("LEGAL_EMB_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 
 # 차원→권장 모델 맵
 DIM_TO_MODEL = {
-    384: "distilbert-base-nli-stsb-mean-tokens",
+    384: "sentence-transformers/all-MiniLM-L6-v2",
     512: "BAAI/bge-small-en-v1.5",
     768: "distilbert-base-nli-stsb-mean-tokens",
     1024:"BAAI/bge-base-en-v1.5",
