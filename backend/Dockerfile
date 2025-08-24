@@ -25,4 +25,4 @@ ENV WEBTOON_CSV_PATH=./webtoon_data.csv \
     FAISS_DB_DIR=./db
 
 # Uvicorn 실행
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8083"]
+CMD ["uvicorn", "main2:app", "--host", "0.0.0.0", "--port", "8083"]
