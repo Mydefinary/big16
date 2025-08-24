@@ -14,34 +14,34 @@ try:
 except Exception:
     from langchain_community.vectorstores import Chroma  # fallback
 
-try:
-    from langchain_huggingface import HuggingFaceEmbeddings  # >=0.1
-except Exception:
-    from langchain_community.embeddings import HuggingFaceEmbeddings  # fallback
+# try:
+#     from langchain_huggingface import HuggingFaceEmbeddings  # >=0.1
+# except Exception:
+#     from langchain_community.embeddings import HuggingFaceEmbeddings  # fallback
 
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from chromadb.errors import InvalidArgumentError  # 차원 불일치 캐치
 
 DEFAULT_CHROMA_DIR = os.getenv("CHROMA_DIR", "./chroma_db5")
 DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
 # 기존 인덱스가 768차원일 가능성이 높아 mpnet 기본
-DEFAULT_EMB_MODEL = os.getenv("LEGAL_EMB_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+DEFAULT_EMB_MODEL = os.getenv("LEGAL_EMB_MODEL", "text-embedding-3-small")
 
 # 차원→권장 모델 맵
 DIM_TO_MODEL = {
-    384: "sentence-transformers/all-MiniLM-L6-v2",
-    512: "BAAI/bge-small-en-v1.5",
-    768: "distilbert-base-nli-stsb-mean-tokens",
-    1024:"BAAI/bge-base-en-v1.5",
+    384: "text-embedding-3-small",
+    512: "text-embedding-3-small",
+    768: "text-embedding-3-small",
+    1024:"text-embedding-3-small",
 }
 
 def _ensure_api_key() -> None:
     if not os.getenv("OPENAI_API_KEY"):
         raise SystemExit("환경변수 OPENAI_API_KEY가 없습니다. .env에 설정하거나 export 해주세요.")
 
-def _emb(model_name: str) -> HuggingFaceEmbeddings:
+def _emb(model_name: str) -> OpenAIEmbeddings:
     # normalize_embeddings=True 를 주면 IP 검색에서 더 안정적인 경우가 많음
-    return HuggingFaceEmbeddings(model_name=model_name)
+    return OpenAIEmbeddings(model=model_name)
 
 def _build_vs(chroma_dir: str, emb_model: str) -> Chroma:
     if not Path(chroma_dir).exists():

@@ -17,7 +17,7 @@ Usage
   python recommend_webtoon_v2.py \
     --query "30대 남성을 타깃으로 할 프리미엄 아웃도어 콜라보레이션용 웹툰 추천" \
     --csv ./webtoon_data_new.csv \
-    --story-db ./db --story-col webtoon_info \
+    --story-db ./db1 --story-col webtoon_info \
     --top 5 --with-llm
 """
 
@@ -545,7 +545,7 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Hybrid webtoon recommender (storyline RAG + status stats)")
     p.add_argument("--query", type=str, required=True, help="자연어 추천 요청")
     p.add_argument("--csv", type=str, default="./webtoon_data_new.csv")
-    p.add_argument("--story-db", type=str, default="./db")
+    p.add_argument("--story-db", type=str, default="./db1")
     p.add_argument("--story-col", type=str, default="webtoon_info")
     p.add_argument("--status-col", type=str, default=None)
     p.add_argument("--top", type=int, default=None)

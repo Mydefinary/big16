@@ -37,9 +37,9 @@ from dotenv import load_dotenv
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-DEFAULT_DB_DIR = "./db"
+DEFAULT_DB_DIR = "./db1"
 DEFAULT_COLLECTION = "webtoon_storylines"
-DEFAULT_EMBEDDING_MODEL = "text-embedding-3-large"
+DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small"
 DEFAULT_CHAT_MODEL = "gpt-4o"
 DEFAULT_TITLE_KEYS = [
     # common English

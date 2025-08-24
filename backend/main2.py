@@ -47,7 +47,7 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 if THIS_DIR not in sys.path:
     sys.path.insert(0, THIS_DIR)
 
-DEF_DB_INFO = os.getenv("INFO_DB", "./db")
+DEF_DB_INFO = os.getenv("INFO_DB", "./db1")
 DEF_COL_INFO = os.getenv("INFO_COLLECTION", "webtoon_info")
 DEF_CSV = os.getenv("STATUS_CSV", "./webtoon_data_new.csv")
 DEF_DB_STATUS = os.getenv("STATUS_DB", "./db2")
