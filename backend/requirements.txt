@@ -10,3 +10,8 @@ langchain_chroma
 langchain-community
 langchain_huggingface
 chromadb
+faiss-cpu
+huggingface-hub
+transformers
+sentence-transformers
+regex

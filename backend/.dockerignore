@@ -6,7 +6,4 @@ __pycache__
 *.egg-info
 .chroma_cache
 intent_logs.csv
-build_webtoon_chroma.py
-build_webtoon_status_chroma.py
-main.py
 chroma_db3/
