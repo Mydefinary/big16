@@ -384,6 +384,14 @@ from pydantic import BaseModel
 
 app = FastAPI(title="Webtoon Chatbot API", version="1.0.0")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 class AskRequest(BaseModel):
     question: str
     session_id: Optional[str] = "default"
