@@ -303,9 +303,15 @@ const SecurityProvider = ({ children }) => {
       isInitializedRef.current = true;
       setSecurityHeaders();
       updateLastActivity();
-      console.log('SecurityProvider initialized');
+      
+      // 전역에서 사용할 수 있도록 노출
+      window.generateCSRFToken = generateCSRFToken;
+      
+      console.log('✅ SecurityProvider initialized');
+      console.log('✅ window.generateCSRFToken:', typeof window.generateCSRFToken);
+      console.log('✅ Test token:', window.generateCSRFToken());
     }
-  }, [setSecurityHeaders, updateLastActivity]);
+  }, [setSecurityHeaders, updateLastActivity, generateCSRFToken]);
 
   // 🔥 라우트 변경 시 보안 검증 - 중복 검증 방지
   useEffect(() => {
@@ -380,20 +386,6 @@ const SecurityProvider = ({ children }) => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
-
-  // CSRF토큰 관련 추가
-  useEffect(() => {
-    if (!isInitializedRef.current) {
-      isInitializedRef.current = true;
-      setSecurityHeaders();
-      updateLastActivity();
-      
-      // 전역에서 사용할 수 있도록 노출
-      window.generateCSRFToken = generateCSRFToken;
-      
-      console.log('SecurityProvider initialized');
-    }
-  }, [setSecurityHeaders, updateLastActivity, generateCSRFToken]);
 
   // 보안 상태가 차단된 경우
   if (securityState.isBlocked && securityState.blockEndTime) {

@@ -61,16 +61,20 @@ const refreshTokenFunction = async () => {
   }
 };
 
-// 요청 인터셉터 수정
+// 요청 인터셉터
 api.interceptors.request.use(
   (config) => {
     console.log(`🔍 API Request: ${config.method?.toUpperCase()} ${config.url}`);
     
-    // POST, PUT, PATCH, DELETE 요청에만 CSRF 토큰 추가
+    // POST, PUT, PATCH, DELETE 요청에 CSRF 토큰 추가
     if (['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase())) {
-      // SecurityContext에서 토큰 가져오기 (전역 함수로 노출 필요)
-      const csrfToken = window.generateCSRFToken?.() || generateCSRFToken();
-      config.headers['X-CSRF-Token'] = csrfToken;
+      const csrfToken = window.generateCSRFToken?.();
+      if (csrfToken) {
+        config.headers['X-CSRF-Token'] = csrfToken;
+        console.log('🎫 CSRF Token added, length:', csrfToken.length);
+      } else {
+        console.warn('⚠️ CSRF Token not available');
+      }
     }
     
     return config;
