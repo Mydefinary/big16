@@ -23,7 +23,7 @@ Run API (option 2):
 CLI examples:
   python main.py auto --ask "타임루프가 주요 소재인 작품 알려줘"
   python main.py auto --ask "20대 남성에게 가장 인기 많은 웹툰 3개, 구독자수와 평점도"
-  python main.py legal --question "웹툰 캐릭터 굿즈 라이선스?" --chroma-dir ./chroma_db6 --k 5 --json
+  python main.py legal --question "웹툰 캐릭터 굿즈 라이선스?" --chroma-dir ./chroma_db5 --k 5 --json
 """
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ DEF_COL_INFO = os.getenv("INFO_COLLECTION", "webtoon_info")
 DEF_CSV = os.getenv("STATUS_CSV", "./webtoon_data_new.csv")
 DEF_DB_STATUS = os.getenv("STATUS_DB", "./db2")
 DEF_COL_STATUS = os.getenv("STATUS_COLLECTION", "webtoon_status")
-DEF_LEGAL_CHROMA = os.getenv("CHROMA_DIR", "./chroma_db6")
+DEF_LEGAL_CHROMA = os.getenv("CHROMA_DIR", "./chroma_db5")
 
 # LLM availability (for router)
 try:
@@ -432,8 +432,21 @@ def _execute_for_api(question: str) -> AskResponse:
         out = run_module_capture(mod, argv)
     else:  # recommend
         mod = "recommend_webtoon_v2" if module_exists("recommend_webtoon_v2") else "recommend_webtoon"
-        argv = ["--query", question, "--csv", DEF_CSV, "--story-db", DEF_DB_INFO, "--story-col", DEF_COL_INFO]
-        if slots.get("top"): argv += ["--top", str(slots["top"])]
+        argv = [
+            "--query", question,
+            "--csv", DEF_CSV,
+            "--story-db", DEF_DB_INFO,
+            "--story-col", DEF_COL_INFO,
+        ]
+        # 라우터가 뽑은 슬롯을 그대로 붙여줌
+        if slots.get("top"):      argv += ["--top", str(slots["top"])]
+        if slots.get("age") is not None:    argv += ["--age", str(slots["age"])]
+        if slots.get("gender"):   argv += ["--gender", str(slots["gender"])]
+
+        # ★ 명시적으로 False가 아닌 한 LLM 이유 생성 활성화 (None 포함)
+        if slots.get("with_llm") is not False:
+            argv += ["--with-llm"]
+
         out = run_module_capture(mod, argv)
 
     # If JSON came back (legal --json), try to normalize to just answer
