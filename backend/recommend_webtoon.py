@@ -589,7 +589,8 @@ def main():
         with_llm=args.with_llm,
     )
 
-    print(f"[Recommend] Top {top_n} (weights: sim={used_weights['sim']}, pop={used_weights['pop']}, rating={used_weights['rating']})\n")
+    # print(f"[Recommend] Top {top_n} (weights: sim={used_weights['sim']}, pop={used_weights['pop']}, rating={used_weights['rating']})\n")
+    print(f"[Recommend] Top {top_n}\n")
     if not items:
         print("(No candidates found: check --story-db/--story-col, or ensure embeddings are built.)")
         return
@@ -602,7 +603,8 @@ def main():
             metas.append(f"구독/관심={c.raw_metrics.get('subs')}")
         if c.raw_metrics.get('views') is not None:
             metas.append(f"조회수={c.raw_metrics.get('views')}")
-        print(f"{i}. {c.title}  | hybrid={c.meta.get('hybrid_score'):.3f} | " + ", ".join(metas) )
+        # print(f"{i}. {c.title}  | hybrid={c.meta.get('hybrid_score'):.3f} | " + ", ".join(metas) )
+        print(f"{i}. {c.title}" )
 
     if args.with_llm and items:
         expl = summarize_reasons(items, q, story_db=args.story_db, story_col=args.story_col)

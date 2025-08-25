@@ -360,6 +360,7 @@ def main():
         filter_json=args.filter_json,
         age=age,
         gender=gender,
+        
     )
 
     # 표시에 사용할 지표(요청 없으면 기본: subs+rating)
@@ -372,7 +373,8 @@ def main():
     if age:    demo_bits.append(f"{age}대")
     demo_label = " | ".join(demo_bits) if demo_bits else "전체"
 
-    print(f"[Result] 대상: {demo_label} | 기준: {reason} | Top {top_n}\n")
+    # print(f"[Result] 대상: {demo_label} | 기준: {reason} | Top {top_n}\n")
+    print(f"[Result] 대상: {demo_label}\n")
     for i, s in enumerate(selections, 1):
         row = df.loc[s.row_index]
         fields = []
