@@ -1,110 +1,231 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { authAPI } from '../services/api';
 import ComingSoonPage from './ComingSoonPage';
+import { toast } from 'react-toastify';
 
 const TokenRequiredPage = ({ pageName, description, DetailComponent }) => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // 로그인한 사용자에게는 실제 페이지 또는 ComingSoonPage 표시
-  if (isAuthenticated()) {
-    // DetailComponent가 있으면 실제 페이지를 보여주고, 없으면 ComingSoonPage 표시
+  // 사용자 정보 가져오기 (Dashboard와 동일한 방식)
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (!isAuthenticated()) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await authAPI.me();
+        setUserInfo(res.data);
+      } catch (error) {
+        console.error('사용자 정보 불러오기 실패:', error);
+        toast.error('세션이 만료되었습니다. 다시 로그인해주세요.');
+        logout();
+        navigate('/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserInfo();
+  }, [isAuthenticated, logout, navigate]);
+
+  // 로딩 중
+  if (loading) {
+    return (
+      <div className="loading">
+        <div className="loading-spinner">사용자 정보를 불러오는 중...</div>
+      </div>
+    );
+  }
+
+  // 로그인하지 않은 경우
+  if (!isAuthenticated() || !userInfo) {
+    return (
+      <div className="token-required-container">
+        <div className="token-required-content">
+          <div className="token-required-icon">
+            🔐
+          </div>
+          
+          <h1 className="token-required-title">
+            {pageName}
+          </h1>
+          
+          <div className="token-required-message">
+            <h2>🚫 접근 권한이 필요합니다</h2>
+            <p className="main-message">
+              이 페이지를 사용하기 위해서는 <strong>로그인</strong>이 필요합니다.
+            </p>
+            
+            {description && (
+              <div className="page-description">
+                <h3>📝 {pageName} 소개</h3>
+                <p>{description}</p>
+              </div>
+            )}
+            
+            <div className="feature-info">
+              <h3>✨ 로그인 후 이용 가능한 기능</h3>
+              <ul>
+                <li>🎨 개인 맞춤형 콘텐츠 제작</li>
+                <li>💾 작업 내용 자동 저장</li>
+                <li>📊 상세한 분석 및 리포트</li>
+                <li>🔄 클라우드 동기화</li>
+                <li>🎯 고급 설정 옵션</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="token-required-actions">
+            <button
+              onClick={() => navigate('/login')}
+              className="action-button primary large"
+            >
+              🔑 로그인하기
+            </button>
+            
+            <button
+              onClick={() => navigate('/register')}
+              className="action-button secondary large"
+            >
+              👤 회원가입
+            </button>
+          </div>
+
+          <div className="help-section">
+            <p className="help-text">
+              계정이 없으신가요? <button onClick={() => navigate('/register')} className="link-text">회원가입</button>은 무료입니다!
+            </p>
+            <p className="help-text">
+              문제가 있으신가요? <button onClick={() => navigate('/faq')} className="link-text">FAQ</button>를 확인해보세요.
+            </p>
+          </div>
+        </div>
+
+        <div className="token-info-box">
+          <h4>🔐 보안 안내</h4>
+          <div className="security-features">
+            <div className="security-item">
+              <span className="security-icon">🛡️</span>
+              <span>JWT 토큰 기반 안전한 인증</span>
+            </div>
+            <div className="security-item">
+              <span className="security-icon">🔄</span>
+              <span>자동 토큰 갱신으로 끊김없는 서비스</span>
+            </div>
+            <div className="security-item">
+              <span className="security-icon">⏰</span>
+              <span>세션 타임아웃으로 보안 강화</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 로그인은 했지만 권한이 없는 경우 (user 역할)
+  if (userInfo.role === 'user') {
+    return (
+      <div className="token-required-container">
+        <div className="token-required-content">
+          <div className="token-required-icon">
+            ⛔
+          </div>
+          
+          <h1 className="token-required-title">
+            {pageName}
+          </h1>
+          
+          <div className="token-required-message">
+            <h2>🚫 접근 권한이 부족합니다</h2>
+            <p className="main-message">
+              이 페이지에 접근하기 위해서는 <strong>운영자 또는 관리자 권한</strong>이 필요합니다.
+            </p>
+            
+            <div className="role-info">
+              <h3>👤 현재 권한: <span className="current-role user">일반 사용자</span></h3>
+              <h3>🔑 필요 권한: <span className="required-roles">운영자, 관리자</span></h3>
+            </div>
+            
+            {description && (
+              <div className="page-description">
+                <h3>📝 {pageName} 소개</h3>
+                <p>{description}</p>
+              </div>
+            )}
+            
+            <div className="permission-info">
+              <h3>ℹ️ 권한 안내</h3>
+              <p>이 기능은 운영자 또는 관리자 권한이 필요한 페이지입니다.</p>
+              <p>권한 승급이 필요하시다면 시스템 관리자에게 문의해주세요.</p>
+            </div>
+          </div>
+
+          <div className="token-required-actions">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="action-button primary large"
+            >
+              📊 대시보드로 돌아가기
+            </button>
+            
+            <button
+              onClick={() => navigate('/contact')}
+              className="action-button secondary large"
+            >
+              📞 관리자 문의
+            </button>
+          </div>
+        </div>
+
+        <div className="token-info-box">
+          <h4>👥 권한 체계</h4>
+          <div className="role-hierarchy">
+            <div className="role-item">
+              <span className="role-badge admin">👑 관리자</span>
+              <span>시스템 전체 관리 권한</span>
+            </div>
+            <div className="role-item">
+              <span className="role-badge operator">⚙️ 운영자</span>
+              <span>콘텐츠 및 사용자 관리</span>
+            </div>
+            <div className="role-item">
+              <span className="role-badge user">👤 일반 사용자</span>
+              <span>기본 서비스 이용</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 운영자(operator) 또는 관리자(admin) 권한이 있는 경우 - 페이지 접근 허용
+  if (userInfo.role === 'operator' || userInfo.role === 'admin') {
     if (DetailComponent) {
       return <DetailComponent />;
     }
     return <ComingSoonPage pageName={pageName} description={description} />;
   }
 
+  // 예상하지 못한 role인 경우 (안전장치)
   return (
     <div className="token-required-container">
       <div className="token-required-content">
-        <div className="token-required-icon">
-          🔐
-        </div>
-        
-        <h1 className="token-required-title">
-          {pageName}
-        </h1>
-        
-        <div className="token-required-message">
-          <h2>🚫 접근 권한이 필요합니다</h2>
-          <p className="main-message">
-            이 페이지를 사용하기 위해서는 <strong>로그인</strong>이 필요합니다.
-          </p>
-          
-          {description && (
-            <div className="page-description">
-              <h3>📝 {pageName} 소개</h3>
-              <p>{description}</p>
-            </div>
-          )}
-          
-          <div className="feature-info">
-            <h3>✨ 로그인 후 이용 가능한 기능</h3>
-            <ul>
-              <li>🎨 개인 맞춤형 콘텐츠 제작</li>
-              <li>💾 작업 내용 자동 저장</li>
-              <li>📊 상세한 분석 및 리포트</li>
-              <li>🔄 클라우드 동기화</li>
-              <li>🎯 고급 설정 옵션</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="token-required-actions">
-          {!isAuthenticated() ? (
-            <>
-              <button 
-                onClick={() => navigate('/login')}
-                className="action-button primary large"
-              >
-                🔑 로그인하기
-              </button>
-              
-              <button 
-                onClick={() => navigate('/register')}
-                className="action-button secondary large"
-              >
-                👤 회원가입
-              </button>
-            </>
-          ) : (
-            <button 
-              onClick={() => navigate('/dashboard')}
-              className="action-button primary large"
-            >
-              📊 대시보드로 이동
-            </button>
-          )}
-        </div>
-
-        <div className="help-section">
-          <p className="help-text">
-            계정이 없으신가요? <button onClick={() => navigate('/register')} className="link-text">회원가입</button>은 무료입니다!
-          </p>
-          <p className="help-text">
-            문제가 있으신가요? <button onClick={() => navigate('/faq')} className="link-text">FAQ</button>를 확인해보세요.
-          </p>
-        </div>
-      </div>
-
-      <div className="token-info-box">
-        <h4>🔐 보안 안내</h4>
-        <div className="security-features">
-          <div className="security-item">
-            <span className="security-icon">🛡️</span>
-            <span>JWT 토큰 기반 안전한 인증</span>
-          </div>
-          <div className="security-item">
-            <span className="security-icon">🔄</span>
-            <span>자동 토큰 갱신으로 끊김없는 서비스</span>
-          </div>
-          <div className="security-item">
-            <span className="security-icon">⏰</span>
-            <span>세션 타임아웃으로 보안 강화</span>
-          </div>
-        </div>
+        <div className="token-required-icon">❌</div>
+        <h1>알 수 없는 권한</h1>
+        <p>알 수 없는 사용자 권한입니다. 관리자에게 문의해주세요.</p>
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="action-button primary large"
+        >
+          대시보드로 돌아가기
+        </button>
       </div>
     </div>
   );
