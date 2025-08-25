@@ -2,20 +2,20 @@ name: Chatbot Frontend CI/CD
 
 on:
   push:
-    branches: [ "chatbot" ]
+    branches: [ "chatbot-lee" ]
     paths:
-      - "chatbot/frontend-test/frontend/**"
+      - "frontend/**"
       - ".github/workflows/chatbot-frontend-cicd.yml"
       - "deployments/chatbot-frontend-deployment.yaml"
   pull_request:
-    branches: [ "chatbot" ]
+    branches: [ "chatbot-lee" ]
     paths:
-      - "chatbot/frontend-test/frontend/**"
+      - "frontend/**"
 
 env:
   ACR_NAME: "kt16big"
-  IMAGE_NAME: "chatbot-frontend"
-  WORKING_DIR: "chatbot/frontend-test/frontend"
+  IMAGE_NAME: "chatbot-frontend-lee"
+  WORKING_DIR: "frontend"
   AKS_CLUSTER_NAME: "kt16big-aks"
   AKS_RESOURCE_GROUP: "kt16big"
   DEPLOYMENT_FILE: "deployments/chatbot-frontend-deployment.yaml"
@@ -74,3 +74,6 @@ jobs:
           IMAGE_TAG: ${{ needs.build-and-push-to-acr.outputs.image_tag }}
         run: |
           envsubst < ${{ env.DEPLOYMENT_FILE }} | kubectl apply -f -
+
+      - name: Wait for rollout
+        run: kubectl rollout status deployment/question-frontend-deployment-lee -n lee --timeout=5m

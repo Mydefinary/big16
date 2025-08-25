@@ -29,7 +29,8 @@
       "Bash(kubectl patch:*)",
       "Bash(docker images:*)",
       "Bash(cp:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(kubectl top:*)"
     ],
     "deny": [],
     "ask": [],

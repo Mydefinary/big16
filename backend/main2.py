@@ -401,8 +401,12 @@ class AskResponse(BaseModel):
     intent: str
     answer: str
 
-@app.get("/question-api/health")
+@app.get("/health")
 def health():
+    return {"status": "ok"}
+
+@app.get("/question-api/health")
+def health_api():
     return {"status": "ok"}
 
 

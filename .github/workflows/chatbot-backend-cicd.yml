@@ -2,20 +2,20 @@ name: Chatbot Backend CI/CD
 
 on:
   push:
-    branches: [ "chatbot" ]
+    branches: [ "chatbot-lee" ]
     paths:
-      - "chatbot/backend/**"
+      - "backend/**"
       - ".github/workflows/chatbot-backend-cicd.yml"
       - "deployments/chatbot-backend-deployment.yaml"
   pull_request:
-    branches: [ "chatbot" ]
+    branches: [ "chatbot-lee" ]
     paths:
-      - "chatbot/backend/**"
+      - "backend/**"
 
 env:
   ACR_NAME: "kt16big"                         # ACR 이름
   IMAGE_NAME: "chatbot-backend"               # 이미지 리포지토리 이름
-  WORKING_DIR: "chatbot/backend"              # Docker 컨텍스트 루트
+  WORKING_DIR: "backend"                      # Docker 컨텍스트 루트
   AKS_CLUSTER_NAME: "kt16big-aks"             # AKS 클러스터 이름
   AKS_RESOURCE_GROUP: "kt16big"               # AKS 리소스 그룹
   DEPLOYMENT_FILE: "deployments/chatbot-backend-deployment.yaml"
@@ -78,4 +78,4 @@ jobs:
           envsubst < ${{ env.DEPLOYMENT_FILE }} | kubectl apply -f -
 
       - name: Wait for rollout
-        run: kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }} --timeout=5m
+        run: kubectl rollout status deployment/question-backend-deployment-lee -n lee --timeout=5m

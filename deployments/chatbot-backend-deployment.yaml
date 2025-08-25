@@ -9,6 +9,11 @@ metadata:
 spec:
   replicas: 1
   revisionHistoryLimit: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: question-backend-lee
@@ -18,10 +23,11 @@ spec:
         app: question-backend-lee
     spec:
       nodeSelector:
-        agentpool: userpool
+        agentpool: ragpool
       containers:
         - name: chatbot-backend-container
           image: kt16big.azurecr.io/chatbot-backend:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8083
           env:
@@ -30,6 +36,29 @@ spec:
                 secretKeyRef:
                   name: api-keys-secret
                   key: OPENAI_API_KEY
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "1500m"
+          livenessProbe:
+            httpGet:
+              path: /question-api/health
+              port: 8083
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /question-api/health
+              port: 8083
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
 ---
 # ===================================================
 # 웹툰 챗봇 - 백엔드 서비스 - Lee Namespace
