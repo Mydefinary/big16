@@ -5,6 +5,7 @@ import { authAPI } from '../services/api';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './Dashboard.css';
+import { useSecurity } from '../components/SecurityProvider';
 
 // 마스킹 함수들을 컴포넌트 외부에 정의
 const maskEmail = (email) => {
@@ -40,12 +41,14 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [showFullInfo, setShowFullInfo] = useState(false);
   const navigate = useNavigate();
-
+  const { securePrint } = useSecurity();
+  
   // 로그인한 유저 정보 불러오기
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
         const res = await authAPI.me();
+        securePrint('사용자 정보 로드 완료:', res.data);
         setUserInfo(res.data);
       } catch (error) {
         console.error('사용자 정보 불러오기 실패:', error);
