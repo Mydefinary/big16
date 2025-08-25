@@ -34,7 +34,13 @@
       "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
       "Bash(python:*)",
       "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
-      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)"
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Read(/C:\\c\\Users\\hoa\\vscode_project\\chatbot-lee/**)",
+      "Bash(docker run:*)",
+      "Bash(docker pull:*)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Read(/c:\\Users\\hoa\\vscode_project\\chatbot-lee\\deployments/**)"
     ],
     "deny": [],
     "ask": [],

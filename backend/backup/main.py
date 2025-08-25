@@ -31,7 +31,7 @@ if not OPENAI_API_KEY:
     raise RuntimeError("환경변수 OPENAI_API_KEY가 없습니다. .env에 설정해 주세요.")
 
 WEBTOON_CSV_PATH = os.getenv("WEBTOON_CSV_PATH", "./webtoon_data.csv")
-CHROMA_DIR = os.getenv("CHROMA_DIR", "./chroma_db5")
+CHROMA_DIR = os.getenv("CHROMA_DIR", "./chroma_db6")
 FAISS_DB_DIR = os.getenv("FAISS_DB_DIR", "./db")
 
 try:

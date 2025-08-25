@@ -21,7 +21,7 @@ COPY . .
 
 # 런타임 환경변수 기본값 (필요시 compose에서 오버라이드)
 ENV WEBTOON_CSV_PATH=./webtoon_data.csv \
-    CHROMA_DIR=./chroma_db5 \
+    CHROMA_DIR=./chroma_db6 \
     FAISS_DB_DIR=./db
 
 # Uvicorn 실행

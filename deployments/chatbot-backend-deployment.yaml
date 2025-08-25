@@ -28,7 +28,7 @@ spec:
       containers:
         - name: chatbot-backend-container
           image: kt16big.azurecr.io/chatbot-backend:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8083
           env:
@@ -67,7 +67,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: question-backend-service-lee
+  name: question-backend-service-lee-2
   namespace: lee
 spec:
   type: ClusterIP

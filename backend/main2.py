@@ -23,7 +23,7 @@ Run API (option 2):
 CLI examples:
   python main.py auto --ask "타임루프가 주요 소재인 작품 알려줘"
   python main.py auto --ask "20대 남성에게 가장 인기 많은 웹툰 3개, 구독자수와 평점도"
-  python main.py legal --question "웹툰 캐릭터 굿즈 라이선스?" --chroma-dir ./chroma_db5 --k 5 --json
+  python main.py legal --question "웹툰 캐릭터 굿즈 라이선스?" --chroma-dir ./chroma_db6 --k 5 --json
 """
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ DEF_COL_INFO = os.getenv("INFO_COLLECTION", "webtoon_info")
 DEF_CSV = os.getenv("STATUS_CSV", "./webtoon_data_new.csv")
 DEF_DB_STATUS = os.getenv("STATUS_DB", "./db2")
 DEF_COL_STATUS = os.getenv("STATUS_COLLECTION", "webtoon_status")
-DEF_LEGAL_CHROMA = os.getenv("CHROMA_DIR", "./chroma_db5")
+DEF_LEGAL_CHROMA = os.getenv("CHROMA_DIR", "./chroma_db6")
 
 # LLM availability (for router)
 try:

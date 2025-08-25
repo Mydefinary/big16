@@ -103,7 +103,7 @@ kubectl set image deployment/question-backend-deployment-lee-2 \
 # .env 파일 생성
 OPENAI_API_KEY=your_openai_api_key
 WEBTOON_CSV_PATH=./webtoon_data.csv
-CHROMA_DIR=./chroma_db5
+CHROMA_DIR=./chroma_db6
 FAISS_DB_DIR=./db
 ```
 

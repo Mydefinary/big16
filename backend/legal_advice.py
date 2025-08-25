@@ -22,7 +22,7 @@ except Exception:
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from chromadb.errors import InvalidArgumentError  # 차원 불일치 캐치
 
-DEFAULT_CHROMA_DIR = os.getenv("CHROMA_DIR", "./chroma_db5")
+DEFAULT_CHROMA_DIR = os.getenv("CHROMA_DIR", "./chroma_db6")
 DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
 # 기존 인덱스가 768차원일 가능성이 높아 mpnet 기본
 DEFAULT_EMB_MODEL = os.getenv("LEGAL_EMB_MODEL", "text-embedding-3-small")

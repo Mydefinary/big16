@@ -5,5 +5,5 @@ __pycache__/
 db/
 db2/
 intent_logs.csv
-
+.cluade/
 kubectl
