@@ -9,6 +9,7 @@ metadata:
 spec:
   replicas: 1
   revisionHistoryLimit: 2
+  progressDeadlineSeconds: 3000
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -47,18 +48,18 @@ spec:
             httpGet:
               path: /question-api/health
               port: 8083
-            initialDelaySeconds: 120
-            periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 5
+            initialDelaySeconds: 300
+            periodSeconds: 60
+            timeoutSeconds: 30
+            failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /question-api/health
               port: 8083
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            timeoutSeconds: 15
+            failureThreshold: 10
 ---
 # ===================================================
 # 웹툰 챗봇 - 백엔드 서비스 - Lee Namespace

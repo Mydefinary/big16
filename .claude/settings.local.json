@@ -30,7 +30,8 @@
       "Bash(docker images:*)",
       "Bash(cp:*)",
       "Bash(sed:*)",
-      "Bash(kubectl top:*)"
+      "Bash(kubectl top:*)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)"
     ],
     "deny": [],
     "ask": [],
