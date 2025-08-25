@@ -6,6 +6,4 @@ __pycache__
 *.egg-info
 .chroma_cache
 intent_logs.csv
-chroma_db3/
 db/
-main.py

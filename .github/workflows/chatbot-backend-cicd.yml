@@ -78,4 +78,4 @@ jobs:
           envsubst < ${{ env.DEPLOYMENT_FILE }} | kubectl apply -f -
 
       - name: Wait for rollout
-        run: kubectl rollout status deployment/question-backend-deployment-lee -n lee --timeout=30m
+        run: kubectl rollout status deployment/question-backend-deployment-lee -n lee --timeout=90m
