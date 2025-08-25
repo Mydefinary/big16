@@ -48,6 +48,7 @@ jobs:
           context: ${{ env.WORKING_DIR }}
           file: ${{ env.WORKING_DIR }}/Dockerfile
           push: true
+          no-cache: true
           tags: |
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ steps.get_sha.outputs.sha }}
             ${{ env.ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
