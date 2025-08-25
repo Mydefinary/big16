@@ -7,3 +7,5 @@ __pycache__
 .chroma_cache
 intent_logs.csv
 db/
+chroma_db3/
+main.py
