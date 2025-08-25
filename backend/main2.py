@@ -454,38 +454,33 @@ def ask(req: AskRequest) -> AskResponse:
 
 
 # ---------------- Serve helper ----------------
-def _serve(host: str = "0.0.0.0", port: int = 8083) -> int:
-    try:
-        import uvicorn
-    except Exception as e:
-        raise SystemExit(f"uvicorn not installed: {e}")
-    uvicorn.run("main2:app", host=host, port=port, reload=False)
-    return 0
-
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8083)
 
 # ---------------- main() ----------------
 
-def main():
-    parser = build_parser()
-    args = parser.parse_args()
+# def main():
+#     parser = build_parser()
+#     args = parser.parse_args()
 
-    if args.cmd == "auto":
-        slots = auto_route(args.ask)
-        intent = slots.get("intent") or "recommend"
-        print(f"[Router] intent={intent} slots={json.dumps(slots, ensure_ascii=False)}\n")
-        if intent == "info":
-            rc = dispatch_info(args, args.ask)
-        elif intent == "status":
-            rc = dispatch_status(args, args.ask, slots)
-        elif intent == "legal":
-            rc = dispatch_legal(args, args.ask, slots)
-        else:
-            rc = dispatch_recommend(args, args.ask, slots)
-        sys.exit(rc)
+#     if args.cmd == "auto":
+#         slots = auto_route(args.ask)
+#         intent = slots.get("intent") or "recommend"
+#         print(f"[Router] intent={intent} slots={json.dumps(slots, ensure_ascii=False)}\n")
+#         if intent == "info":
+#             rc = dispatch_info(args, args.ask)
+#         elif intent == "status":
+#             rc = dispatch_status(args, args.ask, slots)
+#         elif intent == "legal":
+#             rc = dispatch_legal(args, args.ask, slots)
+#         else:
+#             rc = dispatch_recommend(args, args.ask, slots)
+#         sys.exit(rc)
 
-    rc = args.func(args) if hasattr(args, "func") and args.func else 0
-    sys.exit(rc)
+#     rc = args.func(args) if hasattr(args, "func") and args.func else 0
+#     sys.exit(rc)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
