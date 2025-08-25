@@ -33,6 +33,7 @@
       "Bash(kubectl top:*)",
       "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
       "Bash(python:*)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
       "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)"
     ],
     "deny": [],

@@ -8,4 +8,4 @@ __pycache__
 intent_logs.csv
 db/
 chroma_db3/
-main.py
+backup/
