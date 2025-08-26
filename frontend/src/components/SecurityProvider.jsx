@@ -29,7 +29,8 @@ const ALLOWED_ROUTES = [
   '/webtoon-ppl-generator',
   '/webtoon-goods-generator',
   '/webtoon-dashboard',
-  '/faq'
+  '/faq',
+  '/terms'
 ];
 
 // 보안 설정

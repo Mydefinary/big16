@@ -67,7 +67,6 @@ const AdminDashboard = ({ userInfo }) => {
   // 대시보드로 돌아가기
   const goBackToDashboard = () => {
     setCurrentView('dashboard');
-    toast.info('대시보드로 돌아갑니다', { autoClose: 2000 });
   };
 
   // 권한 변경 모달 열기
@@ -146,7 +145,7 @@ const AdminDashboard = ({ userInfo }) => {
                 <th>회사</th>
                 <th>권한</th>
                 <th>가입일</th>
-                <th>액션</th>
+                <th>권한 변경</th>
               </tr>
             </thead>
             <tbody>
