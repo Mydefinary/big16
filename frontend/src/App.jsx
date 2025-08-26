@@ -23,6 +23,7 @@ import FindPassword from './pages/FindPassword';
 import Dashboard from './pages/Dashobard/Dashboard';
 import MyPage from './pages/MyPage';
 import FAQ from './pages/FAQ';
+import TermsAgreement from './pages/TermsAgreement';
 import './App.css';
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
                 <Route path="/find-id" element={<FindId />} />
                 <Route path="/find-password" element={<FindPassword />} />
                 <Route path="/notice-board" element={<Board />} />
+                <Route path="/terms" element={<TermsAgreement />} />
                 <Route
                   path="/dashboard"
                   element={

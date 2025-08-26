@@ -6,6 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import UserDashboard from './UserDashboard';
 import AdminDashboard from './AdminDashboard';
+import OperatorDashboard from './OperatorDashboard';
 import { useSecurity } from '../../components/SecurityProvider';
 
 const Dashboard = () => {
@@ -45,6 +46,10 @@ const Dashboard = () => {
   // 역할에 따라 다른 대시보드 컴포넌트 렌더링
   if (userInfo.role === 'admin') {
     return <AdminDashboard userInfo={userInfo} />;
+  }
+  
+  if (userInfo.role === 'operator') {
+    return <OperatorDashboard userInfo={userInfo} />;
   }
 
   return <UserDashboard userInfo={userInfo} />;
