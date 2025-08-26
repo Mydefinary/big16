@@ -221,7 +221,7 @@ const Login = () => {
         <div className="auth-links">
           <Link to="/find-id" className="link">아이디 찾기</Link>
           <Link to="/find-password" className="link">비밀번호 찾기</Link>
-          <Link to="/register" className="link">회원가입</Link>
+          <Link to="/terms" className="link">회원가입</Link>
         </div>
 
         {/* 로그인 시도 횟수 표시 */}

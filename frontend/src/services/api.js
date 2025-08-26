@@ -144,81 +144,94 @@ api.interceptors.response.use(
 
 // Auth API
 export const authAPI = {
-  login: (credentials) => {
-    console.log('🔐 로그인 시도:', credentials?.loginId);
-    if (!credentials) {
-      return Promise.reject(new Error('로그인 정보가 필요합니다'));
-    }
-    return api.post('/auths/login', credentials);
-  },
-  
-  logout: () => {
-    console.log('🚪 로그아웃 시도');
-    return api.post('/auths/logout');
-  },
-  
-  me: () => {
-    console.log('👤 사용자 정보 조회');
-    return api.get('/auths/me');
-  },
-  
-  refreshToken: () => {
-    console.log('🔄 토큰 갱신 API 직접 호출');
-    return api.post('/auths/refresh', {}); // 빈 body
-  },
-  
-  verifyCode: (email, code) => {
-    console.log('🔢 인증 코드 검증:', email);
-    return api.post('/auths/verify-code', { email, code });
-  },
-  
-  resetPassword: (newPassword, emailToken) => {
-    console.log('🔑 비밀번호 재설정');
-    return api.patch('/auths/reset-password', { newPassword }, {
-      headers: {
-        'X-User-Email': emailToken,
-      },
-    });
-  },
-  
-  changePassword: (currentPassword, newPassword) => {
-    console.log('🔐 비밀번호 변경');
-    return api.patch('/auths/user/password-change', { 
-      currentPassword, 
-      newPassword 
-    });
-  },
-  
-  resendCode: (email) => {
-    console.log('📧 인증 코드 재발송:', email);
-    return api.post('/auths/resend-code', { email });
-  },
+ login: (credentials) => {
+   console.log('🔐 로그인 시도:', credentials?.loginId);
+   if (!credentials) {
+     return Promise.reject(new Error('로그인 정보가 필요합니다'));
+   }
+   return api.post('/auths/login', credentials);
+ },
+ 
+ logout: () => {
+   console.log('🚪 로그아웃 시도');
+   return api.post('/auths/logout');
+ },
+ 
+ me: () => {
+   console.log('👤 사용자 정보 조회');
+   return api.get('/auths/me');
+ },
+ 
+ refreshToken: () => {
+   console.log('🔄 토큰 갱신 API 직접 호출');
+   return api.post('/auths/refresh', {}); // 빈 body
+ },
+ 
+ verifyCode: (email, code) => {
+   console.log('🔢 인증 코드 검증:', email);
+   return api.post('/auths/verify-code', { email, code });
+ },
+ 
+ resetPassword: (newPassword, emailToken) => {
+   console.log('🔑 비밀번호 재설정');
+   return api.patch('/auths/reset-password', { newPassword }, {
+     headers: {
+       'X-User-Email': emailToken,
+     },
+   });
+ },
+ 
+ changePassword: (currentPassword, newPassword) => {
+   console.log('🔐 비밀번호 변경');
+   return api.patch('/auths/user/password-change', { 
+     currentPassword, 
+     newPassword 
+   });
+ },
+ 
+ resendCode: (email) => {
+   console.log('📧 인증 코드 재발송:', email);
+   return api.post('/auths/resend-code', { email });
+ },
+
+ changeUserRole: (targetUserId, newRole) => {
+   console.log('👑 사용자 권한 변경:', targetUserId, '->', newRole);
+   return api.patch('/auths/role-change', { 
+     targetUserId, 
+     newRole 
+   });
+ },
 };
 
 // User API
 export const userAPI = {
-  register: (userData) => {
-    console.log('👤 회원가입 시도:', userData?.email);
-    if (!userData) {
-      return Promise.reject(new Error('회원가입 정보가 필요합니다'));
-    }
-    return api.post('/users/register', userData);
-  },
-  
-  findId: (email) => {
-    console.log('🔍 아이디 찾기:', email);
-    return api.get(`/users/find-id?email=${email}`);
-  },
-  
-  checkEmail: (email) => {
-    console.log('📧 이메일 중복 확인:', email);
-    return api.get(`/users/check-email?email=${email}`);
-  },
-  
-  deactivate: () => {
-    console.log('🗑️ 계정 비활성화 시도');
-    return api.patch('/users/deactivate');
-  },
+ register: (userData) => {
+   console.log('👤 회원가입 시도:', userData?.email);
+   if (!userData) {
+     return Promise.reject(new Error('회원가입 정보가 필요합니다'));
+   }
+   return api.post('/users/register', userData);
+ },
+ 
+ findId: (email) => {
+   console.log('🔍 아이디 찾기:', email);
+   return api.get(`/users/find-id?email=${email}`);
+ },
+ 
+ checkEmail: (email) => {
+   console.log('📧 이메일 중복 확인:', email);
+   return api.get(`/users/check-email?email=${email}`);
+ },
+ 
+ deactivate: () => {
+   console.log('🗑️ 계정 비활성화 시도');
+   return api.patch('/users/deactivate');
+ },
+
+ getAllUsers: () => {
+   console.log('👥 전체 사용자 목록 조회');
+   return api.get('/users/all');
+ },
 };
 
 export default api;

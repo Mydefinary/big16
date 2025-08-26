@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../services/api';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +18,15 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const termsAgreed = localStorage.getItem('termsAgreed');
+    if (!termsAgreed) {
+      navigate('/terms');
+      return;
+    }
+    // 약관 동의 정보 처리
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

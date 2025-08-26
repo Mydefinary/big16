@@ -42,32 +42,7 @@ const UserDashboard = ({ userInfo }) => {
     });
   };
 
-  // 일반 사용자 서비스 이동 함수들
-  const goToChatBot = () => {
-    navigate('/chat-bot');
-    toast.info('AI 챗봇으로 이동합니다', { autoClose: 2000 });
-  };
-
-  const goToHighlightCreator = () => {
-    navigate('/webtoon-highlight-creator');
-    toast.info('하이라이트 제작으로 이동합니다', { autoClose: 2000 });
-  };
-
-  const goToPPLGenerator = () => {
-    navigate('/webtoon-ppl-generator');
-    toast.info('광고 생성기로 이동합니다', { autoClose: 2000 });
-  };
-
-  const goToGoodsGenerator = () => {
-    navigate('/webtoon-goods-generator');
-    toast.info('굿즈 생성기로 이동합니다', { autoClose: 2000 });
-  };
-
-  const goToWebtoonDashboard = () => {
-    navigate('/webtoon-dashboard');
-    toast.info('웹툰 대시보드로 이동합니다', { autoClose: 2000 });
-  };
-
+  // 일반 사용자 서비스 이동 함수
   const goToNoticeBoard = () => {
     navigate('/notice-board');
     toast.info('자유게시판으로 이동합니다', { autoClose: 2000 });
@@ -100,56 +75,6 @@ const UserDashboard = ({ userInfo }) => {
         <p className="services-subtitle">원하는 서비스를 선택해보세요</p>
         
         <div className="services-grid">
-          {/* AI 챗봇 */}
-          <div className="service-card" onClick={goToChatBot}>
-            <div className="service-icon">🤖</div>
-            <h3 className="service-title">AI 챗봇</h3>
-            <p className="service-description">
-              AI 기술을 활용한 스마트 챗봇 시스템으로 궁금한 것들을 물어보세요
-            </p>
-            <div className="service-status available">이용 가능</div>
-          </div>
-
-          {/* 하이라이트 제작 */}
-          <div className="service-card" onClick={goToHighlightCreator}>
-            <div className="service-icon">🎨</div>
-            <h3 className="service-title">하이라이트 제작</h3>
-            <p className="service-description">
-              웹툰의 하이라이트 장면을 AI로 자동 생성하고 편집할 수 있습니다
-            </p>
-            <div className="service-status available">이용 가능</div>
-          </div>
-
-          {/* 광고 생성기 */}
-          <div className="service-card" onClick={goToPPLGenerator}>
-            <div className="service-icon">🎬</div>
-            <h3 className="service-title">광고 생성기</h3>
-            <p className="service-description">
-              창의적인 광고 소재를 자동으로 생성하는 고급 기능입니다
-            </p>
-            <div className="service-status available">이용 가능</div>
-          </div>
-
-          {/* 굿즈 생성기 */}
-          <div className="service-card" onClick={goToGoodsGenerator}>
-            <div className="service-icon">🛍️</div>
-            <h3 className="service-title">굿즈 생성기</h3>
-            <p className="service-description">
-              웹툰 캐릭터를 활용한 다양한 굿즈 디자인을 생성합니다
-            </p>
-            <div className="service-status available">이용 가능</div>
-          </div>
-
-          {/* 웹툰 대시보드 */}
-          <div className="service-card" onClick={goToWebtoonDashboard}>
-            <div className="service-icon">📊</div>
-            <h3 className="service-title">웹툰 대시보드</h3>
-            <p className="service-description">
-              웹툰 관련 데이터와 분석 정보를 한눈에 확인할 수 있습니다
-            </p>
-            <div className="service-status available">이용 가능</div>
-          </div>
-
           {/* 자유게시판 */}
           <div className="service-card" onClick={goToNoticeBoard}>
             <div className="service-icon">📝</div>

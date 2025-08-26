@@ -380,5 +380,49 @@ public class AuthController {
         }
         return ResponseEntity.status(401).body("Unauthorized");
     }
+
+    @PatchMapping("/role-change")
+    public ResponseEntity<String> changeUserRole(@RequestBody ChangeRoleRequest request,
+                                            HttpServletRequest httpRequest) {
+        try {
+            // 요청자의 토큰 검증
+            String token = getTokenFromCookie(httpRequest, "accessToken");
+            if (token == null || !JwtUtil.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰입니다.");
+            }
+            
+            Long requesterId = JwtUtil.getUserIdFromToken(token);
+            
+            // 요청자가 관리자인지 확인
+            Auth requesterAuth = authRepository.findByUserId(requesterId)
+                    .orElseThrow(() -> new IllegalArgumentException("요청자를 찾을 수 없습니다."));
+            
+            if (!"admin".equals(requesterAuth.getRole())) {
+                System.out.println("관리자 아님");
+                System.out.println(requesterAuth.getRole());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("관리자 권한이 필요합니다.");
+            }
+            
+            // 대상 사용자 찾기 및 role 변경
+            Auth targetAuth = authRepository.findByUserId(request.getTargetUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("대상 사용자를 찾을 수 없습니다."));
+
+            targetAuth.setRole(request.getNewRole());
+            authRepository.save(targetAuth);
+
+            // 롤 변경 성공 이벤트 발행
+            RoleChange event = new RoleChange(targetAuth);
+            event.publish();
+
+            return ResponseEntity.ok("Role changed successfully");
+            
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Role 변경 실패: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Role 변경 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
 }
 //>>> Clean Arch / Inbound Adaptor

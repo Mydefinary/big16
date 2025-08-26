@@ -219,7 +219,7 @@ const Header = () => {
         <div className="header-actions">
           {!isAuthenticated() ? (
             <>
-              <Link to="/register" className="header-btn signup-btn">
+              <Link to="/terms" className="header-btn signup-btn">
                 Sign Up
               </Link>
               <Link to="/login" className="header-btn signin-btn">
