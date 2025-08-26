@@ -140,7 +140,7 @@ const Header = () => {
                   font: 'inherit'
                 }}
               >
-                하이라이트 제작 🎨
+                🎨 하이라이트 제작
               </button>
             </li>
             <li className="nav-item">
@@ -157,7 +157,7 @@ const Header = () => {
                   font: 'inherit'
                 }}
               >
-                광고 생성기 🎬
+                🎬 광고 생성기
               </button>
             </li>
             <li className="nav-item">
@@ -174,7 +174,7 @@ const Header = () => {
                   font: 'inherit'
                 }}
               >
-                굿즈 생성기 🛍️
+                🛍️ 굿즈 생성기
               </button>
             </li>
             {/* 🆕 웹툰 대시보드 링크 추가 */}
@@ -192,7 +192,7 @@ const Header = () => {
                   font: 'inherit'
                 }}
               >
-                웹툰 대시보드 📊
+                📊 웹툰 대시보드
               </button>
             </li>
             <li className="nav-item">
@@ -209,7 +209,7 @@ const Header = () => {
                   font: 'inherit'
                 }}
               >
-                자유게시판 📝
+                📝 자유게시판
               </button>
             </li>
           </ul>

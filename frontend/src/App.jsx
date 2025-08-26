@@ -20,7 +20,7 @@ import Register from './pages/Register';
 import EmailVerification from './pages/EmailVerification';
 import FindId from './pages/FindId';
 import FindPassword from './pages/FindPassword';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashobard/Dashboard';
 import MyPage from './pages/MyPage';
 import FAQ from './pages/FAQ';
 import './App.css';

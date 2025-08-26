@@ -7,6 +7,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSecurity } from '../components/SecurityProvider';
 
+
 const Login = () => {
   const [formData, setFormData] = useState({
     loginId: '',
@@ -19,7 +20,8 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { recordLoginAttempt, securityState } = useSecurity();
+  const { recordLoginAttempt, securityState, sanitizeInput } = useSecurity();
+
 
   // 로그인 후 리다이렉트할 경로 결정
   const from = location.state?.from?.pathname || '/dashboard';
@@ -69,10 +71,20 @@ const Login = () => {
     }
   }, [securityState.loginAttempts]);
 
+
   const handleChange = (e) => {
+    const value = e.target.value;
+    
+    // XSS 패턴 감지만 하고 입력은 그대로 저장
+    const dangerousPatterns = /<script|javascript:|on\w+=/i;
+    if (dangerousPatterns.test(value)) {
+      console.warn('[보안 경고] 의심스러운 입력 감지:', value);
+      toast.warn('보안상 위험한 문자가 감지되었습니다.');
+    }
+    
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: value
     });
   };
 
@@ -83,13 +95,37 @@ const Login = () => {
       return;
     }
     
+    // 제출 전 입력값 정제
+    const sanitizedData = {
+      loginId: sanitizeInput(formData.loginId),
+      password: sanitizeInput(formData.password)
+    };
+    
+    // XSS 시도 감지 시 로그인 차단
+    if (formData.loginId !== sanitizedData.loginId || formData.password !== sanitizedData.password) {
+      console.warn('[보안 경고] XSS 시도 감지됨 - 로그인 차단');
+      console.log('원본 데이터:', formData);
+      console.log('정제된 데이터:', sanitizedData);
+      
+      toast.error('보안상 위험한 입력이 감지되어 로그인이 차단되었습니다.', {
+        position: "top-right",
+        autoClose: 5000,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
+      // 로그인 시도 실패로 기록
+      recordLoginAttempt(false);
+      return; // 여기서 함수 종료 - 로그인 시도 안함
+    }
+    
     setLoading(true);
 
     try {
-      console.log('🔐 로그인 요청:', formData.loginId);
+      console.log('🔐 로그인 요청:', sanitizedData.loginId);
       
-      // 🎯 AuthContext의 login 함수 호출 (쿠키 기반)
-      await login(formData);
+      // 🎯 AuthContext의 login 함수 호출
+      await login(sanitizedData);
       
       console.log('✅ 로그인 성공 - 리다이렉트:', from);
       recordLoginAttempt(true);
@@ -101,7 +137,6 @@ const Login = () => {
         draggable: true,
       });
 
-      // 이전 페이지 또는 대시보드로 이동
       navigate(from, { replace: true });
       
     } catch (err) {
@@ -111,7 +146,6 @@ const Login = () => {
       const attempts = securityState.loginAttempts + 1;
       console.log(`로그인 실패 (${attempts}/3)`);
       
-      // 에러 메시지 처리
       let message = '로그인에 실패했습니다.';
       
       if (err.response?.data) {

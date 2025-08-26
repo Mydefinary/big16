@@ -303,7 +303,13 @@ const SecurityProvider = ({ children }) => {
       isInitializedRef.current = true;
       setSecurityHeaders();
       updateLastActivity();
-      console.log('SecurityProvider initialized');
+      
+      // 전역에서 사용할 수 있도록 노출
+      // window.generateCSRFToken = generateCSRFToken;
+      
+      // console.log('✅ SecurityProvider initialized');
+      // console.log('✅ window.generateCSRFToken:', typeof window.generateCSRFToken);
+      // console.log('✅ Test token:', window.generateCSRFToken());
     }
   }, [setSecurityHeaders, updateLastActivity]);
 
