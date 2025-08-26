@@ -73,11 +73,12 @@ const TokenRequiredPage = ({ pageName, description, DetailComponent }) => {
             <div className="feature-info">
               <h3>✨ 로그인 후 이용 가능한 기능</h3>
               <ul>
-                <li>🎨 개인 맞춤형 콘텐츠 제작</li>
-                <li>💾 작업 내용 자동 저장</li>
-                <li>📊 상세한 분석 및 리포트</li>
-                <li>🔄 클라우드 동기화</li>
-                <li>🎯 고급 설정 옵션</li>
+                <li>🤖 AI 챗봇</li>
+                <li>🎨 하이라이트 제작</li>
+                <li>🎬 광고 생성기</li>
+                <li>🛍️ 굿즈 생성기</li>
+                <li>📊 웹툰 대시보드</li>
+                <li>📝 자유게시판</li>
               </ul>
             </div>
           </div>
@@ -148,8 +149,8 @@ const TokenRequiredPage = ({ pageName, description, DetailComponent }) => {
               이 페이지에 접근하기 위해서는 <strong>운영자 또는 관리자 권한</strong>이 필요합니다.
             </p>
             
-            <div className="role-info">
-              <h3>👤 현재 권한: <span className="current-role user">일반 사용자</span></h3>
+            <div className="role-info" style={{ marginBottom: '20px' }}>
+              <h3 style={{ marginBottom: '10px' }}>👤 현재 권한: <span className="current-role user">일반 사용자</span></h3>
               <h3>🔑 필요 권한: <span className="required-roles">운영자, 관리자</span></h3>
             </div>
             
@@ -160,9 +161,9 @@ const TokenRequiredPage = ({ pageName, description, DetailComponent }) => {
               </div>
             )}
             
-            <div className="permission-info">
-              <h3>ℹ️ 권한 안내</h3>
-              <p>이 기능은 운영자 또는 관리자 권한이 필요한 페이지입니다.</p>
+            <div className="permission-info" style={{ marginBottom: '20px' }}>
+              <h3 style={{ marginBottom: '10px' }}>ℹ️ 권한 안내</h3>
+              <p style={{ marginBottom: '10px' }}>이 기능은 운영자 또는 관리자 권한이 필요한 페이지입니다.</p>
               <p>권한 승급이 필요하시다면 시스템 관리자에게 문의해주세요.</p>
             </div>
           </div>
@@ -175,27 +176,27 @@ const TokenRequiredPage = ({ pageName, description, DetailComponent }) => {
               📊 대시보드로 돌아가기
             </button>
             
-            <button
+            {/* <button
               onClick={() => navigate('/contact')}
               className="action-button secondary large"
             >
               📞 관리자 문의
-            </button>
+            </button> */}
           </div>
         </div>
 
         <div className="token-info-box">
           <h4>👥 권한 체계</h4>
           <div className="role-hierarchy">
-            <div className="role-item">
+            <div className="role-item" style={{ marginBottom: '10px' }}>
               <span className="role-badge admin">👑 관리자</span>
               <span>시스템 전체 관리 권한</span>
             </div>
-            <div className="role-item">
+            <div className="role-item" style={{ marginBottom: '10px' }}>
               <span className="role-badge operator">⚙️ 운영자</span>
               <span>콘텐츠 및 사용자 관리</span>
             </div>
-            <div className="role-item">
+            <div className="role-item" style={{ marginBottom: '10px' }}>
               <span className="role-badge user">👤 일반 사용자</span>
               <span>기본 서비스 이용</span>
             </div>

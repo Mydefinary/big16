@@ -305,13 +305,13 @@ const SecurityProvider = ({ children }) => {
       updateLastActivity();
       
       // 전역에서 사용할 수 있도록 노출
-      window.generateCSRFToken = generateCSRFToken;
+      // window.generateCSRFToken = generateCSRFToken;
       
-      console.log('✅ SecurityProvider initialized');
-      console.log('✅ window.generateCSRFToken:', typeof window.generateCSRFToken);
-      console.log('✅ Test token:', window.generateCSRFToken());
+      // console.log('✅ SecurityProvider initialized');
+      // console.log('✅ window.generateCSRFToken:', typeof window.generateCSRFToken);
+      // console.log('✅ Test token:', window.generateCSRFToken());
     }
-  }, [setSecurityHeaders, updateLastActivity, generateCSRFToken]);
+  }, [setSecurityHeaders, updateLastActivity]);
 
   // 🔥 라우트 변경 시 보안 검증 - 중복 검증 방지
   useEffect(() => {

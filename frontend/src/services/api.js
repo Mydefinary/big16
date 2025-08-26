@@ -67,15 +67,15 @@ api.interceptors.request.use(
     console.log(`🔍 API Request: ${config.method?.toUpperCase()} ${config.url}`);
     
     // POST, PUT, PATCH, DELETE 요청에 CSRF 토큰 추가
-    if (['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase())) {
-      const csrfToken = window.generateCSRFToken?.();
-      if (csrfToken) {
-        config.headers['X-CSRF-Token'] = csrfToken;
-        console.log('🎫 CSRF Token added, length:', csrfToken.length);
-      } else {
-        console.warn('⚠️ CSRF Token not available');
-      }
-    }
+    // if (['post', 'put', 'patch', 'delete'].includes(config.method?.toLowerCase())) {
+    //   const csrfToken = window.generateCSRFToken?.();
+    //   if (csrfToken) {
+    //     config.headers['X-CSRF-Token'] = csrfToken;
+    //     console.log('🎫 CSRF Token added, length:', csrfToken.length);
+    //   } else {
+    //     console.warn('⚠️ CSRF Token not available');
+    //   }
+    // }
     
     return config;
   },
