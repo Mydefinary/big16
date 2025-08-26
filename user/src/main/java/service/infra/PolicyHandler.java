@@ -85,5 +85,19 @@ public class PolicyHandler {
             }
         }
     }
+
+    @StreamListener(
+        value = KafkaProcessor.INPUT,
+        condition = "headers['type']=='RoleChange'"
+    )
+    public void wheneverRoleChange_ChangeRole(
+        @Payload RoleChange roleChange
+    ) {
+        System.out.println(
+            "\n\n##### listener DeleteUsers : " + roleChange + "\n\n"
+        );
+        
+        User.ChangeRole(roleChange);
+    }
 }
 //>>> Clean Arch / Inbound Adaptor

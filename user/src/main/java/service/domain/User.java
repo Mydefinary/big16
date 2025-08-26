@@ -116,5 +116,11 @@ public class User {
         System.out.println("User 서비스에서 " + userIds.size() + "개 사용자 삭제 완료");
     }
 
+    public static void ChangeRole(RoleChange roleChange) {
+        repository().findById(roleChange.getUserId()).ifPresent(user->{
+            user.setRole(roleChange.getRole());
+            repository().save(user);
+        });
+    }
 }
 //>>> DDD / Aggregate Root

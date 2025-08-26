@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { authAPI } from '../../services/api';
+import { authAPI, userAPI } from '../../services/api';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './Dashboard.css';
@@ -11,6 +11,12 @@ const AdminDashboard = ({ userInfo }) => {
   const { logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showFullInfo, setShowFullInfo] = useState(false);
+  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard' 또는 'user-management'
+  const [allUsers, setAllUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [selectedRole, setSelectedRole] = useState('');
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -42,29 +48,136 @@ const AdminDashboard = ({ userInfo }) => {
     });
   };
 
-  // 관리자 기능 함수들
-  const goToUserManagement = () => {
-    navigate('/admin/users');
-    toast.info('사용자 관리로 이동합니다', { autoClose: 2000 });
+  // 사용자 관리 화면으로 전환
+  const goToUserManagement = async () => {
+    setCurrentView('user-management');
+    setLoadingUsers(true);
+    try {
+      const response = await userAPI.getAllUsers();
+      setAllUsers(response.data);
+      toast.info('사용자 관리 화면으로 전환되었습니다', { autoClose: 2000 });
+    } catch (error) {
+      console.error('사용자 목록 불러오기 실패:', error);
+      toast.error('사용자 목록을 불러오는데 실패했습니다.', { autoClose: 3000 });
+    } finally {
+      setLoadingUsers(false);
+    }
   };
 
-  const goToContentManagement = () => {
-    navigate('/admin/content');
-    toast.info('콘텐츠 관리로 이동합니다', { autoClose: 2000 });
+  // 대시보드로 돌아가기
+  const goBackToDashboard = () => {
+    setCurrentView('dashboard');
+    toast.info('대시보드로 돌아갑니다', { autoClose: 2000 });
   };
 
-  const goToSystemSettings = () => {
-    navigate('/admin/settings');
-    toast.info('시스템 설정으로 이동합니다', { autoClose: 2000 });
+  // 권한 변경 모달 열기
+  const openRoleModal = (user) => {
+    setSelectedUser(user);
+    setSelectedRole(user.role);
+    setShowRoleModal(true);
   };
 
-  const goToAnalytics = () => {
-    navigate('/admin/analytics');
-    toast.info('분석 도구로 이동합니다', { autoClose: 2000 });
+  // 권한 변경 모달 닫기
+  const closeRoleModal = () => {
+    setSelectedUser(null);
+    setSelectedRole('');
+    setShowRoleModal(false);
   };
 
-  return (
-    <div className="dashboard-main-container">
+  // 권한 변경 확인
+  const confirmRoleChange = async () => {
+    if (!selectedUser || !selectedRole) return;
+    
+    try {
+      await authAPI.changeUserRole(selectedUser.userId, selectedRole);
+      toast.success('사용자 권한이 변경되었습니다.', { autoClose: 3000 });
+      
+      // 화면 즉시 업데이트를 위해 setAllUsers를 먼저 호출
+      setAllUsers(prevUsers => 
+        prevUsers.map(user => 
+          user.userId === selectedUser.userId 
+            ? { ...user, role: selectedRole }
+            : user
+        )
+      );
+      
+      closeRoleModal();
+      
+      // 서버에서 최신 데이터도 가져오기 (백그라운드에서)
+      try {
+        const response = await userAPI.getAllUsers();
+        setAllUsers(response.data);
+      } catch (error) {
+        console.error('사용자 목록 새로고침 실패:', error);
+        // 이미 로컬 상태는 업데이트했으므로 에러 토스트는 표시하지 않음
+      }
+      
+    } catch (error) {
+      console.error('권한 변경 실패:', error);
+      toast.error('권한 변경에 실패했습니다.', { autoClose: 3000 });
+    }
+  };
+
+  // 사용자 관리 화면 렌더링
+  const renderUserManagement = () => (
+    <div className="user-management-container">
+      <div className="user-management-header">
+        <button 
+          className="back-button"
+          onClick={goBackToDashboard}
+        >
+          ← 대시보드로 돌아가기
+        </button>
+        <h2>사용자 관리</h2>
+      </div>
+
+      {loadingUsers ? (
+        <div className="loading">
+          <div className="loading-spinner">사용자 목록을 불러오는 중...</div>
+        </div>
+      ) : (
+        <div className="users-table-container">
+          <table className="users-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>이메일</th>
+                <th>닉네임</th>
+                <th>회사</th>
+                <th>권한</th>
+                <th>가입일</th>
+                <th>액션</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allUsers.map((user, index) => (
+                <tr key={user.userId}>
+                  <td>{index+1}</td>
+                  <td>{showFullInfo ? user.email : maskEmail(user.email)}</td>
+                  <td>{showFullInfo ? user.nickname : maskName(user.nickname)}</td>
+                  <td>{user.company || 'N/A'}</td>
+                  <td>{user.role}</td>
+                  <td>{new Date(user.createdAt).toLocaleDateString('ko-KR')}</td>
+                  <td>
+                    <button 
+                      className="action-btn role-change"
+                      onClick={() => openRoleModal(user)}
+                    >
+                      권한 변경
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+
+  // 기본 대시보드 화면 렌더링
+  const renderDashboard = () => (
+    <>
       {/* 관리자 웰컴 섹션 */}
       <div className="admin-welcome-section">
         <div className="admin-welcome-content">
@@ -97,63 +210,6 @@ const AdminDashboard = ({ userInfo }) => {
             </p>
             <div className="admin-tool-status">관리 도구</div>
           </div>
-
-          {/* 콘텐츠 관리 */}
-          <div className="admin-tool-card" onClick={goToContentManagement}>
-            <div className="admin-tool-icon">📝</div>
-            <h3 className="admin-tool-title">콘텐츠 관리</h3>
-            <p className="admin-tool-description">
-              웹툰, 게시물, 댓글 등 모든 콘텐츠를 관리하고 모더레이션합니다
-            </p>
-            <div className="admin-tool-status">관리 도구</div>
-          </div>
-
-          {/* 시스템 설정 */}
-          <div className="admin-tool-card" onClick={goToSystemSettings}>
-            <div className="admin-tool-icon">⚙️</div>
-            <h3 className="admin-tool-title">시스템 설정</h3>
-            <p className="admin-tool-description">
-              서버 설정, 보안 정책, API 키 관리 등 시스템 전반을 설정합니다
-            </p>
-            <div className="admin-tool-status">관리 도구</div>
-          </div>
-
-          {/* 분석 및 통계 */}
-          <div className="admin-tool-card" onClick={goToAnalytics}>
-            <div className="admin-tool-icon">📊</div>
-            <h3 className="admin-tool-title">분석 및 통계</h3>
-            <p className="admin-tool-description">
-              사용자 활동, 서비스 이용률, 성능 지표 등을 분석합니다
-            </p>
-            <div className="admin-tool-status">분석 도구</div>
-          </div>
-        </div>
-      </div>
-
-      {/* 시스템 상태 */}
-      <div className="system-status-section">
-        <h3 className="system-status-title">📡 시스템 상태</h3>
-        <div className="status-grid">
-          <div className="status-item">
-            <div className="status-indicator active"></div>
-            <span className="status-label">서버 상태</span>
-            <span className="status-value">정상</span>
-          </div>
-          <div className="status-item">
-            <div className="status-indicator active"></div>
-            <span className="status-label">데이터베이스</span>
-            <span className="status-value">정상</span>
-          </div>
-          <div className="status-item">
-            <div className="status-indicator active"></div>
-            <span className="status-label">AI 서비스</span>
-            <span className="status-value">정상</span>
-          </div>
-          <div className="status-item">
-            <div className="status-indicator warning"></div>
-            <span className="status-label">스토리지</span>
-            <span className="status-value">주의</span>
-          </div>
         </div>
       </div>
 
@@ -161,20 +217,6 @@ const AdminDashboard = ({ userInfo }) => {
       <div className="admin-quick-actions-section">
         <h3 className="admin-quick-actions-title">⚡ 빠른 액션</h3>
         <div className="admin-quick-actions-grid">
-          <button 
-            className="admin-quick-action-btn backup"
-            onClick={() => toast.info('백업이 시작되었습니다', { autoClose: 2000 })}
-          >
-            <span className="quick-icon">💾</span>
-            <span>데이터 백업</span>
-          </button>
-          <button 
-            className="admin-quick-action-btn logs"
-            onClick={() => navigate('/admin/logs')}
-          >
-            <span className="quick-icon">📋</span>
-            <span>시스템 로그</span>
-          </button>
           <button 
             className="admin-quick-action-btn privacy"
             onClick={toggleInfoVisibility}
@@ -221,7 +263,69 @@ const AdminDashboard = ({ userInfo }) => {
           </div>
         </div>
       </div>
+    </>
+  );
 
+  return (
+    <div className="dashboard-main-container">
+      {currentView === 'dashboard' ? renderDashboard() : renderUserManagement()}
+      
+      {/* 권한 변경 모달 */}
+      {showRoleModal && (
+        <div className="modal-overlay" onClick={closeRoleModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>권한 변경</h3>
+            <p>
+              사용자 <strong>{selectedUser?.nickname}</strong>의 권한을 변경하시겠습니까?
+            </p>
+            
+            <div className="role-options">
+              <label className="role-option">
+                <input
+                  type="radio"
+                  name="role"
+                  value="user"
+                  checked={selectedRole === 'user'}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                />
+                <span>사용자 (user)</span>
+              </label>
+              
+              <label className="role-option">
+                <input
+                  type="radio"
+                  name="role"
+                  value="operator"
+                  checked={selectedRole === 'operator'}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                />
+                <span>운영자 (operator)</span>
+              </label>
+              
+              <label className="role-option">
+                <input
+                  type="radio"
+                  name="role"
+                  value="admin"
+                  checked={selectedRole === 'admin'}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                />
+                <span>관리자 (admin)</span>
+              </label>
+            </div>
+            
+            <div className="modal-buttons">
+              <button className="cancel-btn" onClick={closeRoleModal}>
+                취소
+              </button>
+              <button className="confirm-btn" onClick={confirmRoleChange}>
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <ToastContainer />
     </div>
   );

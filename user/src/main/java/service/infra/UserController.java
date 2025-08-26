@@ -15,6 +15,10 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
 
 
 //<<< Clean Arch / Inbound Adaptor
@@ -115,6 +119,32 @@ public class UserController {
             System.err.println("회원 탈퇴 중 오류 발생: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 탈퇴 중 오류가 발생했습니다.");
+        }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllUsers() {
+        try {
+            List<User> allUsers = userRepository.findAll();
+            
+            List<Map<String, Object>> userList = allUsers.stream()
+                    .map(user -> {
+                        Map<String, Object> userInfo = new HashMap<>();
+                        userInfo.put("userId", user.getUserId());
+                        userInfo.put("email", user.getEmail());
+                        userInfo.put("nickname", user.getNickname());
+                        userInfo.put("role", user.getRole());
+                        userInfo.put("createdAt", user.getCreatedAt());
+                        userInfo.put("company", user.getCompany());
+                        return userInfo;
+                    })
+                    .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(userList);
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("사용자 목록 조회 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
 }
