@@ -32,7 +32,7 @@ from langchain.schema import Document
 from langchain.chains import RetrievalQAWithSourcesChain
 
 # ---------------- Defaults ----------------
-DEFAULT_DB_DIR = "./db"
+DEFAULT_DB_DIR = "./db1"
 DEFAULT_COLLECTION = "webtoon_info"
 DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small"
 DEFAULT_CHAT_MODEL = "gpt-4o"
