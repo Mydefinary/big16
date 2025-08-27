@@ -99,5 +99,19 @@ public class PolicyHandler {
         
         User.ChangeRole(roleChange);
     }
+
+    @StreamListener(
+        value = KafkaProcessor.INPUT,
+        condition = "headers['type']=='RegisterCompany'"
+    )
+    public void wheneverRegisterCompany_CompanyRegister(
+        @Payload RegisterCompany registerCompany
+    ) {
+        System.out.println(
+            "\n\n##### listener DeleteUsers : " + registerCompany + "\n\n"
+        );
+        
+        User.ChangeCompanyName(registerCompany);
+    }
 }
 //>>> Clean Arch / Inbound Adaptor

@@ -201,6 +201,14 @@ export const authAPI = {
      newRole 
    });
  },
+
+ registerCompany: (companyData) => {
+   console.log('🏢 회사 등록 시도:', companyData?.companyName);
+   if (!companyData || !companyData.companyName) {
+     return Promise.reject(new Error('회사명이 필요합니다'));
+   }
+   return api.post('/auths/register-company', companyData);
+ },
 };
 
 // User API

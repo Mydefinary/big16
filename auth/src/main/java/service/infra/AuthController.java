@@ -371,6 +371,7 @@ public class AuthController {
                 userInfo.put("createdAt", auth.getCreatedAt());
                 userInfo.put("nickName", auth.getNickname());
                 userInfo.put("role", auth.getRole());
+                userInfo.put("isCompanyRegistered", auth.isCompanyRegistered());
                 
                 return ResponseEntity.ok(userInfo);
             }catch (IllegalArgumentException e){
@@ -422,6 +423,45 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Role 변경 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/register-company")
+    public ResponseEntity<String> registerCompany(
+            @RequestBody CompanyRegistrationRequest request,
+            HttpServletRequest httpRequest) {
+        
+        try {
+            // JWT 토큰에서 사용자 정보 추출
+            String token = getTokenFromCookie(httpRequest, "accessToken");
+            if (token == null || !JwtUtil.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰입니다.");
+            }
+
+            Long userId = JwtUtil.getUserIdFromToken(token);
+            
+            // 사용자 조회 (Auth 엔티티 사용)
+            Auth auth = authRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+            
+            // 이미 회사가 등록되어 있는지 확인
+            if (auth.isCompanyRegistered()) {
+                return ResponseEntity.badRequest().body("이미 회사가 등록되어 있습니다.");
+            }
+            
+            // 회사 등록 상태만 변경
+            auth.setCompanyRegistered(true);
+            authRepository.save(auth);
+            
+            // Kafka로 회사 등록 이벤트 발행
+            RegisterCompany event = new RegisterCompany(auth, request.getCompanyName());
+            event.publishAfterCommit();
+            
+            return ResponseEntity.ok("회사 등록 요청이 완료되었습니다.");
+            
+        } catch (Exception e) {
+            System.err.println("회사 등록 중 오류 발생: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회사 등록 중 오류가 발생했습니다.");
         }
     }
 }

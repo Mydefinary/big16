@@ -1,0 +1,438 @@
+/* Company Registration Styles */
+
+.company-registration-container {
+  min-height: calc(100vh - 64px);
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.company-registration-header {
+  text-align: center;
+  animation: slideInDown 0.8s ease-out;
+}
+
+.registration-welcome-content {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(34, 197, 94, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.registration-welcome-content::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: float 6s ease-in-out infinite;
+}
+
+.registration-welcome-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  animation: bounce 2s infinite;
+}
+
+.registration-welcome-title {
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.registration-welcome-message {
+  font-size: 20px;
+  margin-bottom: 16px;
+  opacity: 0.95;
+}
+
+.registration-description {
+  font-size: 16px;
+  margin-bottom: 24px;
+  opacity: 0.9;
+}
+
+.username {
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.6);
+  text-underline-offset: 4px;
+}
+
+.user-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 12px 24px;
+  border-radius: 25px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-weight: 600;
+}
+
+.badge-icon {
+  font-size: 18px;
+}
+
+.registration-form-section {
+  animation: slideInUp 0.8s ease-out 0.2s both;
+}
+
+.registration-form-container {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 8px 32px rgba(34, 197, 94, 0.1);
+  border: 2px solid #dcfce7;
+}
+
+.form-title {
+  font-size: 28px;
+  color: #15803d;
+  margin-bottom: 8px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.form-subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.registration-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.label-icon {
+  font-size: 18px;
+}
+
+.form-input {
+  padding: 16px 20px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: white;
+  font-family: inherit;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+.form-input:disabled {
+  background: #f9fafb;
+  cursor: not-allowed;
+}
+
+.input-helper {
+  font-size: 14px;
+  color: #6b7280;
+  margin-left: 4px;
+}
+
+.register-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  position: relative;
+  overflow: hidden;
+  margin-top: 8px;
+  font-family: inherit;
+}
+
+.register-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.register-btn:hover::before {
+  left: 100%;
+}
+
+.register-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+}
+
+.register-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-icon {
+  font-size: 18px;
+}
+
+.btn-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.registration-info-section {
+  animation: slideInUp 0.8s ease-out 0.4s both;
+}
+
+.info-title {
+  font-size: 24px;
+  color: #15803d;
+  margin-bottom: 24px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.info-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  border: 2px solid #dcfce7;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.08);
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+}
+
+.info-card-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.info-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #15803d;
+  margin-bottom: 8px;
+}
+
+.info-card-description {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+/* Animations */
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .company-registration-container {
+    padding: 20px 16px;
+    gap: 30px;
+  }
+
+  .registration-welcome-content {
+    padding: 32px 24px;
+  }
+
+  .registration-welcome-title {
+    font-size: 32px;
+  }
+
+  .registration-welcome-icon {
+    font-size: 48px;
+  }
+
+  .registration-form-container {
+    padding: 32px 24px;
+  }
+
+  .form-title {
+    font-size: 24px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .company-registration-container {
+    padding: 16px 12px;
+    gap: 24px;
+  }
+
+  .registration-welcome-content {
+    padding: 24px 16px;
+  }
+
+  .registration-welcome-title {
+    font-size: 24px;
+  }
+
+  .registration-form-container {
+    padding: 24px 16px;
+  }
+
+  .form-title {
+    font-size: 20px;
+  }
+
+  .info-card {
+    padding: 20px 16px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .company-registration-container {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+  }
+
+  .registration-form-container,
+  .info-card {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+  }
+
+  .form-title,
+  .info-title {
+    color: #22c55e;
+  }
+
+  .form-subtitle,
+  .input-helper,
+  .info-card-description {
+    color: #cbd5e1;
+  }
+
+  .info-card-title {
+    color: #22c55e;
+  }
+
+  .form-input {
+    background: #0f172a;
+    border-color: #334155;
+    color: #f1f5f9;
+  }
+
+  .form-input:focus {
+    border-color: #22c55e;
+    background: #1e293b;
+  }
+
+  .form-input:disabled {
+    background: #0f172a;
+  }
+}
+
+/* Focus Accessibility */
+.register-btn:focus,
+.form-input:focus {
+  outline: 2px solid #22c55e;
+  outline-offset: 2px;
+}
