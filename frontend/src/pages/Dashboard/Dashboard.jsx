@@ -8,6 +8,7 @@ import UserDashboard from './UserDashboard';
 import AdminDashboard from './AdminDashboard';
 import OperatorDashboard from './OperatorDashboard';
 import { useSecurity } from '../../components/SecurityProvider';
+import CompanyRegistration from './CompanyRegistration';
 
 const Dashboard = () => {
   const { logout } = useAuth();
@@ -48,6 +49,12 @@ const Dashboard = () => {
     return <AdminDashboard userInfo={userInfo} />;
   }
   
+  // user나 operator인데 회사 등록이 안되어 있으면 회사 등록 화면
+  if ((userInfo.role === 'user' || userInfo.role === 'operator') && !userInfo.isCompanyRegistered) {
+    return <CompanyRegistration userInfo={userInfo} setUserInfo={setUserInfo} />;
+  }
+
+  // 회사 등록이 완료된 경우 각각의 대시보드로
   if (userInfo.role === 'operator') {
     return <OperatorDashboard userInfo={userInfo} />;
   }

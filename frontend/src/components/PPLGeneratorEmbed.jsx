@@ -50,7 +50,7 @@ const PPLGeneratorEmbed = () => {
           fontSize: '24px',
           fontWeight: 'bold'
         }}>
-          🎬 PPL 생성기
+          🎬 광고 생성기
         </h2>
         <p style={{
           margin: '8px 0 0 0',

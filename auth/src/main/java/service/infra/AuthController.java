@@ -29,8 +29,13 @@ public class AuthController {
 
     @PatchMapping("/user/password-change")
     public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request,
-                                            @RequestHeader("X-User-Id") Long userId) { // 수정된 부분
-        
+                                            HttpServletRequest httpRequest) {
+        String token = getTokenFromCookie(httpRequest, "accessToken");
+        if (token == null || !JwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰");
+        }
+        Long userId = JwtUtil.getUserIdFromToken(token);
+
         Auth auth = authRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -46,20 +51,42 @@ public class AuthController {
 
     @PatchMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request,
-                                                @RequestHeader("X-User-Email") String token) {
-        String email = JwtUtil.getEmailFromToken(token);
-        String newPassword = request.getNewPassword();
+                                                HttpServletRequest httpRequest,
+                                                HttpServletResponse response) {
+        try {
+            // 쿠키에서 이메일 토큰 가져오기
+            String emailToken = getTokenFromCookie(httpRequest, "emailToken");
+            if (emailToken == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 필요합니다.");
+            }
+            
+            String email = JwtUtil.getEmailFromToken(emailToken);
+            String newPassword = request.getNewPassword();
 
-        Auth auth = authRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            Auth auth = authRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 실제 서비스 로직에 위임
-        auth.resetPassword(newPassword);
-        auth.setEmailToken(null);
+            // 실제 서비스 로직에 위임
+            auth.resetPassword(newPassword);
+            auth.setEmailToken(null);
 
-        // 비밀번호 재설정 후 토큰 초기화
-        auth.invalidateTokens();                                                
-        return ResponseEntity.ok("비밀번호가 재설정되었습니다.");
+            // 비밀번호 재설정 후 토큰 초기화
+            auth.invalidateTokens();
+            authRepository.save(auth);
+            
+            // 사용된 이메일 토큰 쿠키 삭제
+            Cookie deleteEmailToken = new Cookie("emailToken", "");
+            deleteEmailToken.setHttpOnly(true);
+            deleteEmailToken.setSecure(false);
+            deleteEmailToken.setPath("/");
+            deleteEmailToken.setMaxAge(0); // 즉시 만료
+            response.addCookie(deleteEmailToken);
+            
+            return ResponseEntity.ok("비밀번호가 재설정되었습니다.");
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰입니다.");
+        }
     }
 
     @PostMapping("/resend-code")
@@ -88,7 +115,7 @@ public class AuthController {
 
     // 인증 코드 검증
     @PostMapping("/verify-code")
-    public ResponseEntity<?> verifyCode(@RequestBody VerifyCodeRequest request) {
+    public ResponseEntity<?> verifyCode(@RequestBody VerifyCodeRequest request, HttpServletResponse response) {
         String email = request.getEmail();
         String code = request.getCode();
         
@@ -105,7 +132,18 @@ public class AuthController {
             if ("PASSWORD_RESET".equals(auth.getPurpose())){
                 String emailToken = JwtUtil.generateEmailToken(email);
                 auth.setEmailToken(emailToken);
-                return ResponseEntity.ok().header("X-Email-Token", emailToken).build();
+                authRepository.save(auth); // 저장 추가
+                
+                // 쿠키로 이메일 토큰 설정
+                Cookie emailTokenCookie = new Cookie("emailToken", emailToken);
+                emailTokenCookie.setHttpOnly(true);
+                emailTokenCookie.setSecure(false); // 개발환경: false, 프로덕션: true
+                emailTokenCookie.setPath("/");
+                emailTokenCookie.setMaxAge(600); // 10분
+                
+                response.addCookie(emailTokenCookie);
+                
+                return ResponseEntity.ok("인증 성공");
             }
             // 아이디 찾기 일때
             return ResponseEntity.ok("인증 성공");
@@ -236,9 +274,7 @@ public class AuthController {
             // 못불러온거라 기능도 없으니 그냥 주석 처리
             // LoginFailed event = new LoginFailed(auth);
             // event.publish();
-
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("로그인 실패: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증에 실패했습니다.");
         }
     }
 
@@ -371,6 +407,7 @@ public class AuthController {
                 userInfo.put("createdAt", auth.getCreatedAt());
                 userInfo.put("nickName", auth.getNickname());
                 userInfo.put("role", auth.getRole());
+                userInfo.put("isCompanyRegistered", auth.isCompanyRegistered());
                 
                 return ResponseEntity.ok(userInfo);
             }catch (IllegalArgumentException e){
@@ -418,10 +455,49 @@ public class AuthController {
             
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Role 변경 실패: " + e.getMessage());
+                    .body("Role 변경 실패했습니다 ");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Role 변경 중 오류가 발생했습니다: " + e.getMessage());
+                    .body("Role 변경 중 오류가 발생했습니다");
+        }
+    }
+
+    @PostMapping("/register-company")
+    public ResponseEntity<String> registerCompany(
+            @RequestBody CompanyRegistrationRequest request,
+            HttpServletRequest httpRequest) {
+        
+        try {
+            // JWT 토큰에서 사용자 정보 추출
+            String token = getTokenFromCookie(httpRequest, "accessToken");
+            if (token == null || !JwtUtil.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰입니다.");
+            }
+
+            Long userId = JwtUtil.getUserIdFromToken(token);
+            
+            // 사용자 조회 (Auth 엔티티 사용)
+            Auth auth = authRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+            
+            // 이미 회사가 등록되어 있는지 확인
+            if (auth.isCompanyRegistered()) {
+                return ResponseEntity.badRequest().body("이미 회사가 등록되어 있습니다.");
+            }
+            
+            // 회사 등록 상태만 변경
+            auth.setCompanyRegistered(true);
+            authRepository.save(auth);
+            
+            // Kafka로 회사 등록 이벤트 발행
+            RegisterCompany event = new RegisterCompany(auth, request.getCompanyName());
+            event.publishAfterCommit();
+            
+            return ResponseEntity.ok("회사 등록 요청이 완료되었습니다.");
+            
+        } catch (Exception e) {
+            System.err.println("회사 등록 중 오류 발생: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회사 등록 중 오류가 발생했습니다.");
         }
     }
 }

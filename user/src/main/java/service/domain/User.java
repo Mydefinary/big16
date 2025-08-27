@@ -122,5 +122,13 @@ public class User {
             repository().save(user);
         });
     }
+
+    public static void ChangeCompanyName(RegisterCompany registerCompany) {
+        repository().findById(registerCompany.getUserId()).ifPresent(user->{
+            user.setCompany(registerCompany.getCompany());
+            repository().save(user);
+        });
+    }
+    
 }
 //>>> DDD / Aggregate Root
