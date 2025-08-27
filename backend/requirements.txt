@@ -9,4 +9,3 @@ langchain_core
 langchain_chroma
 langchain-community
 chromadb
-faiss-cpu
