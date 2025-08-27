@@ -19,6 +19,13 @@ const AdminDashboard = ({ userInfo }) => {
   const [selectedRole, setSelectedRole] = useState('');
   const navigate = useNavigate();
 
+  const roleLabels = {
+    user: "광고주",
+    operator: "운영자",
+    admin: "관리자",
+  };
+
+
   const handleLogout = async () => {
     setLoading(true);
     try {
@@ -154,8 +161,8 @@ const AdminDashboard = ({ userInfo }) => {
                   <td>{index+1}</td>
                   <td>{showFullInfo ? user.email : maskEmail(user.email)}</td>
                   <td>{showFullInfo ? user.nickname : maskName(user.nickname)}</td>
-                  <td>{user.company || 'N/A'}</td>
-                  <td>{user.role}</td>
+                  <td>{user.company || '미 지정'}</td>
+                  <td>{roleLabels[user.role] || user.role}</td>
                   <td>{new Date(user.createdAt).toLocaleDateString('ko-KR')}</td>
                   <td>
                     <button 
@@ -287,7 +294,7 @@ const AdminDashboard = ({ userInfo }) => {
                   checked={selectedRole === 'user'}
                   onChange={(e) => setSelectedRole(e.target.value)}
                 />
-                <span>사용자 (user)</span>
+                <span>광고주 (user)</span>
               </label>
               
               <label className="role-option">
