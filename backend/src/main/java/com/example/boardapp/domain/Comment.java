@@ -5,14 +5,11 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-// com.example.boardapp.domain.Comment.java
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-
 public class Comment {
 
     @Id
@@ -22,10 +19,6 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     private Post post;
-
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JsonBackReference  // 또는 @JsonIgnore
-    // private Post post;
 
     @Column(nullable = false)
     private String author;
@@ -72,7 +65,4 @@ public class Comment {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-
-
-    // Getter/Setter 생략
 }

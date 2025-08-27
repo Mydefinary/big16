@@ -46,3 +46,4 @@ export function searchPosts(page = 0, size = 10, keyword = '') {
     params: { q: keyword, page, size }
   });
 }
+

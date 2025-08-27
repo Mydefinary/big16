@@ -94,7 +94,9 @@ const canEdit = currentUser && post && (currentUser.nickName === post.author || 
         )}
 
         <div className="d-flex justify-content-end gap-2">
-
+          {currentUser && currentUser.role && currentUser.role.trim() !== '' && (
+            <Link to={`/posts/${id}/reply`} className="btn btn-outline-primary">💬 답글</Link>
+          )}
           {canEdit && (
           <>
           <Link to={`/posts/${id}/edit`} className="btn btn-outline-secondary">✏️ 수정</Link>

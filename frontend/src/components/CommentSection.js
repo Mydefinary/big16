@@ -13,13 +13,14 @@ function CommentSection({ postId }) {
   const [editingId, setEditingId] = useState(null);
   const [editContent, setEditContent] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
-      useEffect(() => {
-        axios.get("http://20.249.113.18:9000/auths/me", { withCredentials: true })
-          .then(res => setCurrentUser(res.data))
-          .catch(err => console.error("사용자 정보 불러오기 실패:", err));
-      }, []);
+  
+  useEffect(() => {
+    axios.get("http://20.249.113.18:9000/auths/me", { withCredentials: true })
+      .then(res => setCurrentUser(res.data))
+      .catch(err => console.error("사용자 정보 불러오기 실패:", err));
+  }, []);
 
-const canEdit = (c) => currentUser && (currentUser.nickName === c.author || currentUser.role === 'admin');
+  const canEdit = (c) => currentUser && (currentUser.nickName === c.author || currentUser.role === 'admin');
 
   useEffect(() => {
     commentApi.get(`/comments/${postId}`)

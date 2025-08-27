@@ -111,6 +111,29 @@ public class PostController {
     }
 
     /**
+     * Creates a reply to an existing post. Accepts multipart form data with optional file.
+     */
+    @PostMapping(value = "/{parentId}/reply", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PostResponseDto> createReply(
+            @PathVariable Long parentId,
+            @RequestParam("title") String title,
+            @RequestParam("author") String author,
+            @RequestParam("content") String content,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
+        
+        // 권한 체크 - 작성자가 role이 있는지 확인
+        // TODO: 실제 사용자 인증 로직 추가 필요
+        
+        Post reply = postService.createReply(parentId, title, author, content, file);
+        PostResponseDto dto = new PostResponseDto(
+                reply.getId(), reply.getTitle(), reply.getAuthor(), reply.getContent(), 
+                reply.getCreatedAt(), reply.getUpdatedAt(), 
+                reply.getAttachmentPath() != null, reply.getAttachmentName()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+    }
+
+    /**
      * Updates an existing post. Accepts multipart form data with optional file. To remove existing attachment without replacing it,
      * include removeAttachment=true.
      */

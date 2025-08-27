@@ -43,32 +43,32 @@ public class CommentController {
     // }
 
     @PostMapping("/{postId}")
-public Comment addComment(@PathVariable Long postId, @RequestBody Comment comment) {
-    System.out.println("📌 postId: " + postId);
-    System.out.println("📌 comment.author: " + comment.getAuthor());
-    System.out.println("📌 comment.content: " + comment.getContent());
+    public Comment addComment(@PathVariable Long postId, @RequestBody Comment comment) {
+        System.out.println("📌 postId: " + postId);
+        System.out.println("📌 comment.author: " + comment.getAuthor());
+        System.out.println("📌 comment.content: " + comment.getContent());
 
-    Post post = postRepository.findById(postId)
-        .orElseThrow(() -> new RuntimeException("Post not found"));
+        Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new RuntimeException("Post not found"));
 
-    comment.setPost(post);
+        comment.setPost(post);
 
-    return commentRepository.save(comment);
-}
+        return commentRepository.save(comment);
+    }
 
-// PUT /api/comments/{id} - 댓글 수정
-@PutMapping("/{id}")
-public Comment updateComment(@PathVariable Long id, @RequestBody Comment updatedComment) {
-    Comment comment = commentRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Comment not found"));
-    comment.setContent(updatedComment.getContent());
-    return commentRepository.save(comment);
-}
+    // PUT /api/comments/{id} - 댓글 수정
+    @PutMapping("/{id}")
+    public Comment updateComment(@PathVariable Long id, @RequestBody Comment updatedComment) {
+        Comment comment = commentRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Comment not found"));
+        comment.setContent(updatedComment.getContent());
+        return commentRepository.save(comment);
+    }
 
-// DELETE /api/comments/{id} - 댓글 삭제
-@DeleteMapping("/{id}")
-public void deleteComment(@PathVariable Long id) {
-    commentRepository.deleteById(id);
-}
+    // DELETE /api/comments/{id} - 댓글 삭제
+    @DeleteMapping("/{id}")
+    public void deleteComment(@PathVariable Long id) {
+        commentRepository.deleteById(id);
+    }
 }
 

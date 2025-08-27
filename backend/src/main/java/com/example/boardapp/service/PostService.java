@@ -60,7 +60,27 @@ public class PostService {
         post.setTitle(title);
         post.setAuthor(author);
         post.setContent(content);
+        post.setDepth(0); // 원글은 depth 0
+        post.setReply(false); // 원글은 답글이 아님
         Post saved = postRepository.save(post);
+        if (file != null && !file.isEmpty()) {
+            storeFile(saved, file);
+        }
+        return saved;
+    }
+
+    public Post createReply(Long parentId, String title, String author, String content, MultipartFile file) throws IOException {
+        Post parentPost = getPost(parentId);
+        
+        Post reply = new Post();
+        reply.setTitle(title);
+        reply.setAuthor(author);
+        reply.setContent(content);
+        reply.setParent(parentPost);
+        reply.setDepth(parentPost.getDepth() + 1);
+        reply.setReply(true);
+        
+        Post saved = postRepository.save(reply);
         if (file != null && !file.isEmpty()) {
             storeFile(saved, file);
         }

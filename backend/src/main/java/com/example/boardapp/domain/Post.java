@@ -49,6 +49,19 @@ public class Post {
     /** The path on disk where the attachment is stored. */
     private String attachmentPath;
 
+    /** 답글 기능을 위한 부모 게시글 참조 */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Post parent;
+
+    /** 게시글 깊이 (0: 원글, 1: 1차 답글, 2: 2차 답글...) */
+    @Column(name = "depth", nullable = false)
+    private int depth = 0;
+
+    /** 답글 여부를 쉽게 확인하기 위한 플래그 */
+    @Column(name = "is_reply", nullable = false)
+    private boolean isReply = false;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
@@ -116,5 +129,29 @@ public class Post {
 
     public void setAttachmentPath(String attachmentPath) {
         this.attachmentPath = attachmentPath;
+    }
+
+    public Post getParent() {
+        return parent;
+    }
+
+    public void setParent(Post parent) {
+        this.parent = parent;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
+    }
+
+    public boolean isReply() {
+        return isReply;
+    }
+
+    public void setReply(boolean reply) {
+        isReply = reply;
     }
 }
