@@ -52,7 +52,7 @@ DEF_COL_INFO = os.getenv("INFO_COLLECTION", "webtoon_info")
 DEF_CSV = os.getenv("STATUS_CSV", "./webtoon_data_new.csv")
 DEF_DB_STATUS = os.getenv("STATUS_DB", "./db2")
 DEF_COL_STATUS = os.getenv("STATUS_COLLECTION", "webtoon_status")
-DEF_LEGAL_CHROMA = os.getenv("CHROMA_DIR", "./chroma_db6")
+DEF_LEGAL_CHROMA = os.getenv("CHROMA_DIR", "./chroma_db5")
 
 # LLM availability (for router)
 try:
