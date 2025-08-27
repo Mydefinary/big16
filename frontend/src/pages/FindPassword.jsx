@@ -134,15 +134,7 @@ const FindPassword = () => {
     setLoading(true);
 
     try {
-      // 인증코드 확인 요청 및 응답 받기
-      const response = await authAPI.verifyCode(email, code);
-
-      // 커스텀 헤더에서 토큰 꺼내기
-      const emailToken = response.headers['x-email-token'];
-      if (emailToken) {
-        localStorage.setItem('emailToken', emailToken);
-      }
-
+      await authAPI.verifyCode(email, code);
       setStep(3);
       
       toast.success('인증이 완료되었습니다!', {
@@ -168,23 +160,16 @@ const FindPassword = () => {
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validatePassword()) return; // 회원가입과 동일한 검증 로직 사용
+    if (!validatePassword()) return;
 
     setLoading(true);
 
     try {
-      const emailToken = localStorage.getItem('emailToken');
-      if (!emailToken) {
-        toast.error('이메일 인증 토큰이 없습니다. 다시 인증해주세요.', {
-          position: "top-right",
-          autoClose: 5000,
-        });
-        setLoading(false);
-        return;
-      }
-      
-      await authAPI.resetPassword(password, emailToken);
+      await authAPI.resetPassword(password);
       setSuccess(true);
+      
+      // localStorage에서 토큰 정리도 불필요하지만 기존 데이터가 있을 수 있으니 정리
+      localStorage.removeItem('emailToken');
       
       // 3초 후 로그인 페이지로 이동
       setTimeout(() => {

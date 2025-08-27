@@ -172,13 +172,9 @@ export const authAPI = {
    return api.post('/auths/verify-code', { email, code });
  },
  
- resetPassword: (newPassword, emailToken) => {
-   console.log('🔑 비밀번호 재설정');
-   return api.patch('/auths/reset-password', { newPassword }, {
-     headers: {
-       'X-User-Email': emailToken,
-     },
-   });
+ resetPassword: (newPassword) => {
+  console.log('🔑 비밀번호 재설정');
+  return api.patch('/auths/reset-password', { newPassword });
  },
  
  changePassword: (currentPassword, newPassword) => {
