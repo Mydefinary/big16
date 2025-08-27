@@ -5,7 +5,7 @@ import { authAPI } from '../services/api';
 import ComingSoonPage from './ComingSoonPage';
 import { toast } from 'react-toastify';
 
-const TokenRequiredPage = ({ pageName, description, DetailComponent }) => {
+const TokenRequiredPage = ({ pageName, description, DetailComponent, allowedRoles = ['operator', 'admin'] }) => {
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
   const [userInfo, setUserInfo] = useState(null);
@@ -130,8 +130,91 @@ const TokenRequiredPage = ({ pageName, description, DetailComponent }) => {
     );
   }
 
-  // 로그인은 했지만 권한이 없는 경우 (user 역할)
-  if (userInfo.role === 'user') {
+  // user나 operator인데 회사 등록이 안되어 있으면 회사 등록 안내 화면
+  if ((userInfo.role === 'user' || userInfo.role === 'operator') && !userInfo.isCompanyRegistered) {
+    return (
+      <div className="token-required-container">
+        <div className="token-required-content">
+          <div className="token-required-icon">
+            🏢
+          </div>
+          
+          <h1 className="token-required-title">
+            {pageName}
+          </h1>
+          
+          <div className="token-required-message">
+            <h2>🏢 회사 등록이 필요합니다</h2>
+            <p className="main-message">
+              이 페이지를 사용하기 위해서는 먼저 <strong>회사 등록</strong>이 완료되어야 합니다.
+            </p>
+            
+            <div className="user-info" style={{ marginBottom: '20px' }}>
+              <h3 style={{ marginBottom: '10px' }}>👤 사용자 정보</h3>
+              <p><strong>이름:</strong> {userInfo.nickName}</p>
+              <p><strong>권한:</strong> <span className={`role-badge ${userInfo.role}`}>
+                {userInfo.role === 'user' ? '👤 일반 사용자' : '⚙️ 운영자'}
+              </span></p>
+            </div>
+            
+            {description && (
+              <div className="page-description">
+                <h3>📝 {pageName} 소개</h3>
+                <p>{description}</p>
+              </div>
+            )}
+            
+            <div className="registration-info" style={{ marginBottom: '20px' }}>
+              <h3 style={{ marginBottom: '10px' }}>ℹ️ 회사 등록 안내</h3>
+              <ul style={{ textAlign: 'left', marginBottom: '15px' }}>
+                <li>📝 회사 정보를 입력하여 등록 요청</li>
+                <li>✅ 승인 후 모든 서비스 이용 가능</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="token-required-actions">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="action-button primary large"
+            >
+              🏢 회사 등록하러 가기
+            </button>
+          </div>
+
+          <div className="help-section">
+            <p className="help-text">
+              회사 등록에 문제가 있으신가요? <button onClick={() => navigate('/faq')} className="link-text">FAQ</button>를 확인해보세요.
+            </p>
+          </div>
+        </div>
+
+        <div className="token-info-box">
+          <h4>🏢 등록 절차</h4>
+          <div className="registration-steps">
+            <div className="step-item" style={{ marginBottom: '10px' }}>
+              <span className="step-number">1</span>
+              <span>회사 정보 입력</span>
+            </div>
+            <div className="step-item" style={{ marginBottom: '10px' }}>
+              <span className="step-number">2</span>
+              <span>관리자 검토</span>
+            </div>
+            <div className="step-item" style={{ marginBottom: '10px' }}>
+              <span className="step-number">3</span>
+              <span>승인 및 서비스 이용</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 권한 체크
+  const hasPermission = allowedRoles.includes(userInfo.role);
+
+  // 권한이 없는 경우
+  if (!hasPermission) {
     return (
       <div className="token-required-container">
         <div className="token-required-content">
@@ -146,12 +229,12 @@ const TokenRequiredPage = ({ pageName, description, DetailComponent }) => {
           <div className="token-required-message">
             <h2>🚫 접근 권한이 부족합니다</h2>
             <p className="main-message">
-              이 페이지에 접근하기 위해서는 <strong>운영자 또는 관리자 권한</strong>이 필요합니다.
+              이 페이지에 접근하기 위해서는 <strong>{allowedRoles.join(', ')} 권한</strong>이 필요합니다.
             </p>
             
             <div className="role-info" style={{ marginBottom: '20px' }}>
-              <h3 style={{ marginBottom: '10px' }}>👤 현재 권한: <span className="current-role user">일반 사용자</span></h3>
-              <h3>🔑 필요 권한: <span className="required-roles">운영자, 관리자</span></h3>
+              <h3 style={{ marginBottom: '10px' }}>👤 현재 권한: <span className="current-role user">{userInfo.role}</span></h3>
+              <h3>🔑 필요 권한: <span className="required-roles">{allowedRoles.join(', ')}</span></h3>
             </div>
             
             {description && (
@@ -163,7 +246,7 @@ const TokenRequiredPage = ({ pageName, description, DetailComponent }) => {
             
             <div className="permission-info" style={{ marginBottom: '20px' }}>
               <h3 style={{ marginBottom: '10px' }}>ℹ️ 권한 안내</h3>
-              <p style={{ marginBottom: '10px' }}>이 기능은 운영자 또는 관리자 권한이 필요한 페이지입니다.</p>
+              <p style={{ marginBottom: '10px' }}>이 기능은 {allowedRoles.join(' 또는 ')} 권한이 필요한 페이지입니다.</p>
               <p>권한 승급이 필요하시다면 시스템 관리자에게 문의해주세요.</p>
             </div>
           </div>
@@ -175,13 +258,6 @@ const TokenRequiredPage = ({ pageName, description, DetailComponent }) => {
             >
               📊 대시보드로 돌아가기
             </button>
-            
-            {/* <button
-              onClick={() => navigate('/contact')}
-              className="action-button secondary large"
-            >
-              📞 관리자 문의
-            </button> */}
           </div>
         </div>
 
@@ -206,30 +282,11 @@ const TokenRequiredPage = ({ pageName, description, DetailComponent }) => {
     );
   }
 
-  // 운영자(operator) 또는 관리자(admin) 권한이 있는 경우 - 페이지 접근 허용
-  if (userInfo.role === 'operator' || userInfo.role === 'admin') {
-    if (DetailComponent) {
-      return <DetailComponent />;
-    }
-    return <ComingSoonPage pageName={pageName} description={description} />;
+  // 권한이 있는 경우 - 페이지 접근 허용
+  if (DetailComponent) {
+    return <DetailComponent />;
   }
-
-  // 예상하지 못한 role인 경우 (안전장치)
-  return (
-    <div className="token-required-container">
-      <div className="token-required-content">
-        <div className="token-required-icon">❌</div>
-        <h1>알 수 없는 권한</h1>
-        <p>알 수 없는 사용자 권한입니다. 관리자에게 문의해주세요.</p>
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="action-button primary large"
-        >
-          대시보드로 돌아가기
-        </button>
-      </div>
-    </div>
-  );
+  return <ComingSoonPage pageName={pageName} description={description} />;
 };
 
 export default TokenRequiredPage;

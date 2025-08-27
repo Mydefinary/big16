@@ -20,7 +20,7 @@ import Register from './pages/Register';
 import EmailVerification from './pages/EmailVerification';
 import FindId from './pages/FindId';
 import FindPassword from './pages/FindPassword';
-import Dashboard from './pages/Dashobard/Dashboard';
+import Dashboard from './pages/Dashboard/Dashboard';
 import MyPage from './pages/MyPage';
 import FAQ from './pages/FAQ';
 import TermsAgreement from './pages/TermsAgreement';
@@ -65,15 +65,16 @@ function App() {
                                            
                 {/* 토큰이 필요한 페이지들 */}
                  <Route
-                   path="/chat-bot"
-                   element={
+                  path="/chat-bot"
+                  element={
                     <TokenRequiredPage
-                       pageName="챗봇"
-                       description="AI 기술을 활용한 챗봇 시스템입니다."
+                      allowedRoles={['user', 'operator', 'admin']}
+                      pageName="챗봇"
+                      description="AI 기술을 활용한 챗봇 시스템입니다."
                       DetailComponent={ChatbotPage}
                     />
                   }
-                 />
+                />
                 <Route
                    path="/webtoon-highlight-creator"
                    element={
@@ -108,8 +109,9 @@ function App() {
                   path="/webtoon-dashboard"
                   element={
                     <TokenRequiredPage
+                      allowedRoles={['user', 'operator', 'admin']}
                       pageName="웹툰 대시보드"
-                      description="웹툰 대시보드 페이지입니다. 웹툰 관련 데이터와 분석 정보를 확인할 수 있습니다."
+                      description="웹툰 대시보드 페이지입니다."
                       DetailComponent={WebtoonDashboardEmbed}
                     />
                   }

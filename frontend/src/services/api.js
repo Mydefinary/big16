@@ -172,13 +172,9 @@ export const authAPI = {
    return api.post('/auths/verify-code', { email, code });
  },
  
- resetPassword: (newPassword, emailToken) => {
-   console.log('🔑 비밀번호 재설정');
-   return api.patch('/auths/reset-password', { newPassword }, {
-     headers: {
-       'X-User-Email': emailToken,
-     },
-   });
+ resetPassword: (newPassword) => {
+  console.log('🔑 비밀번호 재설정');
+  return api.patch('/auths/reset-password', { newPassword });
  },
  
  changePassword: (currentPassword, newPassword) => {
@@ -200,6 +196,14 @@ export const authAPI = {
      targetUserId, 
      newRole 
    });
+ },
+
+ registerCompany: (companyData) => {
+   console.log('🏢 회사 등록 시도:', companyData?.companyName);
+   if (!companyData || !companyData.companyName) {
+     return Promise.reject(new Error('회사명이 필요합니다'));
+   }
+   return api.post('/auths/register-company', companyData);
  },
 };
 

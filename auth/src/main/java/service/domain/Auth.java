@@ -50,6 +50,10 @@ public class Auth {
 
     private String role;
 
+    private boolean termsAgreed=true;
+
+    private boolean isCompanyRegistered=false;
+
     // 토큰 관리 필드들
     private String accessToken;       
     private String refreshToken;      
