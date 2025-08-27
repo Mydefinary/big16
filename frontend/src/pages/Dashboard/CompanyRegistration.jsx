@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { authAPI } from '../../services/api';
+import { maskName } from '../../services/maskingUtils'; // ✅ 마스킹 유틸 추가
 import './CompanyRegistration.css';
 
 const CompanyRegistration = ({ userInfo, setUserInfo }) => {
   const [companyName, setCompanyName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showFullInfo, setShowFullInfo] = useState(false); // ✅ 마스킹 상태 추가
 
   const handleCompanyRegister = async () => {
     if (!companyName.trim()) {
@@ -25,13 +29,8 @@ const CompanyRegistration = ({ userInfo, setUserInfo }) => {
         companyName: companyName.trim()
       });
       
-      toast.success('회사 등록 요청이 완료되었습니다.');
-      
-      // 사용자 정보 업데이트
-      setUserInfo(prev => ({
-        ...prev,
-        isCompanyRegistered: true
-      }));
+      // 성공 모달 표시
+      setShowSuccessModal(true);
       
     } catch (error) {
       console.error('회사 등록 실패:', error);
@@ -41,6 +40,24 @@ const CompanyRegistration = ({ userInfo, setUserInfo }) => {
     }
   };
 
+  // ✅ 정보 표시/숨기기 토글 함수 추가
+  const toggleInfoVisibility = () => {
+    setShowFullInfo(!showFullInfo);
+    toast.info(showFullInfo ? '정보가 마스킹되었습니다' : '정보가 표시되었습니다', {
+      position: "top-right",
+      autoClose: 2000,
+    });
+  };
+
+  // 모달에서 확인 버튼 클릭 시
+  const handleModalConfirm = () => {
+    setShowSuccessModal(false);
+    setUserInfo(prev => ({
+      ...prev,
+      isCompanyRegistered: true
+    }));
+  };
+
   return (
     <div className="company-registration-container">
       <div className="company-registration-header">
@@ -48,7 +65,10 @@ const CompanyRegistration = ({ userInfo, setUserInfo }) => {
           <div className="registration-welcome-icon">🏢</div>
           <h1 className="registration-welcome-title">회사 등록</h1>
           <p className="registration-welcome-message">
-            안녕하세요, <span className="username">{userInfo.nickName}</span>님!
+            안녕하세요, <span className="username">
+              {/* ✅ 마스킹 적용 */}
+              {showFullInfo ? userInfo.nickName : maskName(userInfo.nickName)}
+            </span>님!
           </p>
           <p className="registration-description">
             서비스를 이용하시려면 먼저 회사 정보를 등록해주세요.
@@ -57,6 +77,25 @@ const CompanyRegistration = ({ userInfo, setUserInfo }) => {
             <span className="badge-icon">👤</span>
             <span>{userInfo.role === 'user' ? '일반 사용자' : '운영자'}</span>
           </div>
+          {/* ✅ 정보 보기/숨기기 버튼 추가 */}
+          <button 
+            className="privacy-toggle-btn"
+            onClick={toggleInfoVisibility}
+            style={{
+              marginTop: '10px',
+              padding: '8px 16px',
+              background: '#f0f8ff',
+              border: '1px solid #007bff',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            <span>{showFullInfo ? '🙈' : '👁️'}</span>
+            <span style={{ marginLeft: '8px' }}>
+              {showFullInfo ? '정보 숨기기' : '정보 보기'}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -94,7 +133,7 @@ const CompanyRegistration = ({ userInfo, setUserInfo }) => {
             <button 
               onClick={handleCompanyRegister}
               className="register-btn"
-              disabled={isSubmitting || !companyName.trim()}
+              disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
@@ -122,22 +161,32 @@ const CompanyRegistration = ({ userInfo, setUserInfo }) => {
               입력하신 회사 정보는 관리자 검토 후 승인됩니다
             </div>
           </div>
-          <div className="info-card">
-            <div className="info-card-icon">⏱️</div>
-            <div className="info-card-title">처리 시간</div>
-            <div className="info-card-description">
-              일반적으로 1-2 영업일 내에 승인 처리됩니다
-            </div>
-          </div>
-          <div className="info-card">
-            <div className="info-card-icon">🔔</div>
-            <div className="info-card-title">알림 서비스</div>
-            <div className="info-card-description">
-              승인 완료 시 등록하신 이메일로 알림을 보내드립니다
-            </div>
-          </div>
         </div>
       </div>
+      
+      <ToastContainer />
+      
+      {/* 성공 모달 */}
+      {showSuccessModal && (
+        <div className="modal-overlay">
+          <div className="success-modal">
+            <div className="modal-icon">🎉</div>
+            <h2 className="modal-title">등록 완료!</h2>
+            <p className="modal-message">
+              <strong>{companyName}</strong> 등록이 성공적으로 완료되었습니다.
+            </p>
+            <p className="modal-sub-message">
+              승인 전까지 일부 서비스를 이용하실 수 있습니다.
+            </p>
+            <button 
+              className="modal-confirm-btn"
+              onClick={handleModalConfirm}
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

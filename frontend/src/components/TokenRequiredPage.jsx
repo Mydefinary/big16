@@ -168,8 +168,6 @@ const TokenRequiredPage = ({ pageName, description, DetailComponent, allowedRole
               <h3 style={{ marginBottom: '10px' }}>ℹ️ 회사 등록 안내</h3>
               <ul style={{ textAlign: 'left', marginBottom: '15px' }}>
                 <li>📝 회사 정보를 입력하여 등록 요청</li>
-                <li>⏱️ 관리자 검토 및 승인 (1-2 영업일)</li>
-                <li>🔔 승인 완료 시 이메일 알림</li>
                 <li>✅ 승인 후 모든 서비스 이용 가능</li>
               </ul>
             </div>
