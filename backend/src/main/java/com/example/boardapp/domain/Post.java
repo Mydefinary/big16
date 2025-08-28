@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Entity representing a bulletin board post. Each post may have an optional file
@@ -23,11 +25,16 @@ public class Post {
     @Size(max = 255)
     private String title;
 
-    /** Name of the author (writer). */
+    /** ID of the author (for permission checking). */
     @Column(nullable = false)
-    @NotBlank(message = "작성자명은 필수입니다.")
-    @Size(max = 100)
+    @NotBlank(message = "작성자ID는 필수입니다.")
+    @Size(max = 50)
     private String author;
+
+    /** Display name of the author (for UI display). */
+    @Column(name = "author_nick_name")
+    @Size(max = 100)
+    private String authorNickName;
 
     /** Content of the post. */
     @Lob
@@ -43,11 +50,15 @@ public class Post {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    /** The original filename of the attachment, if present. */
+    /** The original filename of the attachment, if present. (Deprecated - use attachments instead) */
     private String attachmentName;
 
-    /** The path on disk where the attachment is stored. */
+    /** The path on disk where the attachment is stored. (Deprecated - use attachments instead) */
     private String attachmentPath;
+
+    /** List of attachments for this post. */
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Attachment> attachments = new ArrayList<>();
 
     /** 답글 기능을 위한 부모 게시글 참조 */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -97,6 +108,14 @@ public class Post {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public String getAuthorNickName() {
+        return authorNickName;
+    }
+
+    public void setAuthorNickName(String authorNickName) {
+        this.authorNickName = authorNickName;
     }
 
     public String getContent() {
@@ -153,5 +172,18 @@ public class Post {
 
     public void setReply(boolean reply) {
         isReply = reply;
+    }
+
+    public List<Attachment> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<Attachment> attachments) {
+        this.attachments = attachments;
+    }
+
+    public void addAttachment(Attachment attachment) {
+        this.attachments.add(attachment);
+        attachment.setPost(this);
     }
 }

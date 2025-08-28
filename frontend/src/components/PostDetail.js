@@ -21,12 +21,28 @@ export default function PostDetail() {
 
 const canEdit = currentUser && post && (currentUser.nickName === post.author || currentUser.role === 'admin');
 
+// 디버깅용 로그
+console.log('DEBUG - canEdit 검사:', {
+  currentUser: currentUser,
+  postAuthor: post?.author,
+  currentUserNickName: currentUser?.nickName,
+  isEqual: currentUser?.nickName === post?.author,
+  canEdit: canEdit
+});
+
   useEffect(() => {
     fetchPost(id)
       .then(res =>{
       setPost(res.data);
     })
-      .catch(err => setError(err.response?.data || err.message));
+      .catch(err => {
+        if (err.response?.status === 403 && err.response?.data) {
+          // 백엔드에서 보낸 403 권한 오류 메시지 사용
+          setError(err.response.data);
+        } else {
+          setError(err.response?.data || err.message);
+        }
+      });
   }, [id]);
 
   const handleDelete = () => {

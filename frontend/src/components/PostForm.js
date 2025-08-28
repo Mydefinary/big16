@@ -9,7 +9,7 @@ export default function PostForm({ isEdit }) {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [content, setContent] = useState('');
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const [removeAttachment, setRemoveAttachment] = useState(false);
   const [existingAttachmentName, setExistingAttachmentName] = useState('');
   const [error, setError] = useState(null);
@@ -47,7 +47,14 @@ export default function PostForm({ isEdit }) {
     formData.append('title', title);
     formData.append('author', currentUser.nickName);
     formData.append('content', content);
-    if (file) formData.append('file', file);
+    
+    // 다중 파일 처리
+    if (files && files.length > 0) {
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+    }
+    
     if (isEdit) formData.append('removeAttachment', removeAttachment);
 
     const save = isEdit ? updatePost : createPost;
@@ -59,28 +66,33 @@ export default function PostForm({ isEdit }) {
   };
 
   const handleFileChange = (e) => {
-  const selected = e.target.files[0];
-
-  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
-  if (selected) {
-    if (selected.size > 10 * 1024 * 1024) {
-  alert('첨부파일은 10MB 이하만 가능합니다.');
-  e.target.value = null;
-  setFile(null);
-  return;
-}
-
-    if (!allowedTypes.includes(selected.type)) {
-      alert('지원하지 않는 파일 형식입니다. (PDF, JPG, PNG만 허용)');
+    const selectedFiles = Array.from(e.target.files);
+    
+    if (selectedFiles.length > 20) {
+      alert('최대 20개까지 첨부파일을 업로드할 수 있습니다.');
       e.target.value = null;
-      setFile(null);
       return;
     }
-  }
 
-  setFile(selected);
-  if (isEdit) setRemoveAttachment(false);
-};
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+    
+    for (let file of selectedFiles) {
+      if (file.size > 10 * 1024 * 1024) {
+        alert(`파일 "${file.name}"이 10MB를 초과합니다.`);
+        e.target.value = null;
+        return;
+      }
+      
+      if (!allowedTypes.includes(file.type)) {
+        alert(`파일 "${file.name}"의 형식이 지원되지 않습니다. (PDF, JPG, PNG만 허용)`);
+        e.target.value = null;
+        return;
+      }
+    }
+
+    setFiles(selectedFiles);
+    if (isEdit) setRemoveAttachment(false);
+  };
   if (error) {
     return (
       <div className="alert alert-danger mt-4 text-center">
@@ -135,9 +147,28 @@ export default function PostForm({ isEdit }) {
           </div>
 
           <div className="mb-4">
-            <label className="form-label fw-semibold">첨부파일 (10MB 이하)</label>
-            <input type="file" className="form-control" onChange={handleFileChange} />
-            {isEdit && existingAttachmentName && !file && !removeAttachment && (
+            <label className="form-label fw-semibold">첨부파일 (최대 20개, 각각 10MB 이하)</label>
+            <input 
+              type="file" 
+              className="form-control" 
+              onChange={handleFileChange} 
+              multiple 
+            />
+            
+            {files.length > 0 && (
+              <div className="mt-2">
+                <strong>선택된 파일:</strong>
+                <ul className="list-unstyled mt-1">
+                  {files.map((file, index) => (
+                    <li key={index} className="text-muted">
+                      📎 {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {isEdit && existingAttachmentName && files.length === 0 && !removeAttachment && (
               <div className="form-text mt-2">
                 현재 파일: {existingAttachmentName}{' '}
                 <button

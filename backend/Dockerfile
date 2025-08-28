@@ -21,11 +21,11 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Copy built JAR from builder stage
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=builder /app/target/boardapp-0.0.1-SNAPSHOT.jar app.jar
 
 # Create uploads directory
 RUN mkdir -p /app/uploads
 
 EXPOSE 8082
 
-ENTRYPOINT ["java","-jar","/app.jar","--server.port=8082","--server.servlet.context-path=/board"]
+ENTRYPOINT ["java","-jar","/app/app.jar","--server.port=8082","--server.servlet.context-path=/board"]

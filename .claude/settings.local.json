@@ -18,9 +18,30 @@
       "Bash(rm:*)",
       "Bash(az acr login:*)",
       "Bash(mkdir:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(kubectl set image:*)",
+      "Bash(kubectl rollout status:*)",
+      "Bash(docker run:*)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Bash(az acr list:*)",
+      "Bash(docker tag:*)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Bash(kubectl rollout restart:*)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Read(/C:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)",
+      "Read(/c:\\Users\\hoa\\Pictures\\Screenshots/**)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "C:\\c\\Users\\hoa\\vscode_project\\board-lee"
+    ]
   }
 }
