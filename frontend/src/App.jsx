@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import SecurityProvider from './components/SecurityProvider'; // 보안 컴포넌트 추가
 import ProtectedRoute from './components/ProtectedRoute';
 import Header from './components/Header';
+import Footer from './components/Footer'; // Footer 추가
 import TokenRequiredPage from './components/TokenRequiredPage';
 import ComingSoonPage from './components/ComingSoonPage';
 import WebtoonDetail from './components/WebtoonDetail';
@@ -124,6 +125,7 @@ function App() {
                  />
               </Routes>
             </main>
+            <Footer /> {/* Footer 추가 */}
           </div>
         </SecurityProvider>
       </Router>
