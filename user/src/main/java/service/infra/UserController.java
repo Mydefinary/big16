@@ -39,11 +39,11 @@ public class UserController {
         try {
             // 1) 중복 아이디/이메일 체크 (필요 시)
             if(userRepository.findByLoginId(request.getLoginId()).isPresent()) {
-                logger.warn("중복 아이디 가입 시도 - LoginId: {}, IP: {}", request.getLoginId(), getClientIpAddress(httpRequest));
+                logger.warn("중복 아이디 가입 시도 - LoginId: {}", request.getLoginId());
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 로그인 아이디입니다.");
             }
             if(userRepository.findByEmail(request.getEmail()).isPresent()) {
-                logger.warn("중복 이메일 가입 시도 - Email: {}, IP: {}", request.getEmail(), getClientIpAddress(httpRequest));
+                logger.warn("중복 이메일 가입 시도 - Email: {}", request.getEmail());
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일입니다.");
             }
 
@@ -65,7 +65,7 @@ public class UserController {
             // 트랜잭션 커밋 후 이벤트 발행
             userSavedEvent.publishAfterCommit();
 
-            logger.info("회원가입 성공 - LoginId: {}, IP: {}", request.getLoginId(), getClientIpAddress(httpRequest));
+            logger.info("회원가입 성공 - LoginId: {}", request.getLoginId());
 
             // 4) 응답 반환
             return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 완료되었습니다. 이메일 인증을 진행해 주세요");
@@ -127,11 +127,11 @@ public class UserController {
     @PatchMapping("/deactivate")
     public ResponseEntity<?> deactivateUser(@RequestHeader("X-User-Id") Long userId, HttpServletRequest request) {
         try {
-            logger.info("회원탈퇴 요청 - 사용자 ID: {}, IP: {}", userId, getClientIpAddress(request));
+            logger.info("회원탈퇴 요청 - 사용자 ID: {}", userId);
             
             Optional<User> userOpt = userRepository.findById(userId);
             if (userOpt.isEmpty()) {
-                logger.warn("탈퇴 요청한 사용자를 찾을 수 없음 - 사용자 ID: {}, IP: {}", userId, getClientIpAddress(request));
+                logger.warn("탈퇴 요청한 사용자를 찾을 수 없음 - 사용자 ID: {}", userId);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자를 찾을 수 없습니다.");
             }
 
@@ -182,21 +182,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("사용자 목록 조회 중 오류가 발생했습니다.");
         }
-    }
-
-    // 클라이언트 IP 주소를 안전하게 가져오는 헬퍼 메서드
-    private String getClientIpAddress(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-        
-        String xRealIp = request.getHeader("X-Real-IP");
-        if (xRealIp != null && !xRealIp.isEmpty()) {
-            return xRealIp;
-        }
-        
-        return request.getRemoteAddr();
     }
 }
 //>>> Clean Arch / Inbound Adaptor

@@ -221,7 +221,7 @@ public class AuthController {
             return ResponseEntity.ok(responseBody);
             
         } catch (Exception e) {
-            logger.warn("토큰 갱신 실패 - IP: {}", getClientIpAddress(request));
+            logger.warn("토큰 갱신 실패");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("토큰 갱신 실패");
         }
@@ -234,7 +234,7 @@ public class AuthController {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
             
             if (!auth.isVerified()){
-                logger.warn("미인증 사용자 로그인 시도 - IP: {}", getClientIpAddress(request));
+                logger.warn("미인증 사용자 로그인 시도 - LoginId: {}", command.getLoginId());
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("로그인 실패 : 이메일 미인증 상태");
             }
@@ -274,11 +274,11 @@ public class AuthController {
             response_body.put("message", "로그인 성공");
             response_body.put("tokenType", "Bearer");
             
-            logger.info("로그인 성공 - 사용자 ID: {}, IP: {}", auth.getUserId(), getClientIpAddress(request));
+            logger.info("로그인 성공 - 사용자 ID: {}", auth.getUserId());
             
             return ResponseEntity.ok(response_body);
         } catch (IllegalArgumentException e) {
-            logger.warn("로그인 실패 - LoginId: {}, IP: {}", command.getLoginId(), getClientIpAddress(request));
+            logger.warn("로그인 실패 - LoginId: {}", command.getLoginId());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증에 실패했습니다.");
         }
     }
@@ -307,7 +307,7 @@ public class AuthController {
                 auth.invalidateTokens();
                 authRepository.save(auth);
                 
-                logger.info("로그아웃 완료 - 사용자 ID: {}, IP: {}", userId, getClientIpAddress(request));
+                logger.info("로그아웃 완료 - 사용자 ID: {}", userId);
             }
             
             // ✅ MVC에서 쿠키 삭제
@@ -331,7 +331,7 @@ public class AuthController {
             
         } catch (Exception e) {
             // 토큰이 만료되거나 잘못되어도 로그아웃은 성공으로 처리하고 쿠키는 삭제
-            logger.warn("로그아웃 처리 중 오류 - IP: {}", getClientIpAddress(request));
+            logger.warn("로그아웃 처리 중 오류 발생");
             
             // ✅ 오류가 있어도 쿠키는 삭제
             Cookie deleteAccessToken = new Cookie("accessToken", "");
@@ -408,7 +408,7 @@ public class AuthController {
                     .orElseThrow(() -> new IllegalArgumentException("요청자를 찾을 수 없습니다."));
             
             if (!"admin".equals(requesterAuth.getRole())) {
-                logger.warn("권한 없는 role 변경 시도 - 요청자 ID: {}, IP: {}", requesterId, getClientIpAddress(httpRequest));
+                logger.warn("권한 없는 role 변경 시도 - 요청자 ID: {}", requesterId);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("관리자 권한이 필요합니다.");
             }
             
@@ -477,21 +477,6 @@ public class AuthController {
             logger.error("회사 등록 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회사 등록 중 오류가 발생했습니다.");
         }
-    }
-
-    // 클라이언트 IP 주소를 안전하게 가져오는 헬퍼 메서드
-    private String getClientIpAddress(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-        
-        String xRealIp = request.getHeader("X-Real-IP");
-        if (xRealIp != null && !xRealIp.isEmpty()) {
-            return xRealIp;
-        }
-        
-        return request.getRemoteAddr();
     }
 }
 //>>> Clean Arch / Inbound Adaptor
