@@ -16,6 +16,8 @@ import service.common.JwtUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.mindrot.jbcrypt.BCrypt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //<<< Clean Arch / Inbound Adaptor
 
@@ -23,6 +25,8 @@ import org.mindrot.jbcrypt.BCrypt;
 @RequestMapping(value="/auths")
 @Transactional
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     AuthRepository authRepository;
@@ -217,18 +221,20 @@ public class AuthController {
             return ResponseEntity.ok(responseBody);
             
         } catch (Exception e) {
+            logger.warn("토큰 갱신 실패");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("토큰 갱신 실패: " + e.getMessage());
+                    .body("토큰 갱신 실패");
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginCommand command, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody LoginCommand command, HttpServletResponse response, HttpServletRequest request) {
         try {
             Auth auth = authRepository.findByLoginId(command.getLoginId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
             
             if (!auth.isVerified()){
+                logger.warn("미인증 사용자 로그인 시도 - LoginId: {}", command.getLoginId());
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("로그인 실패 : 이메일 미인증 상태");
             }
@@ -268,12 +274,11 @@ public class AuthController {
             response_body.put("message", "로그인 성공");
             response_body.put("tokenType", "Bearer");
             
+            logger.info("로그인 성공 - 사용자 ID: {}", auth.getUserId());
+            
             return ResponseEntity.ok(response_body);
         } catch (IllegalArgumentException e) {
-            // 로그인 실패 이벤트 발행 해야하는데 auth를 
-            // 못불러온거라 기능도 없으니 그냥 주석 처리
-            // LoginFailed event = new LoginFailed(auth);
-            // event.publish();
+            logger.warn("로그인 실패 - LoginId: {}", command.getLoginId());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증에 실패했습니다.");
         }
     }
@@ -302,7 +307,7 @@ public class AuthController {
                 auth.invalidateTokens();
                 authRepository.save(auth);
                 
-                System.out.println("로그아웃 완료: userId = " + userId);
+                logger.info("로그아웃 완료 - 사용자 ID: {}", userId);
             }
             
             // ✅ MVC에서 쿠키 삭제
@@ -326,7 +331,7 @@ public class AuthController {
             
         } catch (Exception e) {
             // 토큰이 만료되거나 잘못되어도 로그아웃은 성공으로 처리하고 쿠키는 삭제
-            System.err.println("로그아웃 처리 중 오류: " + e.getMessage());
+            logger.warn("로그아웃 처리 중 오류 발생");
             
             // ✅ 오류가 있어도 쿠키는 삭제
             Cookie deleteAccessToken = new Cookie("accessToken", "");
@@ -344,38 +349,6 @@ public class AuthController {
             response.addCookie(deleteAccessToken);
             response.addCookie(deleteRefreshToken);
             
-            return ResponseEntity.ok("로그아웃이 완료되었습니다.");
-        }
-    }
-
-    // 모든 기기에서 로그아웃 (추가 기능)
-    @PostMapping("/logout-all")
-    public ResponseEntity<?> logoutAll(@RequestBody LogoutRequest request) {
-        String refreshToken = request.getRefreshToken();
-        
-        if (refreshToken == null || refreshToken.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Refresh Token이 필요합니다.");
-        }
-        
-        try {
-            Long userId = JwtUtil.getUserIdFromToken(refreshToken);
-            
-            // 해당 사용자의 모든 토큰 무효화
-            Optional<Auth> authOptional = authRepository.findByUserId(userId);
-            
-            if (authOptional.isPresent()) {
-                Auth auth = authOptional.get();
-                auth.invalidateTokens();
-                authRepository.save(auth);
-                
-                System.out.println("전체 로그아웃 완료: userId = " + userId);
-            }
-            
-            return ResponseEntity.ok("모든 기기에서 로그아웃이 완료되었습니다.");
-            
-        } catch (Exception e) {
-            System.err.println("전체 로그아웃 처리 중 오류: " + e.getMessage());
             return ResponseEntity.ok("로그아웃이 완료되었습니다.");
         }
     }
@@ -412,7 +385,7 @@ public class AuthController {
                 return ResponseEntity.ok(userInfo);
             }catch (IllegalArgumentException e){
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("인증 실패: " + e.getMessage());
+                    .body("인증 실패");
             }
         }
         return ResponseEntity.status(401).body("Unauthorized");
@@ -435,8 +408,7 @@ public class AuthController {
                     .orElseThrow(() -> new IllegalArgumentException("요청자를 찾을 수 없습니다."));
             
             if (!"admin".equals(requesterAuth.getRole())) {
-                System.out.println("관리자 아님");
-                System.out.println(requesterAuth.getRole());
+                logger.warn("권한 없는 role 변경 시도 - 요청자 ID: {}", requesterId);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("관리자 권한이 필요합니다.");
             }
             
@@ -451,12 +423,16 @@ public class AuthController {
             RoleChange event = new RoleChange(targetAuth);
             event.publish();
 
+            logger.info("Role 변경 성공 - 대상 사용자 ID: {}, 새 Role: {}, 요청자 ID: {}", 
+                       request.getTargetUserId(), request.getNewRole(), requesterId);
+
             return ResponseEntity.ok("Role changed successfully");
             
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Role 변경 실패했습니다 ");
+                    .body("Role 변경 실패했습니다");
         } catch (Exception e) {
+            logger.error("Role 변경 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Role 변경 중 오류가 발생했습니다");
         }
@@ -493,10 +469,12 @@ public class AuthController {
             RegisterCompany event = new RegisterCompany(auth, request.getCompanyName());
             event.publishAfterCommit();
             
+            logger.info("회사 등록 완료 - 사용자 ID: {}", userId);
+            
             return ResponseEntity.ok("회사 등록 요청이 완료되었습니다.");
             
         } catch (Exception e) {
-            System.err.println("회사 등록 중 오류 발생: " + e.getMessage());
+            logger.error("회사 등록 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회사 등록 중 오류가 발생했습니다.");
         }
     }

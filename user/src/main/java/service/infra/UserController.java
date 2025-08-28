@@ -19,7 +19,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //<<< Clean Arch / Inbound Adaptor
 
@@ -28,39 +29,51 @@ import java.util.HashMap;
 @Transactional
 public class UserController {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
     @Autowired
     UserRepository userRepository;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRegisterRequest request) {
-        // 1) 중복 아이디/이메일 체크 (필요 시)
-        if(userRepository.findByLoginId(request.getLoginId()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 로그인 아이디입니다.");
+    public ResponseEntity<?> registerUser(@RequestBody UserRegisterRequest request, HttpServletRequest httpRequest) {
+        try {
+            // 1) 중복 아이디/이메일 체크 (필요 시)
+            if(userRepository.findByLoginId(request.getLoginId()).isPresent()) {
+                logger.warn("중복 아이디 가입 시도 - LoginId: {}", request.getLoginId());
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 로그인 아이디입니다.");
+            }
+            if(userRepository.findByEmail(request.getEmail()).isPresent()) {
+                logger.warn("중복 이메일 가입 시도 - Email: {}", request.getEmail());
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일입니다.");
+            }
+
+            // 2) User 엔티티 생성 및 저장
+            User user = new User();
+            user.setLoginId(request.getLoginId());
+            user.setEmail(request.getEmail());
+            user.setNickname(request.getNickname());
+            user.setStatus("TRY_TO_REGISTERED"); // 가입 후 이메일 인증 대기 상태
+            user.setRole("user");
+            user.setCreatedAt(new Date());
+            userRepository.save(user);
+
+            // 3) 비밀번호 저장 등 Auth BC와 연동 (이벤트 발행 또는 직접 호출)
+            // User 저장이 완료된 후에 이벤트를 발행하여 Auth BC로 비밀번호 정보 전달
+            UserSaved userSavedEvent = new UserSaved(user);
+            // 비밀번호는 반드시 암호화된 상태로 포함시켜야 함
+            userSavedEvent.setPassword(encryptPassword(request.getPassword())); 
+            // 트랜잭션 커밋 후 이벤트 발행
+            userSavedEvent.publishAfterCommit();
+
+            logger.info("회원가입 성공 - LoginId: {}", request.getLoginId());
+
+            // 4) 응답 반환
+            return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 완료되었습니다. 이메일 인증을 진행해 주세요");
+            
+        } catch (Exception e) {
+            logger.error("회원가입 처리 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원가입 중 오류가 발생했습니다.");
         }
-        if(userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 존재하는 이메일입니다.");
-        }
-
-        // 2) User 엔티티 생성 및 저장
-        User user = new User();
-        user.setLoginId(request.getLoginId());
-        user.setEmail(request.getEmail());
-        user.setNickname(request.getNickname());
-        user.setStatus("TRY_TO_REGISTERED"); // 가입 후 이메일 인증 대기 상태
-        user.setRole("user");
-        user.setCreatedAt(new Date());
-        userRepository.save(user);
-
-        // 3) 비밀번호 저장 등 Auth BC와 연동 (이벤트 발행 또는 직접 호출)
-        // User 저장이 완료된 후에 이벤트를 발행하여 Auth BC로 비밀번호 정보 전달
-        UserSaved userSavedEvent = new UserSaved(user);
-        // 비밀번호는 반드시 암호화된 상태로 포함시켜야 함
-        userSavedEvent.setPassword(encryptPassword(request.getPassword())); 
-        // 트랜잭션 커밋 후 이벤트 발행
-        userSavedEvent.publishAfterCommit();
-
-        // 4) 응답 반환
-        return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 완료되었습니다. 이메일 인증을 진행해 주세요");
     }
 
     // 비밀번호 암호화 예시 메서드 (구현 필요)
@@ -73,38 +86,57 @@ public class UserController {
     // 아이디 찾기 (아이디 반환 Policy를 통해 아이디를 넘겨줌)
     @GetMapping("/find-id")
     public ResponseEntity<?> findLoginIdByEmail(@RequestParam String email) {
-        return userRepository.findByEmail(email)
-            .map(user -> ResponseEntity.ok(user.getLoginId()))
-            .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 이메일에 등록된 아이디가 없습니다."));
-            //아이디 없으면 toast 처리하기위해 응답메시지를 보냄
+        try {
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            
+            if (userOpt.isPresent()) {
+                logger.info("아이디 찾기 성공");
+                return ResponseEntity.ok(userOpt.get().getLoginId());
+            } else {
+                logger.warn("아이디 찾기 실패 - 존재하지 않는 이메일");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 이메일에 등록된 아이디가 없습니다.");
+            }
+            
+        } catch (Exception e) {
+            logger.error("아이디 찾기 처리 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("아이디 찾기 중 오류가 발생했습니다.");
+        }
     }
 
     // 이메일 존재 여부 확인 → Event 발행
     @GetMapping("/check-email")
     public ResponseEntity<?> checkEmailExistence(@RequestParam String email) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
+        try {
+            Optional<User> userOpt = userRepository.findByEmail(email);
 
-        if (userOpt.isPresent()) {
-            userOpt.get().publishEmailExistsConfirmed(); // ← 이 메서드를 User 안에 정의
-            return ResponseEntity.ok("이메일이 존재합니다.");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("이메일을 찾을 수 없습니다.");
+            if (userOpt.isPresent()) {
+                userOpt.get().publishEmailExistsConfirmed(); // ← 이 메서드를 User 안에 정의
+                logger.info("이메일 존재 확인 완료");
+                return ResponseEntity.ok("이메일이 존재합니다.");
+            } else {
+                logger.warn("이메일 존재하지 않음");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("이메일을 찾을 수 없습니다.");
+            }
+            
+        } catch (Exception e) {
+            logger.error("이메일 존재 여부 확인 중 오류 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이메일 확인 중 오류가 발생했습니다.");
         }
     }
 
     @PatchMapping("/deactivate")
-    public ResponseEntity<?> deactivateUser(@RequestHeader("X-User-Id") Long userId) {
+    public ResponseEntity<?> deactivateUser(@RequestHeader("X-User-Id") Long userId, HttpServletRequest request) {
         try {
-            System.out.println("회원탈퇴 요청 - 사용자 ID: " + userId); // 디버깅용 로그
+            logger.info("회원탈퇴 요청 - 사용자 ID: {}", userId);
             
             Optional<User> userOpt = userRepository.findById(userId);
             if (userOpt.isEmpty()) {
-                System.out.println("사용자를 찾을 수 없음 - ID: " + userId);
+                logger.warn("탈퇴 요청한 사용자를 찾을 수 없음 - 사용자 ID: {}", userId);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자를 찾을 수 없습니다.");
             }
 
             User user = userOpt.get();
-            System.out.println("사용자 탈퇴 처리 시작 - 이메일: " + user.getEmail());
+            logger.info("사용자 탈퇴 처리 시작 - 사용자 ID: {}", userId);
             
             // 탈퇴 이벤트 발행 (삭제 전에 먼저 실행)
             user.Withdrawal();
@@ -112,12 +144,11 @@ public class UserController {
             // 실제 사용자 데이터 삭제
             userRepository.delete(user);
             
-            System.out.println("회원탈퇴 완료 - 사용자 ID: " + userId);
+            logger.info("회원탈퇴 완료 - 사용자 ID: {}", userId);
             return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
             
         } catch (Exception e) {
-            System.err.println("회원 탈퇴 중 오류 발생: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("회원 탈퇴 처리 중 오류 발생 - 사용자 ID: {}", userId, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회원 탈퇴 중 오류가 발생했습니다.");
         }
     }
@@ -125,6 +156,8 @@ public class UserController {
     @GetMapping("/all")
     public ResponseEntity<?> getAllUsers() {
         try {
+            logger.info("전체 사용자 목록 조회 요청");
+            
             List<User> allUsers = userRepository.findAll();
             
             List<Map<String, Object>> userList = allUsers.stream()
@@ -140,11 +173,14 @@ public class UserController {
                     })
                     .collect(Collectors.toList());
             
+            logger.info("전체 사용자 목록 조회 완료 - 사용자 수: {}", userList.size());
+            
             return ResponseEntity.ok(userList);
             
         } catch (Exception e) {
+            logger.error("사용자 목록 조회 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("사용자 목록 조회 중 오류가 발생했습니다: " + e.getMessage());
+                    .body("사용자 목록 조회 중 오류가 발생했습니다.");
         }
     }
 }
