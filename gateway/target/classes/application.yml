@@ -118,7 +118,7 @@ spring:
         - id: user-private
           uri: http://user-backend-lee-service:9002
           predicates:
-            - Path=/users/**
+            - Path=/users/deactivate
           filters:
             - name: JwtAuthenticationFilter
             

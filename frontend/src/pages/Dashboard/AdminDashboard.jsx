@@ -60,7 +60,7 @@ const AdminDashboard = ({ userInfo }) => {
     setCurrentView('user-management');
     setLoadingUsers(true);
     try {
-      const response = await userAPI.getAllUsers();
+      const response = await authAPI.getUsers();
       setAllUsers(response.data);
       toast.info('사용자 관리 화면으로 전환되었습니다', { autoClose: 2000 });
     } catch (error) {
@@ -111,7 +111,7 @@ const AdminDashboard = ({ userInfo }) => {
       
       // 서버에서 최신 데이터도 가져오기 (백그라운드에서)
       try {
-        const response = await userAPI.getAllUsers();
+        const response = await authAPI.getUsers();
         setAllUsers(response.data);
       } catch (error) {
         console.error('사용자 목록 새로고침 실패:', error);
