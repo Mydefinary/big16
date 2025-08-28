@@ -45,7 +45,6 @@ export default function PostForm({ isEdit }) {
     }
     const formData = new FormData();
     formData.append('title', title);
-    formData.append('author', currentUser.nickName);
     formData.append('content', content);
     
     // 다중 파일 처리
