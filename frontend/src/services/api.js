@@ -205,6 +205,12 @@ export const authAPI = {
    }
    return api.post('/auths/register-company', companyData);
  },
+
+ // 새로 추가: 관리자 전용 사용자 목록 조회
+ getUsers: () => {
+   console.log('👥 관리자 사용자 목록 조회');
+   return api.get('/auths/admin/users');
+ },
 };
 
 // User API
@@ -231,11 +237,7 @@ export const userAPI = {
    console.log('🗑️ 계정 비활성화 시도');
    return api.patch('/users/deactivate');
  },
-
- getAllUsers: () => {
-   console.log('👥 전체 사용자 목록 조회');
-   return api.get('/users/all');
- },
+ 
 };
 
 export default api;
