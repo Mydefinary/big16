@@ -1,0 +1,71 @@
+.footer {
+  background-color: #e9e9e9;
+  border-top: 1px solid #d9d9d9;
+  padding: 20px 0;
+  margin-top: auto;
+  width: 100%;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.footer-icon-fallback {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.company-name {
+  font-weight: 600;
+  color: #4a4a4a;
+  font-size: 16px;
+}
+
+.footer-copyright {
+  text-align: center;
+}
+
+.footer-copyright p {
+  margin: 0;
+  color: #6b6b6b;
+  font-size: 14px;
+}
+
+/* 반응형 디자인 */
+@media (min-width: 768px) {
+  .footer-content {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .footer-copyright {
+    text-align: right;
+  }
+}

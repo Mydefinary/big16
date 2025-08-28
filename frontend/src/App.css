@@ -16,6 +16,9 @@ body {
 }
 
 .App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   text-align: center;
 }
 
@@ -889,6 +892,7 @@ body {
 
 /* 메인 콘텐츠 영역 */
 .main-content {
+  flex: 1;
   min-height: calc(100vh - 64px); /* Header 높이만큼 빼기 */
 }
 

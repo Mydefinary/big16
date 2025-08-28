@@ -3,7 +3,7 @@ import React from 'react';
 const Main = () => {
   const styles = {
     webtoonHero: {
-      width: '100vw',
+      // width: '100vw',
       height: '100vh',
       background: 'linear-gradient(135deg, #4ecdc4 0%, #44b39d 100%)',
       display: 'flex',
