@@ -14,12 +14,16 @@ import service.domain.EmailNotFound;
 import service.domain.UserDeleted;
 import service.domain.UserRegistered;
 import service.domain.UserSaved;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Entity
 @Table(name = "User_table")
 @Data
 //<<< DDD / Aggregate Root
 public class User {
+
+    private static final Logger logger = LoggerFactory.getLogger(User.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,13 +47,12 @@ public class User {
     public void onPostPersist() {
         // UserSaved userSaved = new UserSaved(this);
         // userSaved.publishAfterCommit();
-
     }
 
     @PreUpdate
     public void onPreUpdate() {
-        // System.out.println("회원탈퇴 실행");
-        
+        // 보안상 구체적인 작업 정보 노출 방지
+        logger.debug("User entity update operation initiated");
     }
 
     public void Withdrawal(){
@@ -94,6 +97,7 @@ public class User {
                 user.setStatus("EMAIL_VERIFIED");
                 repository().save(user);
             }
+
          });
 
     }
@@ -110,10 +114,10 @@ public class User {
         UserRepository userRepository = UserApplication.applicationContext.getBean(
             UserRepository.class
         );
-        
+
         userRepository.deleteAllById(userIds);
-        
-        System.out.println("User 서비스에서 " + userIds.size() + "개 사용자 삭제 완료");
+
+        logger.info("User cleanup operation completed for {} entries", userIds.size());
     }
 
     public static void ChangeRole(RoleChange roleChange) {
@@ -129,6 +133,6 @@ public class User {
             repository().save(user);
         });
     }
-    
+
 }
 //>>> DDD / Aggregate Root

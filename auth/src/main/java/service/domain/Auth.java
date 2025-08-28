@@ -23,12 +23,16 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Entity
 @Table(name = "Auth_table")
 @Data
 //<<< DDD / Aggregate Root
 public class Auth {
+
+    private static final Logger logger = LoggerFactory.getLogger(Auth.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -82,10 +86,7 @@ public class Auth {
 
     @PreUpdate
     public void onPreUpdate() {
-        // System.out.println("PreUpdate에서 비밀번호 재설정 되는지");
-        // 어차피 이후 정책 발행을 하지 않아서 주석 처리함
-        // PasswordEdited passwordEdited = new PasswordEdited(this);
-        // passwordEdited.publishAfterCommit();
+        
     }
 
     public static AuthRepository repository() {
@@ -124,16 +125,6 @@ public class Auth {
 
         if (authOptional.isPresent()) {
             Auth auth = authOptional.get();
-            // 기존 인증 코드가 있고, 생성된 지 5분 이내면 재사용
-            // if (auth.getPurpose().equals("PASSWORD_RESET") && auth.codeGeneratedAt != null) {
-            //     Duration duration = Duration.between(auth.codeGeneratedAt, LocalDateTime.now());
-            //     if (duration.toMinutes() < 5) {
-            //         // 기존 코드 유효하므로 재사용, 이벤트 재발행만 할지 말지 결정 가능
-            //         System.out.println("기존 인증 코드가 아직 유효합니다.");
-            //         return;
-            //     }
-            // }
-            // 랜덤 인증 코드 생성 (6자리 숫자 예시)
             String code = String.format("%06d", new Random().nextInt(999999));
             
             auth.setPurpose("PASSWORD_RESET");
@@ -146,8 +137,8 @@ public class Auth {
             EmailVerificationRequested event = new EmailVerificationRequested(auth);
             event.publishAfterCommit();
         } else {
-            // 어차피 UserBC에서 처리하기떄문에 복잡한 예외처리 없이 로그정도만
-            System.out.println("이메일 없음");
+            // 보안상 구체적인 정보 노출 방지
+            logger.debug("Email verification request failed for user authentication");
         }
 
     }
@@ -190,8 +181,8 @@ public class Auth {
             EmailVerificationRequested event = new EmailVerificationRequested(auth);
             event.publishAfterCommit();
         } else {
-            // 어차피 UserBC에서 처리하기떄문에 복잡한 예외처리 없이 로그정도만
-            System.out.println("이메일 없음");
+            // 보안상 구체적인 정보 노출 방지
+            logger.debug("Email verification request failed for user registration");
         }
 
     }
@@ -211,7 +202,7 @@ public class Auth {
     // 로그인 검증
     public String verifyPassword(String inputPassword) {
         if (!BCrypt.checkpw(inputPassword, this.passwordHash)) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException("Authentication failed");
         }
         return this.loginId; // 로그인 ID 반환 (토큰 생성에 사용)
     }
@@ -234,8 +225,6 @@ public class Auth {
         
         // 코드 생성 시간 업데이트 (기존 필드 사용)
         this.codeGeneratedAt = LocalDateTime.now();
-        
-        System.out.println("새로운 인증코드 재생성: " + code + " (이메일: " + this.email + ")");
         
         return code;
     }
@@ -262,46 +251,10 @@ public class Auth {
             // Auth 데이터 완전 삭제
             repository().delete(auth);
             
-            System.out.println("사용자 탈퇴로 인한 Auth 데이터 삭제 완료: userId = " + userDeleted.getUserId());
+            logger.info("Auth data deletion completed for user withdrawal");
         } else {
-            System.out.println("삭제할 Auth 데이터가 없습니다: userId = " + userDeleted.getUserId());
+            logger.debug("No Auth data found for deletion request");
         }
     }
-
-    //<<< Clean Arch / Port Method
-    // Policy를 사용하지 않기로 해서 폐기
-    // public static void resetPassword(EmailVerified emailVerified) {
-    //     // purpose가 PASSWORD_RESET 일 때만 수행
-    //     if (!"PASSWORD_RESET".equals(emailVerified.getPurpose())) {
-    //         System.out.println("[resetPassword] 비밀번호 재설정 목적이 아님. 무시함.");
-    //         return;
-    //     }
-
-    //     repository().findByUserId(emailVerified.getUserId()).ifPresent(auth -> {
-    //         // 새 비밀번호가 이벤트에 포함되어야 함 (예: emailVerified.getNewPassword())
-    //         // 실제로는 별도 비밀번호 재설정 요청과 연동 필요
-
-    //         // 임시로 새 비밀번호를 event에서 가져온다고 가정
-    //         String newPassword = emailVerified.getNewPassword();
-    //         if (newPassword == null || newPassword.isEmpty()) {
-    //             System.out.println("[resetPassword] 새 비밀번호가 이벤트에 없습니다.");
-    //             return;
-    //         }
-
-    //         // 비밀번호 암호화 및 저장
-    //         String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
-    //         auth.setPasswordHash(hashedPassword);
-    //         repository().save(auth);
-
-    //         System.out.println("[resetPassword] 비밀번호 재설정 완료: userId = " + auth.getUserId());
-
-    //         // 비밀번호 재설정 완료 이벤트 발행
-    //         PasswordReseted passwordReseted = new PasswordReseted(auth);
-    //         passwordReseted.publishAfterCommit();
-    //     });
-    //}
-
-    //>>> Clean Arch / Port Method
-
 }
 //>>> DDD / Aggregate Root

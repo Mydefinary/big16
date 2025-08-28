@@ -22,6 +22,10 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 5000,
+    minify: 'esbuild', // 기본값 (생략해도 됨)
+  },
+  esbuild: {
+    drop: ['console', 'debugger'], // console.log와 debugger 제거
   },
   server: {
     host: true,
