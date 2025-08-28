@@ -36,21 +36,14 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
         String referer = request.getHeaders().getFirst("Referer");
         String path = request.getURI().getPath();
         
-        System.out.println("🔍 Referer: " + referer);
-        
         if (referer != null) {
             // 정적 파일인 경우 (확장자가 있는 경우)
             if (path.contains(".")) {
                 // 정적 파일은 같은 서브 프론트에서 오는 것도 허용
-                // 예: /ppl-gen/static/js/main.js 의 referer가 /ppl-gen/ 인 경우 허용
                 String currentService = getCurrentService(path);
                 String refererService = getCurrentService(referer);
                 
-                System.out.println("🔍 Current service: " + currentService);
-                System.out.println("🔍 Referer service: " + refererService);
-                
                 if (currentService != null && currentService.equals(refererService)) {
-                    System.out.println("✅ Static file from same service - allowed");
                     return true;
                 }
             }
@@ -115,10 +108,8 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
         if (path.contains(".")) {
             // 서브 프론트의 정적 파일은 iframe 체크를 통과시키고, 메인 프론트는 바로 허용
             if (isIframeOnlyPath(path)) {
-                System.out.println("📁 Sub-frontend static file - will be handled by iframe check: " + path);
                 return false; // iframe 체크를 거치도록
             }
-            System.out.println("📁 Main frontend static file - public access: " + path);
             return true;
         }
 
@@ -338,59 +329,38 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
             String path = request.getURI().getPath();
-            String method = request.getMethod().toString();
 
-            System.out.println("=== JWT Filter Debug ===");
-            System.out.println("📍 Request Path: " + path);
-            System.out.println("🔧 Request Method: " + method);
-            System.out.println("🔍 Is Public Path: " + isPublicPath(path));
-            System.out.println("🚫 Is Iframe Only Path: " + isIframeOnlyPath(path));
-            System.out.println("📁 Contains dot (static file): " + path.contains("."));
-
-            // iframe 전용 경로인지 확인 (정적 파일 체크보다 먼저)
+            // iframe 전용 경로 체크
             if (isIframeOnlyPath(path)) {
                 if (!isValidIframeRequest(request)) {
-                    System.out.println("🚫 Direct access to iframe-only path blocked: " + path);
                     return handleBlockedAccess(exchange);
                 }
-                System.out.println("✅ Valid iframe request detected for: " + path);
-                // iframe 요청이 유효하면 바로 다음 단계로 진행 (JWT 체크 없이)
                 return chain.filter(exchange);
             }
 
+            // 공개 경로 체크
             if (isPublicPath(path)) {
-                System.out.println("✅ Public path - bypassing JWT filter");
                 return chain.filter(exchange);
             }
 
-            System.out.println("🔒 Private path - checking JWT token");
-
+            // JWT 토큰 검증
             String token = getTokenFromCookie(request, "accessToken");
-            System.out.println("🎫 Access Token from Cookie: " + (token != null ? "Present (length: " + token.length() + ")" : "Missing"));
 
             if (token == null) {
                 String refreshToken = getTokenFromCookie(request, "refreshToken");
-                System.out.println("🔄 Checking Refresh Token: " + (refreshToken != null ? "Present" : "Missing"));
-
                 if (refreshToken != null && JwtUtil.validateToken(refreshToken)) {
-                    System.out.println("🎯 Using Refresh Token for authentication");
                     token = refreshToken;
                 } else {
-                    System.out.println("❌ No valid token found in cookies - returning 401");
                     return handleUnauthorized(exchange);
                 }
             }
 
-            System.out.println("🔑 Token found, validating...");
-
             try {
                 if (!JwtUtil.validateToken(token)) {
-                    System.out.println("❌ Token validation failed");
                     return handleUnauthorized(exchange);
                 }
 
                 Long userId = JwtUtil.getUserIdFromToken(token);
-                System.out.println("✅ Token valid for user: " + userId);
 
                 ServerHttpRequest modifiedRequest = request.mutate()
                         .header("X-User-Id", userId.toString())
@@ -399,8 +369,6 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                 return chain.filter(exchange.mutate().request(modifiedRequest).build());
 
             } catch (Exception e) {
-                System.out.println("❌ JWT processing error: " + e.getMessage());
-                e.printStackTrace();
                 return handleUnauthorized(exchange);
             }
         };
