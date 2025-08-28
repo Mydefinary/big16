@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.client.RestTemplate;
 
 //<<< Clean Arch / Inbound Adaptor
 
@@ -30,6 +31,9 @@ public class AuthController {
 
     @Autowired
     AuthRepository authRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     @PatchMapping("/user/password-change")
     public ResponseEntity<String> changePassword(@RequestBody ChangePasswordRequest request,
@@ -476,6 +480,33 @@ public class AuthController {
         } catch (Exception e) {
             logger.error("회사 등록 중 오류 발생", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("회사 등록 중 오류가 발생했습니다.");
+        }
+    }
+
+    @GetMapping("/admin/users")
+    public ResponseEntity<?> getUsers(HttpServletRequest request) {
+        try {
+            String token = getTokenFromCookie(request, "accessToken");
+            if (token == null || !JwtUtil.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰");
+            }
+            
+            Long userId = JwtUtil.getUserIdFromToken(token);
+            Auth auth = authRepository.findByUserId(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            if (!"admin".equals(auth.getRole())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("관리자 권한 필요");
+            }
+            
+            String url = "http://user-backend-lee-service:9002/users/all";
+            ResponseEntity<Object> response = restTemplate.getForEntity(url, Object.class);
+            
+            return ResponseEntity.ok(response.getBody());
+            
+        } catch (Exception e) {
+            logger.error("사용자 목록 조회 실패", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("조회 실패");
         }
     }
 }

@@ -7,6 +7,8 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import service.config.kafka.KafkaProcessor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableBinding(KafkaProcessor.class)
@@ -19,4 +21,10 @@ public class AuthApplication {
     public static void main(String[] args) {
         applicationContext = SpringApplication.run(AuthApplication.class, args);
     }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+    
 }
